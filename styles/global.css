@@ -21,3 +21,17 @@
     url(/fonts/KelsonSans-Light.eot) format("embedded-opentype");
   font-weight: 300;
 }
+
+.CodeMirror {
+  height: 640px !important;
+  padding: 8px !important;
+  border: 1px dashed #ffffff !important;
+  text-align: left !important;
+}
+
+.cm-s-material.CodeMirror,
+.CodeMirror-linenumbers,
+.CodeMirror-linenumber {
+  background-color: #121212 !important;
+  font-size: 12px !important;
+}

@@ -6,9 +6,20 @@ import { MainWrapper, CenterBox, MintButton } from '../components/styled'
 function Home() {
   return (
     <>
+      <img
+        src='images/curves.png'
+        alt="curves"
+        style={{
+          position: 'fixed',
+          bottom: 100,
+          objectFit: 'fill',
+          height: 400,
+          minWidth: '100%',
+        }}
+      />
       <div
         style={{
-          // backgroundImage: `url(${backImage})`,
+          backgroundImage: `url('images/background.jpg')`,
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center center',
@@ -50,7 +61,7 @@ function Home() {
             <Hidden smDown>
               <div
                 style={{
-                  // background: `url(${whiteLineImage}) left top`,
+                  background: `url('images/white_line.png') left top`,
                   width: 64,
                   height: 8,
                 }}

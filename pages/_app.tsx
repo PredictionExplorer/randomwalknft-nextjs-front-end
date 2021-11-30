@@ -12,6 +12,7 @@ const Web3ProviderNetwork = dynamic(
 
 import Web3ReactManager from '../components/Web3ReactManager'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 
 import createEmotionCache from '../cache/createEmotionCache'
 import getLibrary from '../utils/getLibrary'
@@ -37,7 +38,7 @@ function MyApp(props: MyAppProps) {
               <>
                 <Header />
                 <Component {...pageProps} />
-                {/* <Footer /> */}
+                <Footer />
               </>
             </Web3ReactManager>
           </ThemeProvider>

@@ -34,5 +34,9 @@ export function formatEtherscanLink(
 export const parseBalance = (
   value: BigNumberish,
   decimals = 18,
-  decimalsToDisplay = 3,
+  decimalsToDisplay = 4,
 ) => parseFloat(formatUnits(value, decimals)).toFixed(decimalsToDisplay)
+
+export const formatId = (id: number) => {
+  return `#${id.toString().padStart(6, '0')}`
+}

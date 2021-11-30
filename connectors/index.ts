@@ -3,6 +3,7 @@ import { SafeAppConnector } from '@gnosis.pm/safe-apps-web3-react'
 import { InjectedConnector } from '@web3-react/injected-connector'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 
+import { INFURA_KEY } from '../config/app'
 import {
   ALL_SUPPORTED_CHAIN_IDS,
   DEFAULT_CHAIN_ID,
@@ -10,8 +11,6 @@ import {
 } from '../config/chains'
 import getLibrary from '../utils/getLibrary'
 import { NetworkConnector } from './NetworkConnector'
-
-const INFURA_KEY = process.env.REACT_APP_INFURA_KEY
 
 const NETWORK_URLS: { [key in SupportedChainId]: string } = {
   [SupportedChainId.ARBITRUM_ONE]: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`,

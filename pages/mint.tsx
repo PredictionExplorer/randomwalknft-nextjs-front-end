@@ -1,20 +1,63 @@
 import React, { useState, useEffect } from 'react'
-import { Typography, Box, Grid } from '@mui/material'
-import { ethers } from 'ethers'
+import {
+  Typography,
+  Box,
+  Grid,
+  Card,
+  CardActionArea,
+  Hidden,
+  Link,
+} from '@mui/material'
 import Countdown from 'react-countdown'
+import { Fade } from 'react-slideshow-image'
 
-import { MainWrapper, CenterBox } from '../components/styled'
+import { NFT_ADDRESS, MARKET_ADDRESS } from '../config/app'
+import {
+  MainWrapper,
+  CenterBox,
+  NavLink,
+  MintActiveButton,
+  NFTImage,
+  NFTInfoWrapper,
+} from '../components/styled'
+import Counter from '../components/Counter'
 
-import { useActiveWeb3React } from '../hooks/web3'
+import useNFTContract from '../hooks/useNFTContract'
+import useMarketContract from '../hooks/useMarketContract'
+
+import { formatId, parseBalance } from '../utils'
 
 const Mint = () => {
   const [saleSeconds, setSaleSeconds] = useState(null)
   const [countdownCompleted, setCountdownCompleted] = useState(false)
-  const [mintPrice, setMintPrice] = useState(0)
-  const [withdrawalAmount, setWithdrawalAmount] = useState(0)
+  const [mintPrice, setMintPrice] = useState('0')
+  const [withdrawalAmount, setWithdrawalAmount] = useState('0')
   const [tokenIds, setTokenIds] = useState([])
 
-  const { account, library } = useActiveWeb3React()
+  const nftContract = useNFTContract(NFT_ADDRESS)
+  const marketContract = useMarketContract(MARKET_ADDRESS)
+
+  const handleMint = () => {}
+
+  useEffect(() => {
+    const getData = async () => {
+      const mintPrice = await nftContract.getMintPrice()
+      setMintPrice(
+        (parseFloat(parseBalance(mintPrice)) * 1.01 + 0.008).toFixed(4),
+      )
+
+      const withdrawalAmount = await nftContract.withdrawalAmount()
+      setWithdrawalAmount(parseBalance(withdrawalAmount))
+
+      let seconds = (await nftContract.timeUntilSale()).toNumber()
+      setSaleSeconds(seconds)
+
+      // const tokenIds = await nftService.random()
+      // setTokenIds(tokenIds)
+    }
+
+    getData()
+  }, [nftContract, marketContract])
 
   return (
     <MainWrapper>
@@ -77,7 +120,11 @@ const Mint = () => {
                 Withdrawal to mint ratio
               </Typography>
               <Typography variant="body2" gutterBottom>
-                <span>{(withdrawalAmount / mintPrice).toFixed(2)}</span>
+                <span>
+                  {(
+                    parseFloat(withdrawalAmount) / parseFloat(mintPrice)
+                  ).toFixed(2)}
+                </span>
               </Typography>
             </Box>
             <Box mb={3}>
@@ -85,13 +132,13 @@ const Mint = () => {
                 Verified NFT Contract
               </Typography>
               <Typography variant="body2" gutterBottom>
-                <MuiLink
+                <NavLink
                   color="textPrimary"
                   target="_blank"
                   href={`https://arbiscan.io/address/${NFT_ADDRESS}#code`}
                 >
                   {NFT_ADDRESS}
-                </MuiLink>
+                </NavLink>
               </Typography>
             </Box>
             <Box mb={3}>
@@ -99,29 +146,27 @@ const Mint = () => {
                 Verified Market Contract
               </Typography>
               <Typography variant="body2" gutterBottom>
-                <MuiLink
+                <NavLink
                   color="textPrimary"
                   target="_blank"
                   href={`https://arbiscan.io/address/${MARKET_ADDRESS}#code`}
                 >
                   {MARKET_ADDRESS}
-                </MuiLink>
+                </NavLink>
               </Typography>
             </Box>
-            <Box className={classes.centerMobile}>
+            <CenterBox>
               <Hidden smDown>
                 <div
                   style={{
-                    background: `url(${pinkLineImage}) left top`,
+                    background: `url('images/pink_line.png') left top`,
                     width: 64,
                     height: 8,
                   }}
                 ></div>
               </Hidden>
-              <Button className={classes.mintActiveButton} onClick={handleMint}>
-                Mint now
-              </Button>
-            </Box>
+              <MintActiveButton onClick={handleMint}>Mint now</MintActiveButton>
+            </CenterBox>
           </Grid>
           {(saleSeconds <= 0 || countdownCompleted) && tokenIds.length > 0 && (
             <Grid item xs={12} sm={12} md={6} lg={5}>
@@ -130,18 +175,11 @@ const Mint = () => {
                   const fileName = id.toString().padStart(6, '0')
                   return (
                     <Card key={i} style={{ filter: 'none', margin: 2 }}>
-                      <CardActionArea component={Link} to={`/detail/${id}`}>
-                        <CardMedia
-                          className={classes.nftImage}
+                      <CardActionArea>
+                        <NFTImage
                           image={`https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_thumb.jpg`}
                         />
-                        <Typography
-                          color="textPrimary"
-                          className={classes.nftInfo}
-                          variant="body1"
-                        >
-                          {formatId(id)}
-                        </Typography>
+                        <NFTInfoWrapper>{formatId(id)}</NFTInfoWrapper>
                       </CardActionArea>
                     </Card>
                   )
