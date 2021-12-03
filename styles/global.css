@@ -35,3 +35,16 @@
   background-color: #121212 !important;
   font-size: 12px !important;
 }
+
+.MuiToggleButton-root {
+  background-color: #000 !important;
+}
+.MuiToggleButton-root.Mui-selected {
+  background-color: #1d1d1d !important;
+}
+.MuiToggleButton-root:hover {
+  background-color: #0d0d0d !important;
+}
+.MuiToggleButton-root.Mui-selected:hover {
+  background-color: #222 !important;
+}

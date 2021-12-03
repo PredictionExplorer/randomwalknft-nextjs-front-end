@@ -1,0 +1,92 @@
+import { useRouter } from 'next/router'
+import React, { useState, useEffect } from 'react'
+
+import {
+  Box,
+  Divider,
+  Alert,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material'
+
+import { useNFT } from '../../hooks/useNFT'
+import { useBuyOfferIds, useSellTokenIds } from '../../hooks/useOffer'
+import { useActiveWeb3React } from '../../hooks/web3'
+
+import NFTTrait from '../../components/NFTTrait'
+import NFTBuyOffers from '../../components/NFTBuyOffers'
+import { MainWrapper } from '../../components/styled'
+
+const Detail = () => {
+  const router = useRouter()
+  const { id, seller } = router.query
+  const nft = useNFT(id)
+  const buyOffers = useBuyOfferIds(id)
+  const { account, library } = useActiveWeb3React()
+  const sellTokenIds = useSellTokenIds(account)
+  const [darkTheme, setDarkTheme] = useState(true)
+
+  useEffect(() => {
+    const darkModes = [
+      '#black_image',
+      '#black_single_video',
+      '#black_triple_video',
+    ]
+    const lightModes = [
+      '#white_image',
+      '#white_single_video',
+      '#white_triple_video',
+    ]
+    if (darkModes.includes(location.hash)) {
+      setDarkTheme(true)
+    } else if (lightModes.includes(location.hash)) {
+      setDarkTheme(false)
+    }
+  }, [location])
+
+  if (!nft) return <></>
+
+  return (
+    <MainWrapper
+      maxWidth={false}
+      style={{
+        paddingLeft: 0,
+        paddingRight: 0,
+      }}
+    >
+      {/* {location.state && location.state.message && (
+        <Box px={8} mb={2}>
+          <Alert variant="outlined" severity="success">
+            {location.state.message}
+          </Alert>
+        </Box>
+      )} */}
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        style={{ position: 'relative', height: 60 }}
+      >
+        <Divider style={{ background: '#121212', width: '100%' }} />
+        <ToggleButtonGroup
+          value={darkTheme}
+          exclusive
+          onChange={() => setDarkTheme(!darkTheme)}
+          style={{ position: 'absolute' }}
+        >
+          <ToggleButton value={true}>Dark theme</ToggleButton>
+          <ToggleButton value={false}>White theme</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+      <NFTTrait nft={nft} darkTheme={darkTheme} seller={seller} />
+      <NFTBuyOffers
+        offers={buyOffers}
+        nft={nft}
+        account={account}
+        sellTokenIds={sellTokenIds}
+      />
+    </MainWrapper>
+  )
+}
+
+export default Detail

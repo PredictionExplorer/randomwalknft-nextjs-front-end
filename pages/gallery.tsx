@@ -18,8 +18,7 @@ const Gallery = () => {
   const contract = useNFTContract(NFT_ADDRESS)
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search)
-    const address = searchParams.get('address')
+    const address = router.query['address'] as string
 
     const getTokens = async () => {
       try {
@@ -29,12 +28,12 @@ const Gallery = () => {
           const tokens = await contract.walletOfOwner(address)
           tokenIds = tokens.map((t) => t.toNumber()).reverse()
         } else {
-          setAddress(address)
           const balance = await contract.totalSupply()
           tokenIds = Object.keys(new Array(balance.toNumber()).fill(0))
           tokenIds = tokenIds.reverse()
         }
 
+        setAddress(address)
         setCollection(tokenIds)
         setLoading(false)
       } catch (err) {

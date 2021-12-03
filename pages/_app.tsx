@@ -17,6 +17,10 @@ import Footer from '../components/Footer'
 import createEmotionCache from '../cache/createEmotionCache'
 import getLibrary from '../utils/getLibrary'
 import theme from '../config/styles'
+
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/material.css'
+import 'codemirror/theme/neat.css'
 import '../styles/global.css'
 
 // Client-side cache, shared for the whole session of the user in the browser.

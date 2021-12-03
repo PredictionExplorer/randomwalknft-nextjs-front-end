@@ -10,21 +10,24 @@ import {
 } from '@mui/material'
 import Countdown from 'react-countdown'
 import { Fade } from 'react-slideshow-image'
+import 'react-slideshow-image/dist/styles.css'
 
 import { NFT_ADDRESS, MARKET_ADDRESS } from '../config/app'
 import {
   MainWrapper,
   CenterBox,
-  NavLink,
   MintActiveButton,
   NFTImage,
   NFTInfoWrapper,
+  StyledLink,
+  StyledCard,
 } from '../components/styled'
 import Counter from '../components/Counter'
 
 import useNFTContract from '../hooks/useNFTContract'
 import useMarketContract from '../hooks/useMarketContract'
 
+import api from '../services/api'
 import { formatId, parseBalance } from '../utils'
 
 const Mint = () => {
@@ -52,8 +55,8 @@ const Mint = () => {
       let seconds = (await nftContract.timeUntilSale()).toNumber()
       setSaleSeconds(seconds)
 
-      // const tokenIds = await nftService.random()
-      // setTokenIds(tokenIds)
+      const tokenIds = await api.random()
+      setTokenIds(tokenIds)
     }
 
     getData()
@@ -132,13 +135,12 @@ const Mint = () => {
                 Verified NFT Contract
               </Typography>
               <Typography variant="body2" gutterBottom>
-                <NavLink
-                  color="textPrimary"
+                <StyledLink
                   target="_blank"
                   href={`https://arbiscan.io/address/${NFT_ADDRESS}#code`}
                 >
                   {NFT_ADDRESS}
-                </NavLink>
+                </StyledLink>
               </Typography>
             </Box>
             <Box mb={3}>
@@ -146,13 +148,12 @@ const Mint = () => {
                 Verified Market Contract
               </Typography>
               <Typography variant="body2" gutterBottom>
-                <NavLink
-                  color="textPrimary"
+                <StyledLink
                   target="_blank"
                   href={`https://arbiscan.io/address/${MARKET_ADDRESS}#code`}
                 >
                   {MARKET_ADDRESS}
-                </NavLink>
+                </StyledLink>
               </Typography>
             </Box>
             <CenterBox>
@@ -174,14 +175,18 @@ const Mint = () => {
                 {tokenIds.map((id, i) => {
                   const fileName = id.toString().padStart(6, '0')
                   return (
-                    <Card key={i} style={{ filter: 'none', margin: 2 }}>
-                      <CardActionArea>
+                    <StyledCard key={i} style={{ margin: 2 }}>
+                      <CardActionArea href={`/detail/${id}`}>
                         <NFTImage
                           image={`https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_thumb.jpg`}
                         />
-                        <NFTInfoWrapper>{formatId(id)}</NFTInfoWrapper>
+                        <NFTInfoWrapper>
+                          <Typography variant="body1">
+                            {formatId(id)}
+                          </Typography>
+                        </NFTInfoWrapper>
                       </CardActionArea>
-                    </Card>
+                    </StyledCard>
                   )
                 })}
               </Fade>

@@ -9,14 +9,28 @@ import {
   Button,
   Accordion,
   CardMedia,
+  Card,
+  TextField,
+  Skeleton,
+  Typography,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { isMobile } from 'react-device-detect'
 
-export const NavLink = styled(Link)({
+export const StyledLink = styled(Link)({
   color: '#fff',
-  textDecoration: 'none',
+  textDecoration: 'underline',
+})
+
+export const StyledCard = styled(Card)({
+  border: '1px solid #F4BFFF',
+  boxSizing: 'border-box',
+  borderRadius: 20,
+})
+
+export const NavLink = styled(StyledLink)({
   textTransform: 'uppercase',
+  textDecoration: 'none',
   ':hover': {
     textDecoration: 'underline',
   },
@@ -51,6 +65,14 @@ export const Wallet = styled(Chip)(({ theme }) => ({
 
 export const MobileWallet = styled(Wallet)({
   margin: '0 auto',
+})
+
+export const ConnectButton = styled(Button)({
+  marginLeft: 'auto',
+})
+
+export const MobileConnectButton = styled(ConnectButton)({
+  marginRight: 'auto',
 })
 
 export const MainWrapper = styled(Container)(({ theme }) => ({
@@ -119,8 +141,61 @@ export const NFTImage = styled(CardMedia)({
   paddingTop: '64%',
 })
 
+export const NFTSkeleton = styled(Skeleton)({
+  width: '100%',
+  paddingTop: '64%',
+})
+
 export const NFTInfoWrapper = styled('div')({
   position: 'absolute',
   top: 20,
   right: 24,
 })
+
+export const NFTPrice = styled(Typography)({
+  borderRadius: 3,
+  backgroundColor: '#C676D7',
+  padding: '3px 12px',
+  marginTop: 12,
+})
+
+export const SearchBox = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginBottom: theme.spacing(4),
+  [theme.breakpoints.down('xs')]: {
+    flexDirection: 'column',
+  },
+}))
+
+export const SearchField = styled(TextField)(({ theme }) => ({
+  marginRight: theme.spacing(1),
+  width: 360,
+  [theme.breakpoints.down('xs')]: {
+    marginRight: 0,
+    marginBottom: theme.spacing(2),
+    width: '100%',
+  },
+}))
+
+export const SearchButton = styled(Button)(({ theme }) => ({
+  [theme.breakpoints.down('xs')]: {
+    width: '100%',
+  },
+}))
+
+export const VideoCard = styled(StyledCard)({
+  border: 'none',
+  boxShadow: '0px 0px 10px #000000',
+  position: 'relative',
+})
+
+export const SectionWrapper = styled(Box)(({ theme }) => ({
+  paddingTop: theme.spacing(8),
+  paddingBottom: theme.spacing(8),
+  [theme.breakpoints.down('sm')]: {
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
+  },
+}))

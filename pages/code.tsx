@@ -1,8 +1,7 @@
 import React from 'react'
-import dynamic from 'next/dynamic'
 import { Box, Typography, Grid, Link } from '@mui/material'
 
-import { MainWrapper } from '../components/styled'
+import { MainWrapper, StyledLink } from '../components/styled'
 
 // Workaround
 const { Controlled: CodeMirror } =
@@ -10,9 +9,6 @@ const { Controlled: CodeMirror } =
 
 // Workaround
 if (typeof window !== 'undefined') {
-  import('codemirror/lib/codemirror.css')
-  import('codemirror/theme/material.css')
-  import('codemirror/theme/neat.css')
   import('codemirror/mode/python/python.js')
 }
 
@@ -35,12 +31,9 @@ const CodeViewer = () => (
             into images. You can also find it on IPFS:
           </Typography>
           <Typography variant="body2">
-            <Link
-              color="textPrimary"
-              href="https://cloudflare-ipfs.com/ipfs/QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W"
-            >
+            <StyledLink href="https://cloudflare-ipfs.com/ipfs/QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W">
               ipfs://QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W
-            </Link>
+            </StyledLink>
           </Typography>
         </Box>
       </Grid>

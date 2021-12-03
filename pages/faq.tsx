@@ -5,9 +5,9 @@ import {
   Paper,
   Typography,
   Grid,
-  Link,
   AccordionSummary,
   AccordionDetails,
+  Link,
 } from '@mui/material'
 
 import AddIcon from '@mui/icons-material/Add'
@@ -138,11 +138,19 @@ const FAQ = () => {
                   style={{ lineHeight: 2 }}
                 >
                   Have more questions, reach out to us on&nbsp;
-                  <Link color="primary" href="https://twitter.com">
+                  <Link
+                    color="primary"
+                    style={{ textDecoration: 'none' }}
+                    href="https://twitter.com"
+                  >
                     Twitter
                   </Link>
                   &nbsp;or&nbsp;
-                  <Link color="primary" href="https://discord.com">
+                  <Link
+                    color="primary"
+                    style={{ textDecoration: 'none' }}
+                    href="https://discord.com"
+                  >
                     Discord
                   </Link>
                 </Typography>

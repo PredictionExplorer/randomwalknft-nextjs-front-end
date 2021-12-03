@@ -4,7 +4,13 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { isMobile } from 'react-device-detect'
 
-import { NavLink, MobileWallet, Wallet } from './styled'
+import {
+  NavLink,
+  MobileWallet,
+  Wallet,
+  ConnectButton,
+  MobileConnectButton,
+} from './styled'
 import { injected, walletconnect } from '../connectors'
 import { useActiveWeb3React } from '../hooks/web3'
 import { shortenHex } from '../utils'
@@ -86,15 +92,24 @@ const ConnectWalletButton = ({ isMobileView }) => {
     )
   }
 
-  return (
-    <Button
+  return isMobileView ? (
+    <MobileConnectButton
       variant="outlined"
       color="secondary"
       size="large"
       onClick={handleConnectWallet}
     >
       Connect to wallet
-    </Button>
+    </MobileConnectButton>
+  ) : (
+    <ConnectButton
+      variant="outlined"
+      color="secondary"
+      size="large"
+      onClick={handleConnectWallet}
+    >
+      Connect to wallet
+    </ConnectButton>
   )
 }
 
