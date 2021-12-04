@@ -50,10 +50,7 @@ function MyApp(props: MyAppProps) {
                 pageProps.nft.id,
               )}`}
             />
-            <meta
-              property="og:image"
-              content="https://www.larvalabs.com/cryptopunks/cryptopunk5347.png?customColor=638596"
-            />
+            <meta property="og:image" content={pageProps.nft.black_image_url} />
             <meta
               property="og:description"
               content={`Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters. These are the details for ${formatId(
@@ -70,7 +67,7 @@ function MyApp(props: MyAppProps) {
             />
             <meta
               name="twitter:image"
-              content="https://www.larvalabs.com/cryptopunks/cryptopunk5347.png?customColor=638596"
+              content={pageProps.nft.black_image_url}
             />
             <meta
               name="twitter:description"
