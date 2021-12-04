@@ -4,7 +4,6 @@ import {
   Box,
   Container,
   Typography,
-  TableContainer,
   Table,
   TableHead,
   TableRow,
@@ -16,7 +15,7 @@ import {
 import { useOffer } from '../hooks/useOffer'
 import useMarketContract from '../hooks/useMarketContract'
 
-import { SectionWrapper } from './styled'
+import { SectionWrapper, TablePrimaryContainer } from './styled'
 
 const OfferRow = ({ offerId, isOwner, account }) => {
   const offer = useOffer(offerId)
@@ -81,7 +80,7 @@ const OfferRow = ({ offerId, isOwner, account }) => {
 
 const OfferTable = ({ offers, isOwner, account }) => {
   return (
-    <TableContainer>
+    <TablePrimaryContainer>
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
@@ -110,7 +109,7 @@ const OfferTable = ({ offers, isOwner, account }) => {
           )}
         </TableBody>
       </Table>
-    </TableContainer>
+    </TablePrimaryContainer>
   )
 }
 
