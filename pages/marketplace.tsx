@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { Box, Typography } from '@mui/material'
 import { ethers } from 'ethers'
 
-import { NFT_ADDRESS, MARKET_ADDRESS } from '../config/app'
 import PaginationOfferGrid from '../components/PaginationOfferGrid'
 import { MainWrapper } from '../components/styled'
 import { getOfferById } from '../hooks/useOffer'
@@ -13,8 +12,8 @@ const Marketplace = () => {
   const [loading, setLoading] = useState(true)
   const [collection, setCollection] = useState([])
 
-  const nftContract = useNFTContract(NFT_ADDRESS)
-  const marketContract = useMarketContract(MARKET_ADDRESS)
+  const nftContract = useNFTContract()
+  const marketContract = useMarketContract()
 
   useEffect(() => {
     const getTokens = async () => {

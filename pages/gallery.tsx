@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Box, Typography } from '@mui/material'
 
-import { NFT_ADDRESS } from '../config/app'
-
 import PaginationGrid from '../components/PaginationGrid'
 import { MainWrapper } from '../components/styled'
 
@@ -15,7 +13,7 @@ const Gallery = () => {
   const [collection, setCollection] = useState([])
   const [address, setAddress] = useState(null)
 
-  const contract = useNFTContract(NFT_ADDRESS)
+  const contract = useNFTContract()
 
   useEffect(() => {
     const address = router.query['address'] as string

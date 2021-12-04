@@ -13,7 +13,6 @@ import {
   Button,
 } from '@mui/material'
 
-import { MARKET_ADDRESS } from '../config/app'
 import { useOffer } from '../hooks/useOffer'
 import useMarketContract from '../hooks/useMarketContract'
 
@@ -21,7 +20,7 @@ import { SectionWrapper } from './styled'
 
 const OfferRow = ({ offerId, isOwner, account }) => {
   const offer = useOffer(offerId)
-  const contract = useMarketContract(MARKET_ADDRESS)
+  const contract = useMarketContract()
 
   const handleAcceptBuy = async () => {
     try {

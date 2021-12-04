@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 
-import { NFT_ADDRESS, MARKET_ADDRESS } from '../config/app'
+import { NFT_ADDRESS } from '../config/app'
 import useNFTContract from './useNFTContract'
 import useMarketContract from './useMarketContract'
 
@@ -29,8 +29,8 @@ export const getOfferById = async (nftContract, marketContract, offerId) => {
 }
 
 export const useOffer = (offerId) => {
-  const nftContract = useNFTContract(NFT_ADDRESS)
-  const marketContract = useMarketContract(MARKET_ADDRESS)
+  const nftContract = useNFTContract()
+  const marketContract = useMarketContract()
   const [offer, setOffer] = useState(null)
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export const useOffer = (offerId) => {
 }
 
 export const useBuyOfferIds = (tokenId) => {
-  const contract = useMarketContract(MARKET_ADDRESS)
+  const contract = useMarketContract()
   const [buyOfferIds, setBuyOfferIds] = useState([])
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export const useBuyOfferIds = (tokenId) => {
 }
 
 export const useBuyTokenIds = (address) => {
-  const contract = useMarketContract(MARKET_ADDRESS)
+  const contract = useMarketContract()
   const [buyTokenIds, setBuyTokenIds] = useState([])
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export const useBuyTokenIds = (address) => {
 }
 
 export const useAccountBuyOfferIds = (address) => {
-  const contract = useMarketContract(MARKET_ADDRESS)
+  const contract = useMarketContract()
   const [buyOfferIds, setBuyOfferIds] = useState([])
 
   useEffect(() => {
@@ -118,7 +118,7 @@ export const useAccountBuyOfferIds = (address) => {
 }
 
 export const useSellOfferIds = (tokenId) => {
-  const contract = useMarketContract(MARKET_ADDRESS)
+  const contract = useMarketContract()
   const [sellOfferIds, setSellOfferIds] = useState([])
 
   useEffect(() => {
@@ -140,7 +140,7 @@ export const useSellOfferIds = (tokenId) => {
 }
 
 export const useAccountSellOfferIds = (address) => {
-  const contract = useMarketContract(MARKET_ADDRESS)
+  const contract = useMarketContract()
   const [sellOfferIds, setSellOfferIds] = useState([])
 
   useEffect(() => {
@@ -165,7 +165,7 @@ export const useAccountSellOfferIds = (address) => {
 }
 
 export const useSellTokenIds = (address) => {
-  const contract = useMarketContract(MARKET_ADDRESS)
+  const contract = useMarketContract()
   const [sellTokenIds, setSellTokenIds] = useState([])
 
   useEffect(() => {

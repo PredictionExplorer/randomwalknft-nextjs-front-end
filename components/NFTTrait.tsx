@@ -63,8 +63,8 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
   const [accountTokenIds, setAccountTokenIds] = useState([])
 
   const router = useRouter()
-  const nftContract = useNFTContract(NFT_ADDRESS)
-  const marketContract = useMarketContract(MARKET_ADDRESS)
+  const nftContract = useNFTContract()
+  const marketContract = useMarketContract()
 
   const { account, library } = useActiveWeb3React()
 

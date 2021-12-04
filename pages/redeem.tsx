@@ -4,7 +4,6 @@ import moment from 'moment'
 import { Button, Box, Typography, Grid, Paper } from '@mui/material'
 import Countdown from 'react-countdown'
 
-import { NFT_ADDRESS } from '../config/app'
 import { CenterBox, MainWrapper, StyledLink } from '../components/styled'
 import Counter from '../components/Counter'
 import useNFTContract from '../hooks/useNFTContract'
@@ -14,7 +13,7 @@ const Redeem = () => {
   const [lastMinter, setLastMinter] = useState(null)
   const [withdrawalAmount, setWithdrawalAmount] = useState(null)
 
-  const contract = useNFTContract(NFT_ADDRESS)
+  const contract = useNFTContract()
 
   const handleWithdraw = async () => {
     try {

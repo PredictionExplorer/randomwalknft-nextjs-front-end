@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 
-import { NFT_ADDRESS } from '../config/app'
 import useNFTContract from './useNFTContract'
 
 export const useNFT = (tokenId) => {
-  const contract = useNFTContract(NFT_ADDRESS)
+  const contract = useNFTContract()
   const [nft, setNft] = useState(null)
 
   useEffect(() => {

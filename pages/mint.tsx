@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import {
-  Typography,
-  Box,
-  Grid,
-  Card,
-  CardActionArea,
-  Hidden,
-  Link,
-} from '@mui/material'
+import { useRouter } from 'next/router'
+import { ethers } from 'ethers'
+import { Typography, Box, Grid, CardActionArea, Hidden } from '@mui/material'
 import Countdown from 'react-countdown'
 import { Fade } from 'react-slideshow-image'
 import 'react-slideshow-image/dist/styles.css'
@@ -37,10 +31,43 @@ const Mint = () => {
   const [withdrawalAmount, setWithdrawalAmount] = useState('0')
   const [tokenIds, setTokenIds] = useState([])
 
-  const nftContract = useNFTContract(NFT_ADDRESS)
-  const marketContract = useMarketContract(MARKET_ADDRESS)
+  const nftContract = useNFTContract()
+  const marketContract = useMarketContract()
 
-  const handleMint = () => {}
+  const router = useRouter()
+
+  const handleMint = async () => {
+    if (nftContract) {
+      try {
+        if (saleSeconds > 0 && !countdownCompleted) {
+          alert('The sale is not open yet.')
+          return
+        }
+
+        const mintPrice = await nftContract.getMintPrice()
+        const newPrice = parseFloat(ethers.utils.formatEther(mintPrice)) * 1.01
+
+        const receipt = await nftContract
+          .mint({ value: ethers.utils.parseEther(newPrice.toFixed(4)) })
+          .then((tx) => tx.wait())
+
+        const token_id = receipt.events[0].args.tokenId.toNumber()
+
+        await api.create(token_id)
+
+        router.push(`/detail/${token_id}`)
+      } catch (err) {
+        const { data } = err
+        if (data && data.message) {
+          alert(data.message)
+        } else {
+          alert("There's an error")
+        }
+      }
+    } else {
+      alert('Please connect your wallet on Arbitrum network')
+    }
+  }
 
   useEffect(() => {
     const getData = async () => {
