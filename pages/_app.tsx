@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app'
 import dynamic from 'next/dynamic'
+import Head from 'next/head'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { CacheProvider, EmotionCache } from '@emotion/react'
@@ -17,6 +18,7 @@ import Footer from '../components/Footer'
 import createEmotionCache from '../cache/createEmotionCache'
 import getLibrary from '../utils/getLibrary'
 import theme from '../config/styles'
+import { formatId } from '../utils'
 
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/material.css'
@@ -33,22 +35,69 @@ interface MyAppProps extends AppProps {
 function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
   return (
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <Web3ProviderNetwork getLibrary={getLibrary}>
-        <CacheProvider value={emotionCache}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Web3ReactManager>
-              <>
-                <Header />
-                <Component {...pageProps} />
-                <Footer />
-              </>
-            </Web3ReactManager>
-          </ThemeProvider>
-        </CacheProvider>
-      </Web3ProviderNetwork>
-    </Web3ReactProvider>
+    <>
+      <Head>
+        <title>Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+        {pageProps.nft && (
+          <>
+            <meta
+              property="og:title"
+              content={`Random Walk NFT: Details for ${formatId(
+                pageProps.nft.id,
+              )}`}
+            />
+            <meta
+              property="og:image"
+              content="https://www.larvalabs.com/cryptopunks/cryptopunk5347.png?customColor=638596"
+            />
+            <meta
+              property="og:description"
+              content={`Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters. These are the details for ${formatId(
+                pageProps.nft.id,
+              )}`}
+            />
+
+            <meta name="twitter:card" content="summary" />
+            <meta
+              name="twitter:title"
+              content={`Random Walk NFT: Details for ${formatId(
+                pageProps.nft.id,
+              )}`}
+            />
+            <meta
+              name="twitter:image"
+              content="https://www.larvalabs.com/cryptopunks/cryptopunk5347.png?customColor=638596"
+            />
+            <meta
+              name="twitter:description"
+              content={`Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters. These are the details for ${formatId(
+                pageProps.nft.id,
+              )}`}
+            />
+          </>
+        )}
+      </Head>
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <Web3ProviderNetwork getLibrary={getLibrary}>
+          <CacheProvider value={emotionCache}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <Web3ReactManager>
+                <>
+                  <Header />
+                  <Component {...pageProps} />
+                  <Footer />
+                </>
+              </Web3ReactManager>
+            </ThemeProvider>
+          </CacheProvider>
+        </Web3ProviderNetwork>
+      </Web3ReactProvider>
+    </>
   )
 }
 
