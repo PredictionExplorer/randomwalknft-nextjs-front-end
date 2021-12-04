@@ -106,10 +106,10 @@ const Redeem = () => {
       <Paper>
         <Box my={4} p={3}>
           <Typography variant="body2" style={{ lineHeight: 2 }}>
-            If nobody mints for 30 days after the last mint, last minter can
+            If nobody mints for 30 days after the last mint, the last minter can
             withdraw 50% of all the ETH that was spent on minting up to that
-            point. (ETH spent on minting does not go to the creators of the NFT,
-            it goes back to the minters through this mechanism.)
+            point. In this way, ETH spent on minting goes to the minters, not
+            the creators of Random Walk NFT.
           </Typography>
         </Box>
       </Paper>

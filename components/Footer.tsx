@@ -26,7 +26,7 @@ const Footer = () => (
                 component="span"
                 color="textSecondary"
               >
-                Member of
+                Member of the
               </Typography>
               &nbsp;
               <Link

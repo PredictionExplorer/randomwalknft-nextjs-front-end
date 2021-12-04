@@ -7,7 +7,7 @@ function Home() {
   return (
     <>
       <img
-        src='images/curves.png'
+        src="images/curves.png"
         alt="curves"
         style={{
           position: 'fixed',
@@ -46,14 +46,21 @@ function Home() {
           <Box mt={3}>
             <Typography align="left" variant="body1" gutterBottom>
               100% of the ΞTH spent on minting goes back to the minters through
-              an&nbsp;
-              <Link href="/redeem" style={{ cursor: 'pointer' }}>
-                interesting mechanism
+              a&nbsp;
+              <Link
+                href="/redeem"
+                style={{
+                  cursor: 'pointer',
+                  color: 'white',
+                  textDecoration: 'underline',
+                }}
+              >
+                novel incentive structure
               </Link>
               .
             </Typography>
             <Typography align="left" variant="body1" gutterBottom>
-              Trade your NFTs on the built in 0.00% fee marketplace.
+              Trade your NFTs on the built-in 0.00% fee marketplace.
             </Typography>
           </Box>
           <CenterBox mt={3}>

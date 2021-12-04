@@ -119,7 +119,7 @@ const Mint = () => {
             RANDOM WALK
           </Typography>
           <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
-            NFT AT
+            NFT FOR
           </Typography>
           <Typography
             variant="h4"
