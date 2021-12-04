@@ -7,6 +7,11 @@ class ApiService {
     await axios.post(baseUrl + 'tokens', { token_id })
   }
 
+  public async get(token_id: number | string) {
+    const { data } = await axios.get(baseUrl + 'tokens/' + token_id)
+    return data;
+  }
+
   public async result() {
     const { data } = await axios.get(baseUrl + 'result')
     return data

@@ -43,12 +43,12 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
     id,
     name,
     seed,
-    white_image,
-    black_image,
-    white_single_video,
-    black_single_video,
-    white_triple_video,
-    black_triple_video,
+    white_image_url,
+    black_image_url,
+    white_single_video_url,
+    black_single_video_url,
+    white_triple_video_url,
+    black_triple_video_url,
     owner,
   } = nft
 
@@ -199,7 +199,9 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
     ) {
       setTheme(hash.includes('black') ? 'black' : 'white')
       handlePlay(
-        hash.includes('black') ? black_single_video : white_single_video,
+        hash.includes('black')
+          ? black_single_video_url
+          : white_single_video_url,
       )
     } else if (
       hash === '#black_triple_video' ||
@@ -207,15 +209,17 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
     ) {
       setTheme(hash.includes('black') ? 'black' : 'white')
       handlePlay(
-        hash.includes('black') ? black_triple_video : white_triple_video,
+        hash.includes('black')
+          ? black_triple_video_url
+          : white_triple_video_url,
       )
     }
   }, [
     location,
-    black_single_video,
-    white_single_video,
-    black_triple_video,
-    white_triple_video,
+    black_single_video_url,
+    white_single_video_url,
+    black_triple_video_url,
+    white_triple_video_url,
   ])
 
   useEffect(() => {
@@ -248,7 +252,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
             <StyledCard>
               <CardActionArea onClick={() => setImageOpen(true)}>
                 <NFTImage
-                  image={theme === 'black' ? black_image : white_image}
+                  image={theme === 'black' ? black_image_url : white_image_url}
                 />
                 <NFTInfoWrapper>
                   <Typography
@@ -329,17 +333,21 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
             )}
             {imageOpen && (
               <Lightbox
-                image={theme === 'black' ? black_image : white_image}
+                image={theme === 'black' ? black_image_url : white_image_url}
                 onClose={() => setImageOpen(false)}
               />
             )}
           </Grid>
           <Grid item xs={12} sm={8} md={6}>
             <NFTVideo
-              image_thumb={theme === 'black' ? black_image : white_image}
+              image_thumb={
+                theme === 'black' ? black_image_url : white_image_url
+              }
               onClick={() =>
                 handlePlay(
-                  theme === 'black' ? black_single_video : white_single_video,
+                  theme === 'black'
+                    ? black_single_video_url
+                    : white_single_video_url,
                 )
               }
             />
@@ -354,10 +362,14 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
           <Grid container spacing={4} justifyContent="center">
             <Grid item xs={12} sm={8} md={6}>
               <NFTVideo
-                image_thumb={theme === 'black' ? black_image : white_image}
+                image_thumb={
+                  theme === 'black' ? black_image_url : white_image_url
+                }
                 onClick={() =>
                   handlePlay(
-                    theme === 'black' ? black_triple_video : white_triple_video,
+                    theme === 'black'
+                      ? black_triple_video_url
+                      : white_triple_video_url,
                   )
                 }
               />

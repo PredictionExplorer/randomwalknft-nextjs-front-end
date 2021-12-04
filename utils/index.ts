@@ -37,6 +37,6 @@ export const parseBalance = (
   decimalsToDisplay = 4,
 ) => parseFloat(formatUnits(value, decimals)).toFixed(decimalsToDisplay)
 
-export const formatId = (id: number) => {
+export const formatId = (id: number | string) => {
   return `#${id.toString().padStart(6, '0')}`
 }

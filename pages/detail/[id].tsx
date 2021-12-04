@@ -1,28 +1,26 @@
+import { GetServerSidePropsContext } from 'next'
 import { useRouter } from 'next/router'
+import Head from 'next/head'
 import React, { useState, useEffect } from 'react'
 
-import {
-  Box,
-  Divider,
-  Alert,
-  ToggleButton,
-  ToggleButtonGroup,
-} from '@mui/material'
-
-import { useNFT } from '../../hooks/useNFT'
-import { useBuyOfferIds, useSellTokenIds } from '../../hooks/useOffer'
-import { useActiveWeb3React } from '../../hooks/web3'
+import { Box, Divider, ToggleButton, ToggleButtonGroup } from '@mui/material'
 
 import NFTTrait from '../../components/NFTTrait'
 import NFTBuyOffers from '../../components/NFTBuyOffers'
 import { MainWrapper } from '../../components/styled'
 
-const Detail = () => {
+import { useBuyOfferIds, useSellTokenIds } from '../../hooks/useOffer'
+import { useActiveWeb3React } from '../../hooks/web3'
+
+import api from '../../services/api'
+
+import { formatId } from '../../utils'
+
+const Detail = ({ nft }) => {
   const router = useRouter()
-  const { id, seller } = router.query
-  const nft = useNFT(id)
-  const buyOffers = useBuyOfferIds(id)
-  const { account, library } = useActiveWeb3React()
+  const { seller } = router.query
+  const buyOffers = useBuyOfferIds(nft.id)
+  const { account } = useActiveWeb3React()
   const sellTokenIds = useSellTokenIds(account)
   const [darkTheme, setDarkTheme] = useState(true)
 
@@ -47,46 +45,91 @@ const Detail = () => {
   if (!nft) return <></>
 
   return (
-    <MainWrapper
-      maxWidth={false}
-      style={{
-        paddingLeft: 0,
-        paddingRight: 0,
-      }}
-    >
-      {/* {location.state && location.state.message && (
+    <>
+      <Head>
+        <title>Random Walk NFT {formatId(nft.id)}</title>
+        <meta
+          name="description"
+          content={`These are the details for Random Walk NFT ${formatId(nft.id)}`}
+        />
+        <meta
+          property="og:title"
+          content="CryptoPunks: Details for Punk #5347"
+        />
+        <meta
+          property="og:image"
+          content="https://www.larvalabs.com/cryptopunks/cryptopunk5347.png?customColor=638596"
+        />
+        <meta
+          property="og:description"
+          content="CryptoPunks are 10,000 collectible characters on the Ethereum blockchain. These are the details for Punk #5347"
+        />
+
+        <meta name="twitter:card" content="summary" />
+        <meta
+          name="twitter:title"
+          content="CryptoPunks: Details for Punk #5347"
+        />
+        <meta name="twitter:site" content="@larvalabs" />
+        <meta
+          name="twitter:image"
+          content="https://www.larvalabs.com/cryptopunks/cryptopunk5347.png?customColor=638596"
+        />
+        <meta
+          name="twitter:description"
+          content="CryptoPunks are 10,000 collectible characters on the Ethereum blockchain. These are the details for Punk #5347"
+        />
+      </Head>
+      <MainWrapper
+        maxWidth={false}
+        style={{
+          paddingLeft: 0,
+          paddingRight: 0,
+        }}
+      >
+        {/* {location.state && location.state.message && (
         <Box px={8} mb={2}>
           <Alert variant="outlined" severity="success">
             {location.state.message}
           </Alert>
         </Box>
       )} */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        style={{ position: 'relative', height: 60 }}
-      >
-        <Divider style={{ background: '#121212', width: '100%' }} />
-        <ToggleButtonGroup
-          value={darkTheme}
-          exclusive
-          onChange={() => setDarkTheme(!darkTheme)}
-          style={{ position: 'absolute' }}
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          style={{ position: 'relative', height: 60 }}
         >
-          <ToggleButton value={true}>Dark theme</ToggleButton>
-          <ToggleButton value={false}>White theme</ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-      <NFTTrait nft={nft} darkTheme={darkTheme} seller={seller} />
-      <NFTBuyOffers
-        offers={buyOffers}
-        nft={nft}
-        account={account}
-        sellTokenIds={sellTokenIds}
-      />
-    </MainWrapper>
+          <Divider style={{ background: '#121212', width: '100%' }} />
+          <ToggleButtonGroup
+            value={darkTheme}
+            exclusive
+            onChange={() => setDarkTheme(!darkTheme)}
+            style={{ position: 'absolute' }}
+          >
+            <ToggleButton value={true}>Dark theme</ToggleButton>
+            <ToggleButton value={false}>White theme</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+        <NFTTrait nft={nft} darkTheme={darkTheme} seller={seller} />
+        <NFTBuyOffers
+          offers={buyOffers}
+          nft={nft}
+          account={account}
+          sellTokenIds={sellTokenIds}
+        />
+      </MainWrapper>
+    </>
   )
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const id = context.params!.id
+  const tokenId = Array.isArray(id) ? id[0] : id
+  const nft = await api.get(tokenId)
+  return {
+    props: { nft },
+  }
 }
 
 export default Detail
