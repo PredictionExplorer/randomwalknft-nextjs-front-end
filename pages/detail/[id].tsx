@@ -50,33 +50,40 @@ const Detail = ({ nft }) => {
         <title>Random Walk NFT {formatId(nft.id)}</title>
         <meta
           name="description"
-          content={`These are the details for Random Walk NFT ${formatId(nft.id)}`}
+          content={`These are the details for Random Walk NFT ${formatId(
+            nft.id,
+          )}`}
         />
         <meta
           property="og:title"
+          key="ogTitle"
           content="CryptoPunks: Details for Punk #5347"
         />
         <meta
           property="og:image"
+          key="ogImage"
           content="https://www.larvalabs.com/cryptopunks/cryptopunk5347.png?customColor=638596"
         />
         <meta
           property="og:description"
+          key="ogDescription"
           content="CryptoPunks are 10,000 collectible characters on the Ethereum blockchain. These are the details for Punk #5347"
         />
 
-        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:card" key="twitterCard" content="summary" />
         <meta
           name="twitter:title"
+          key="twitterTitle"
           content="CryptoPunks: Details for Punk #5347"
         />
-        <meta name="twitter:site" content="@larvalabs" />
         <meta
           name="twitter:image"
+          key="twitterImage"
           content="https://www.larvalabs.com/cryptopunks/cryptopunk5347.png?customColor=638596"
         />
         <meta
           name="twitter:description"
+          key="twitterDescription"
           content="CryptoPunks are 10,000 collectible characters on the Ethereum blockchain. These are the details for Punk #5347"
         />
       </Head>
