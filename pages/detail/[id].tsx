@@ -33,10 +33,13 @@ const Detail = ({ nft }) => {
       '#white_single_video',
       '#white_triple_video',
     ]
-    if (darkModes.includes(hash[0])) {
-      setDarkTheme(true)
-    } else if (lightModes.includes(hash[0])) {
-      setDarkTheme(false)
+
+    if (hash.length) {
+      if (darkModes.includes(hash[0])) {
+        setDarkTheme(true)
+      } else if (lightModes.includes(hash[0])) {
+        setDarkTheme(false)
+      }
     }
   }, [router])
 
