@@ -385,7 +385,12 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                   Owner
                 </Typography>
                 <Typography align="left" variant="body2" color="textPrimary">
-                  <Link>{seller || owner}</Link>
+                  <Link 
+                    style={{ color: '#fff' }}
+                    href={`/gallery?address=${seller || owner}`}
+                  >
+                    {seller || owner}
+                  </Link>
                 </Typography>
               </Box>
               <Box mb={3}>

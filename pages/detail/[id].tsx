@@ -2,7 +2,7 @@ import { GetServerSidePropsContext } from 'next'
 import { useRouter } from 'next/router'
 import React, { useState, useEffect } from 'react'
 
-import { Box, Divider, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { Box, Divider, ToggleButton, ToggleButtonGroup, Alert } from '@mui/material'
 
 import NFTTrait from '../../components/NFTTrait'
 import NFTBuyOffers from '../../components/NFTBuyOffers'
@@ -22,6 +22,7 @@ const Detail = ({ nft }) => {
   const [darkTheme, setDarkTheme] = useState(true)
 
   useEffect(() => {
+    let hash = router.asPath.match(/#([a-z0-9]+)/gi)
     const darkModes = [
       '#black_image',
       '#black_single_video',
@@ -32,12 +33,12 @@ const Detail = ({ nft }) => {
       '#white_single_video',
       '#white_triple_video',
     ]
-    if (darkModes.includes(location.hash)) {
+    if (darkModes.includes(hash[0])) {
       setDarkTheme(true)
-    } else if (lightModes.includes(location.hash)) {
+    } else if (lightModes.includes(hash[0])) {
       setDarkTheme(false)
     }
-  }, [location])
+  }, [router])
 
   if (!nft) return <></>
 
@@ -49,13 +50,13 @@ const Detail = ({ nft }) => {
         paddingRight: 0,
       }}
     >
-      {/* {location.state && location.state.message && (
+      {router.query && router.query.message && (
         <Box px={8} mb={2}>
           <Alert variant="outlined" severity="success">
-            {location.state.message}
+            {router.query.message}
           </Alert>
         </Box>
-      )} */}
+      )}
       <Box
         display="flex"
         alignItems="center"

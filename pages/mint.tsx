@@ -55,7 +55,13 @@ const Mint = () => {
 
         await api.create(token_id)
 
-        router.push(`/detail/${token_id}`)
+        router.push({ 
+          pathname: `/detail/${token_id}`,
+          query: {
+            message:
+              "Media files are being generated. Please refrersh the page in a few minutes."
+          }
+        })
       } catch (err) {
         const { data } = err
         if (data && data.message) {
