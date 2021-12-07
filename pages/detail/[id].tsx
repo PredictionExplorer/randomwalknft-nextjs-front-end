@@ -34,7 +34,7 @@ const Detail = ({ nft }) => {
       '#white_triple_video',
     ]
 
-    if (hash.length) {
+    if (hash) {
       if (darkModes.includes(hash[0])) {
         setDarkTheme(true)
       } else if (lightModes.includes(hash[0])) {
