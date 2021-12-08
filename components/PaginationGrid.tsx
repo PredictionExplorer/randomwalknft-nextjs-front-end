@@ -18,8 +18,7 @@ const PaginationGrid = ({ loading, data }) => {
 
   const handleNextPage = (page) => {
     router.query['page'] = page
-    // const searchParams = new URLSearchParams(router.query)
-    // router.push(`${router.pathname}?${searchParams.toString()}`)
+    router.push({ pathname: router.pathname, query: router.query})
   }
 
   const handleSearchChange = async (e) => {

@@ -58,8 +58,7 @@ const Mint = () => {
         router.push({ 
           pathname: `/detail/${token_id}`,
           query: {
-            message:
-              "Media files are being generated. Please refrersh the page in a few minutes."
+            message: "success"
           }
         })
       } catch (err) {

@@ -56,7 +56,9 @@ const Detail = ({ nft }) => {
       {router.query && router.query.message && (
         <Box px={8} mb={2}>
           <Alert variant="outlined" severity="success">
-            {router.query.message}
+            {router.query.message === 'success'
+              ? 'Media files are being generated. Please refrersh the page in a few minutes.'
+              : ''}
           </Alert>
         </Box>
       )}
