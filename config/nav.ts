@@ -13,7 +13,7 @@ const NAVS: NavItem[] = [
   { title: 'FAQ', route: '/faq' },
   { title: 'Generation Code', route: '/code' },
   { title: 'Random', route: '/random' },
-  // { title: 'Random Video', route: '/random-video' },
+  { title: 'Random Video', route: '/random-video' },
 ]
 
 export default NAVS
