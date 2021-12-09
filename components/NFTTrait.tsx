@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { ethers } from 'ethers'
+import { Contract, ethers } from 'ethers'
 import {
   Box,
   Typography,
@@ -61,6 +61,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
   const [tokenName, setTokenName] = useState(name)
   const [address, setAddress] = useState('')
   const [accountTokenIds, setAccountTokenIds] = useState([])
+  const [realOwner, setRealOwner] = useState('')
 
   const router = useRouter()
   const nftContract = useNFTContract()
@@ -185,6 +186,14 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
   }
 
   useEffect(() => {
+    const getOwner = async () => {
+      const owner = await nftContract.ownerOf(nft.id);
+      setRealOwner(owner);
+    }
+    getOwner();
+  }, [nftContract, nft])
+
+  useEffect(() => {
     setTheme(darkTheme ? 'black' : 'white')
   }, [darkTheme])
 
@@ -305,7 +314,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                 </Grid>
               </Grid>
             </Box>
-            {account === (seller || owner) && accountTokenIds.length > 0 && (
+            {account === (seller || realOwner) && accountTokenIds.length > 0 && (
               <Box mt={1}>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
@@ -387,9 +396,9 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                 <Typography align="left" variant="body2" color="textPrimary">
                   <Link 
                     style={{ color: '#fff' }}
-                    href={`/gallery?address=${seller || owner}`}
+                    href={`/gallery?address=${seller || realOwner}`}
                   >
-                    {seller || owner}
+                    {seller || realOwner}
                   </Link>
                 </Typography>
               </Box>
@@ -412,7 +421,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                 </Box>
               )}
               <Box>
-                {account === nft.owner ? (
+                {account === realOwner ? (
                   <>
                     <Box mb={3}>
                       <Typography gutterBottom variant="h6" align="left">
@@ -526,7 +535,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                         </Button>
                       </Box>
                     ) : (
-                      nft.owner.toLowerCase() ===
+                      realOwner.toLowerCase() ===
                         MARKET_ADDRESS.toLowerCase() && (
                         <Box mb={3}>
                           <Button

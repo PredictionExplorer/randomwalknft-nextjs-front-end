@@ -24,7 +24,8 @@ const RandomVideo = (props) => {
 
   useEffect(() => {
     if (blackVideo) {
-      ref.current.play()
+      ref.current.load()
+      // ref.current.play()
     }
   }, [blackVideo])
 
