@@ -43,6 +43,7 @@ const RandomVideo = (props) => {
           <video
             autoPlay
             muted
+            playsInline
             style={{
               position: 'absolute',
               width: '100%',
