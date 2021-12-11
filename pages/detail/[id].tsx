@@ -79,13 +79,15 @@ const Detail = ({ nft }) => {
           <ToggleButton value={false}>White theme</ToggleButton>
         </ToggleButtonGroup>
       </Box>
-      <NFTTrait nft={nft} darkTheme={darkTheme} seller={seller} />
-      <NFTBuyOffers
+      <NFTTrait nft={nft} darkTheme={darkTheme} seller={seller} offers={buyOffers} />
+      {buyOffers.length > 0 && (
+        <NFTBuyOffers
         offers={buyOffers}
         nft={nft}
         account={account}
         sellTokenIds={sellTokenIds}
-      />
+        />
+      )}
     </MainWrapper>
   )
 }

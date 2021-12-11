@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
-import { Contract, ethers } from 'ethers'
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { ethers } from "ethers";
 import {
   Box,
   Typography,
@@ -10,35 +10,36 @@ import {
   Grid,
   Link,
   Container,
-} from '@mui/material'
+} from "@mui/material";
 
-import { CopyToClipboard } from 'react-copy-to-clipboard'
-import Lightbox from 'react-awesome-lightbox'
-import 'react-awesome-lightbox/build/style.css'
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import Lightbox from "react-awesome-lightbox";
+import "react-awesome-lightbox/build/style.css";
 
-import ModalVideo from 'react-modal-video'
-import 'react-modal-video/css/modal-video.min.css'
+import ModalVideo from "react-modal-video";
+import "react-modal-video/css/modal-video.min.css";
 
-import { MARKET_ADDRESS, NFT_ADDRESS } from '../config/app'
-import NFTVideo from './NFTVideo'
-import useNFTContract from '../hooks/useNFTContract'
-import useMarketContract from '../hooks/useMarketContract'
+import { MARKET_ADDRESS, NFT_ADDRESS } from "../config/app";
+import NFTVideo from "./NFTVideo";
+import useNFTContract from "../hooks/useNFTContract";
+import useMarketContract from "../hooks/useMarketContract";
 import {
+  useOffer,
   useSellTokenIds,
   useSellOfferIds,
   getOfferById,
-} from '../hooks/useOffer'
-import { useActiveWeb3React } from '../hooks/web3'
-import { formatId } from '../utils'
+} from "../hooks/useOffer";
+import { useActiveWeb3React } from "../hooks/web3";
+import { formatId } from "../utils";
 import {
   StyledCard,
   SectionWrapper,
   NFTImage,
   NFTInfoWrapper,
   NFTPrice,
-} from './styled'
+} from "./styled";
 
-const NFTTrait = ({ nft, darkTheme, seller }) => {
+const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
   const {
     id,
     name,
@@ -49,59 +50,59 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
     black_single_video_url,
     white_triple_video_url,
     black_triple_video_url,
-    owner,
-  } = nft
+  } = nft;
 
-  const [open, setOpen] = useState(false)
-  const [imageOpen, setImageOpen] = useState(false)
-  const [videoPath, setVideoPath] = useState(null)
-  const [sellPrice, setSellPrice] = useState(null)
-  const [theme, setTheme] = useState(darkTheme ? 'black' : 'white')
-  const [price, setPrice] = useState('')
-  const [tokenName, setTokenName] = useState(name)
-  const [address, setAddress] = useState('')
-  const [accountTokenIds, setAccountTokenIds] = useState([])
-  const [realOwner, setRealOwner] = useState('')
+  const [open, setOpen] = useState(false);
+  const [imageOpen, setImageOpen] = useState(false);
+  const [videoPath, setVideoPath] = useState(null);
+  const [sellPrice, setSellPrice] = useState(null);
+  const [theme, setTheme] = useState(darkTheme ? "black" : "white");
+  const [price, setPrice] = useState("");
+  const [tokenName, setTokenName] = useState(name);
+  const [address, setAddress] = useState("");
+  const [accountTokenIds, setAccountTokenIds] = useState([]);
+  const [realOwner, setRealOwner] = useState("");
+  const [highestOffer, setHighestOffer] = useState(null);
 
-  const router = useRouter()
-  const nftContract = useNFTContract()
-  const marketContract = useMarketContract()
+  const router = useRouter();
+  const nftContract = useNFTContract();
+  const marketContract = useMarketContract();
 
-  const { account, library } = useActiveWeb3React()
+  const { account, library } = useActiveWeb3React();
 
-  const sellOfferIds = useSellOfferIds(id)
-  const sellTokenIds = useSellTokenIds(account)
+  const sellOfferIds = useSellOfferIds(id);
+  const sellTokenIds = useSellTokenIds(account);
 
   const handlePlay = (videoPath) => {
     fetch(videoPath).then((res) => {
       if (res.ok) {
-        setVideoPath(videoPath)
-        setOpen(true)
+        setVideoPath(videoPath);
+        setOpen(true);
       } else {
-        alert('Video is being generated, come back later')
+        alert("Video is being generated, come back later");
       }
-    })
-  }
+    });
+  };
 
   const handleMakeSell = async () => {
     try {
       const approvedAll = await nftContract.isApprovedForAll(
         account,
-        MARKET_ADDRESS,
-      )
+        MARKET_ADDRESS
+      );
       if (!approvedAll) {
         await nftContract
           .setApprovalForAll(MARKET_ADDRESS, true)
-          .then((tx) => tx.wait())
+          .then((tx) => tx.wait());
       }
       await marketContract
         .makeSellOffer(NFT_ADDRESS, id, ethers.utils.parseEther(price))
-        .then((tx) => tx.wait())
-      window.location.reload()
+        .then((tx) => tx.wait());
+      window.location.reload();
     } catch (err) {
-      alert(err.data ? err.data.message : err.message)
+      alert(err.data ? err.data.message : err.message);
     }
-  }
+  };
 
   const handleMakeBuy = async () => {
     try {
@@ -109,119 +110,128 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
         .makeBuyOffer(NFT_ADDRESS, id, {
           value: ethers.utils.parseEther(price),
         })
-        .then((tx) => tx.wait())
-      window.location.reload()
+        .then((tx) => tx.wait());
+      window.location.reload();
     } catch (err) {
-      alert(err.data ? err.data.message : err.message)
+      alert(err.data ? err.data.message : err.message);
     }
-  }
+  };
 
   const handleCancelSell = async () => {
     try {
       await marketContract
         .cancelSellOffer(sellOfferIds[0])
-        .then((tx) => tx.wait())
-      window.location.reload()
+        .then((tx) => tx.wait());
+      window.location.reload();
     } catch (err) {
-      alert(err.data ? err.data.message : err.message)
+      alert(err.data ? err.data.message : err.message);
     }
-  }
+  };
 
   const handleAcceptSell = async () => {
     try {
-      const offerId = sellOfferIds[0]
-      const offer = await marketContract.offers(offerId)
+      const offerId = sellOfferIds[0];
+      const offer = await marketContract.offers(offerId);
       await marketContract
         .acceptSellOffer(offerId, {
           value: ethers.BigNumber.from(offer.price),
         })
-        .then((tx) => tx.wait())
+        .then((tx) => tx.wait());
 
-      router.push('/my-nfts')
+      router.push("/my-nfts");
     } catch (err) {
-      alert(err.data ? err.data.message : err.message)
+      alert(err.data ? err.data.message : err.message);
     }
-  }
+  };
 
   const handleTransfer = async () => {
     try {
       await nftContract
         .transferFrom(account, address, id)
-        .then((tx) => tx.wait())
+        .then((tx) => tx.wait());
 
-      router.push('/my-nfts')
+      router.push("/my-nfts");
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const handleSetTokenName = async () => {
     try {
-      await nftContract.setTokenName(id, tokenName).then((tx) => tx.wait())
-      router.push('/my-nfts')
+      await nftContract.setTokenName(id, tokenName).then((tx) => tx.wait());
+      router.push("/my-nfts");
     } catch (err) {
-      alert(err.data ? err.data.message : err.message)
+      alert(err.data ? err.data.message : err.message);
     }
-  }
+  };
 
-  const handlePrev = () => router.push(`/detail/${Math.max(id - 1, 0)}`)
+  const handlePrev = () => router.push(`/detail/${Math.max(id - 1, 0)}`);
 
   const handleNext = async () => {
-    const totalSupply = await nftContract.totalSupply()
-    router.push(`/detail/${Math.min(id + 1, totalSupply.toNumber() - 1)}`)
-  }
+    const totalSupply = await nftContract.totalSupply();
+    router.push(`/detail/${Math.min(id + 1, totalSupply.toNumber() - 1)}`);
+  };
 
   const handlePrevInWallet = () => {
-    const index = accountTokenIds.indexOf(id)
-    router.push(`/detail/${accountTokenIds[Math.max(index - 1, 0)]}`)
-  }
+    const index = accountTokenIds.indexOf(id);
+    router.push(`/detail/${accountTokenIds[Math.max(index - 1, 0)]}`);
+  };
 
   const handleNextInWallet = async () => {
-    const index = accountTokenIds.indexOf(id)
+    const index = accountTokenIds.indexOf(id);
     router.push(
       `/detail/${
         accountTokenIds[Math.min(index + 1, accountTokenIds.length - 1)]
-      }`,
-    )
-  }
+      }`
+    );
+  };
+
+  useEffect(() => {
+    let maxOffer;
+    offers.map((id, i) => {
+      const offer = useOffer(id);
+      if (!maxOffer || maxOffer.price < offer.price) {
+        maxOffer = offer;
+      }
+    });
+    if (offers.length > 0) {
+      setHighestOffer(maxOffer.buyer);
+    }
+  }, [offers]);
 
   useEffect(() => {
     const getOwner = async () => {
       const owner = await nftContract.ownerOf(nft.id);
       setRealOwner(owner);
-    }
+    };
     getOwner();
-  }, [nftContract, nft])
+  }, [nftContract, nft]);
 
   useEffect(() => {
-    setTheme(darkTheme ? 'black' : 'white')
-  }, [darkTheme])
+    setTheme(darkTheme ? "black" : "white");
+  }, [darkTheme]);
 
   useEffect(() => {
-    const { hash } = location
-    if (hash === '#black_image' || hash === '#white_image') {
-      setTheme(hash.includes('black') ? 'black' : 'white')
-      setImageOpen(true)
+    const { hash } = location;
+    if (hash === "#black_image" || hash === "#white_image") {
+      setTheme(hash.includes("black") ? "black" : "white");
+      setImageOpen(true);
     } else if (
-      hash === '#black_single_video' ||
-      hash === '#white_single_video'
+      hash === "#black_single_video" ||
+      hash === "#white_single_video"
     ) {
-      setTheme(hash.includes('black') ? 'black' : 'white')
+      setTheme(hash.includes("black") ? "black" : "white");
       handlePlay(
-        hash.includes('black')
-          ? black_single_video_url
-          : white_single_video_url,
-      )
+        hash.includes("black") ? black_single_video_url : white_single_video_url
+      );
     } else if (
-      hash === '#black_triple_video' ||
-      hash === '#white_triple_video'
+      hash === "#black_triple_video" ||
+      hash === "#white_triple_video"
     ) {
-      setTheme(hash.includes('black') ? 'black' : 'white')
+      setTheme(hash.includes("black") ? "black" : "white");
       handlePlay(
-        hash.includes('black')
-          ? black_triple_video_url
-          : white_triple_video_url,
-      )
+        hash.includes("black") ? black_triple_video_url : white_triple_video_url
+      );
     }
   }, [
     location,
@@ -229,29 +239,29 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
     white_single_video_url,
     black_triple_video_url,
     white_triple_video_url,
-  ])
+  ]);
 
   useEffect(() => {
     const getSellOffer = async (id) => {
-      const offer = await getOfferById(nftContract, marketContract, id)
-      setSellPrice(offer.price)
-    }
+      const offer = await getOfferById(nftContract, marketContract, id);
+      setSellPrice(offer.price);
+    };
     if (sellOfferIds.length > 0) {
-      getSellOffer(sellOfferIds[0])
+      getSellOffer(sellOfferIds[0]);
     }
 
-    return () => setSellPrice(null)
-  }, [library, sellOfferIds])
+    return () => setSellPrice(null);
+  }, [library, sellOfferIds]);
 
   useEffect(() => {
     const getAccountTokenIds = async () => {
-      const tokenIds = await nftContract.walletOfOwner(account)
-      setAccountTokenIds(tokenIds.map((tokenId) => tokenId.toNumber()))
-    }
+      const tokenIds = await nftContract.walletOfOwner(account);
+      setAccountTokenIds(tokenIds.map((tokenId) => tokenId.toNumber()));
+    };
     if (account) {
-      getAccountTokenIds()
+      getAccountTokenIds();
     }
-  }, [account, library])
+  }, [account, library]);
 
   return (
     <Container>
@@ -261,14 +271,14 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
             <StyledCard>
               <CardActionArea onClick={() => setImageOpen(true)}>
                 <NFTImage
-                  image={theme === 'black' ? black_image_url : white_image_url}
+                  image={theme === "black" ? black_image_url : white_image_url}
                 />
                 <NFTInfoWrapper>
                   <Typography
                     variant="body1"
                     gutterBottom
                     sx={{
-                      color: theme === 'black' ? '#FFFFFF' : '#000000',
+                      color: theme === "black" ? "#FFFFFF" : "#000000",
                     }}
                   >
                     {formatId(id)}
@@ -286,7 +296,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                     <Button
                       variant="outlined"
                       color="primary"
-                      style={{ width: '100%' }}
+                      style={{ width: "100%" }}
                     >
                       Copy link
                     </Button>
@@ -296,7 +306,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                   <Button
                     variant="outlined"
                     color="primary"
-                    style={{ width: '100%' }}
+                    style={{ width: "100%" }}
                     onClick={handlePrev}
                   >
                     Prev
@@ -306,7 +316,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                   <Button
                     variant="outlined"
                     color="primary"
-                    style={{ width: '100%' }}
+                    style={{ width: "100%" }}
                     onClick={handleNext}
                   >
                     Next
@@ -321,7 +331,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                     <Button
                       variant="outlined"
                       color="primary"
-                      style={{ width: '100%' }}
+                      style={{ width: "100%" }}
                       onClick={handlePrevInWallet}
                     >
                       Prev In Wallet
@@ -331,7 +341,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                     <Button
                       variant="outlined"
                       color="primary"
-                      style={{ width: '100%' }}
+                      style={{ width: "100%" }}
                       onClick={handleNextInWallet}
                     >
                       Next In Wallet
@@ -342,7 +352,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
             )}
             {imageOpen && (
               <Lightbox
-                image={theme === 'black' ? black_image_url : white_image_url}
+                image={theme === "black" ? black_image_url : white_image_url}
                 onClose={() => setImageOpen(false)}
               />
             )}
@@ -350,13 +360,13 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
           <Grid item xs={12} sm={8} md={6}>
             <NFTVideo
               image_thumb={
-                theme === 'black' ? black_image_url : white_image_url
+                theme === "black" ? black_image_url : white_image_url
               }
               onClick={() =>
                 handlePlay(
-                  theme === 'black'
+                  theme === "black"
                     ? black_single_video_url
-                    : white_single_video_url,
+                    : white_single_video_url
                 )
               }
             />
@@ -372,13 +382,13 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
             <Grid item xs={12} sm={8} md={6}>
               <NFTVideo
                 image_thumb={
-                  theme === 'black' ? black_image_url : white_image_url
+                  theme === "black" ? black_image_url : white_image_url
                 }
                 onClick={() =>
                   handlePlay(
-                    theme === 'black'
+                    theme === "black"
                       ? black_triple_video_url
-                      : white_triple_video_url,
+                      : white_triple_video_url
                   )
                 }
               />
@@ -389,13 +399,28 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
               </Box>
             </Grid>
             <Grid item xs={12} sm={8} md={6}>
+              {highestOffer && (
+                <Box mb={3}>
+                  <Typography align="left" variant="body1" color="secondary">
+                    Highest Offer
+                  </Typography>
+                  <Typography align="left" variant="body2" color="textPrimary">
+                    <Link
+                      style={{ color: "#fff" }}
+                      href={`/gallery?address=${highestOffer}`}
+                    >
+                      {highestOffer}
+                    </Link>
+                  </Typography>
+                </Box>
+              )}
               <Box mb={3}>
                 <Typography align="left" variant="body1" color="secondary">
                   Owner
                 </Typography>
                 <Typography align="left" variant="body2" color="textPrimary">
-                  <Link 
-                    style={{ color: '#fff' }}
+                  <Link
+                    style={{ color: "#fff" }}
                     href={`/gallery?address=${seller || realOwner}`}
                   >
                     {seller || realOwner}
@@ -529,7 +554,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                           variant="contained"
                           onClick={handleCancelSell}
                           size="large"
-                          style={{ height: '100%' }}
+                          style={{ height: "100%" }}
                         >
                           Cancel Sell Offer
                         </Button>
@@ -543,7 +568,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
                             variant="contained"
                             onClick={handleAcceptSell}
                             size="large"
-                            style={{ height: '100%' }}
+                            style={{ height: "100%" }}
                           >
                             Buy Now for {sellPrice && sellPrice.toFixed(4)}Ξ
                           </Button>
@@ -564,7 +589,7 @@ const NFTTrait = ({ nft, darkTheme, seller }) => {
         />
       </SectionWrapper>
     </Container>
-  )
-}
+  );
+};
 
-export default NFTTrait
+export default NFTTrait;

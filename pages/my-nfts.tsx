@@ -18,7 +18,7 @@ const MyNFTs = () => {
       try {
         setLoading(true)
         const tokens = await contract.walletOfOwner(account)
-        const nftIds = tokens.map((t) => t.toNumber())
+        const nftIds = tokens.map((t) => t.toNumber()).reverse()
         setNftIds(nftIds)
         setLoading(false)
       } catch (err) {
