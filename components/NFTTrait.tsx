@@ -186,18 +186,18 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
     );
   };
 
-  useEffect(() => {
-    let maxOffer;
-    offers.map((id, i) => {
-      const offer = useOffer(id);
-      if (!maxOffer || maxOffer.price < offer.price) {
-        maxOffer = offer;
-      }
-    });
-    if (offers.length > 0) {
-      setHighestOffer(maxOffer.buyer);
-    }
-  }, [offers]);
+  // useEffect(() => {
+  //   let maxOffer;
+  //   offers.map((id, i) => {
+  //     const offer = useOffer(id);
+  //     if (!maxOffer || maxOffer.price < offer.price) {
+  //       maxOffer = offer;
+  //     }
+  //   });
+  //   if (offers.length > 0) {
+  //     setHighestOffer(maxOffer.buyer);
+  //   }
+  // }, [offers]);
 
   useEffect(() => {
     const getOwner = async () => {
