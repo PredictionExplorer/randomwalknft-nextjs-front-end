@@ -43,7 +43,7 @@ const Header = () => {
   const renderDesktop = () => {
     return (
       <Toolbar disableGutters>
-        <Image src="/images/logo.svg" width={73} height={93} alt="logo" />
+        <Image src="/images/logo2.png" width={93} height={93} alt="logo" />
         {NAV_SECTIONS.map((nav, i) => (
           <Box ml={3} key={i}>
             <NavLink href={nav.route}>{nav.title}</NavLink>
@@ -62,7 +62,7 @@ const Header = () => {
 
     return (
       <Toolbar>
-        <Image src="/images/logo.svg" width={73} height={93} alt="logo" />
+        <Image src="/images/logo2.png" width={93} height={93} alt="logo" />
         <IconButton
           aria-label="menu"
           aria-haspopup="true"

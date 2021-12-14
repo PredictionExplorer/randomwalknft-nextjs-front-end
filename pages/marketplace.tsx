@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, Drawer, ListItem } from '@mui/material'
+import { NavLink, DrawerList } from '../components/styled'
 import { ethers } from 'ethers'
 
 import PaginationOfferGrid from '../components/PaginationOfferGrid'
@@ -11,6 +12,8 @@ import useMarketContract from '../hooks/useMarketContract'
 const Marketplace = () => {
   const [loading, setLoading] = useState(true)
   const [collection, setCollection] = useState([])
+  
+  const [drawerOpen, toggleDrawerOpen] = useState(false)
 
   const nftContract = useNFTContract()
   const marketContract = useMarketContract()
@@ -42,6 +45,8 @@ const Marketplace = () => {
 
     getTokens()
   }, [nftContract, marketContract])
+
+  const handleDrawerClose = () => toggleDrawerOpen(!drawerOpen)
 
   return (
     <MainWrapper>
