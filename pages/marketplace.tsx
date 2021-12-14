@@ -1,52 +1,71 @@
-import React, { useState, useEffect } from 'react'
-import { Box, Typography, Drawer, ListItem } from '@mui/material'
-import { NavLink, DrawerList } from '../components/styled'
-import { ethers } from 'ethers'
+import React, { useState, useEffect } from "react";
+import { Box, Typography, MenuItem, FormControl } from "@mui/material";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { ethers } from "ethers";
 
-import PaginationOfferGrid from '../components/PaginationOfferGrid'
-import { MainWrapper } from '../components/styled'
-import { getOfferById } from '../hooks/useOffer'
-import useNFTContract from '../hooks/useNFTContract'
-import useMarketContract from '../hooks/useMarketContract'
+import PaginationOfferGrid from "../components/PaginationOfferGrid";
+import { MainWrapper } from "../components/styled";
+import { getOfferById } from "../hooks/useOffer";
+import useNFTContract from "../hooks/useNFTContract";
+import useMarketContract from "../hooks/useMarketContract";
+import { NFT_ADDRESS } from "../config/app";
 
 const Marketplace = () => {
-  const [loading, setLoading] = useState(true)
-  const [collection, setCollection] = useState([])
-  
-  const [drawerOpen, toggleDrawerOpen] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [collection, setCollection] = useState([]);
 
-  const nftContract = useNFTContract()
-  const marketContract = useMarketContract()
+  const [filterMode, setFilterMode] = useState("0");
+
+  const nftContract = useNFTContract();
+  const marketContract = useMarketContract();
+
+  const handleChange = async (e: SelectChangeEvent) => {
+    setFilterMode(e.target.value);
+  };
 
   useEffect(() => {
     const getTokens = async () => {
       try {
-        setLoading(true)
-        const numOffers = await marketContract.numOffers()
-        const offerIds = Object.keys(new Array(numOffers.toNumber()).fill(0))
+        setLoading(true);
+        const numOffers = await marketContract.numOffers();
+        const offerIds = Object.keys(new Array(numOffers.toNumber()).fill(0));
         let offers = await Promise.all(
           offerIds.map((offerId) =>
-            getOfferById(nftContract, marketContract, offerId),
-          ),
-        )
-        const zeroAddress = ethers.constants.AddressZero
+            getOfferById(nftContract, marketContract, offerId)
+          )
+        );
+        const zeroAddress = ethers.constants.AddressZero;
         offers = offers
           .filter(
-            (offer) => offer && offer.active && offer.buyer === zeroAddress,
+            (offer) => offer && offer.active && offer.buyer === zeroAddress
           )
-          .sort((x, y) => x.price - y.price)
-        setCollection(offers)
-        setLoading(false)
+          .sort((x, y) => x.price - y.price);
+
+        // if filterMode == "With Offers"
+        if (filterMode == "1") {
+          offers = await Promise.all(
+            offers.map(async (offer) => {
+              const buyOfferIds = await marketContract.getBuyOffers(
+                NFT_ADDRESS,
+                offer.id
+              );
+              return buyOfferIds.length > 0 ? offer : null;
+            })
+          );
+          offers = offers.reverse().filter((e) => {
+            return e != null;
+          });
+        }
+        setCollection(offers);
+        setLoading(false);
       } catch (err) {
-        console.log(err)
-        setLoading(false)
+        console.log(err);
+        setLoading(false);
       }
-    }
+    };
 
-    getTokens()
-  }, [nftContract, marketContract])
-
-  const handleDrawerClose = () => toggleDrawerOpen(!drawerOpen)
+    getTokens();
+  }, [nftContract, marketContract, filterMode]);
 
   return (
     <MainWrapper>
@@ -79,9 +98,25 @@ const Marketplace = () => {
           MARKETPLACE
         </Typography>
       </Box>
+
+      <Box sx={{ mt: 1.5 }}>
+        <FormControl sx={{ m: 1, minWidth: 80 }}>
+          <Select
+            value={filterMode}
+            onChange={handleChange}
+            displayEmpty
+            autoWidth
+            inputProps={{ "aria-label": "Without label" }}
+          >
+            <MenuItem value={0}>All</MenuItem>
+            <MenuItem value={1}>With Offers</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
       <PaginationOfferGrid loading={loading} data={collection} />
     </MainWrapper>
-  )
-}
+  );
+};
 
-export default Marketplace
+export default Marketplace;

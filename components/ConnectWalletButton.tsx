@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { Button, MenuItem, Menu, Box } from '@mui/material'
+import { MenuItem, Menu, Box } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { isMobile } from 'react-device-detect'
