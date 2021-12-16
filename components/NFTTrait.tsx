@@ -400,7 +400,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
               </Box>
             </Grid>
             <Grid item xs={12} sm={8} md={6}>
-              {!highestOffer && (
+              {highestOffer && (
                 <Box mb={3}>
                   <Typography align="left" variant="body1" color="secondary">
                     Highest Offer
