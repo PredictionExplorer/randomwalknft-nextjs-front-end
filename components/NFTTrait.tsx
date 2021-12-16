@@ -186,18 +186,19 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
     );
   };
 
-  // useEffect(() => {
-  //   let maxOffer;
-  //   offers.map((id, i) => {
-  //     const offer = useOffer(id);
-  //     if (!maxOffer || maxOffer.price < offer.price) {
-  //       maxOffer = offer;
-  //     }
-  //   });
-  //   if (offers.length > 0) {
-  //     setHighestOffer(maxOffer.buyer);
-  //   }
-  // }, [offers]);
+  useEffect(() => {
+    let maxOffer;
+    offers.map(async (id, i) => {
+      const offer = await getOfferById(nftContract, marketContract, id);
+      if (!maxOffer || maxOffer.price < offer.price) {
+        maxOffer = offer;
+      }
+    });
+
+    if (offers.length > 0) {
+      setHighestOffer(maxOffer.price);
+    }
+  }, [offers]);
 
   useEffect(() => {
     const getOwner = async () => {
@@ -399,18 +400,13 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
               </Box>
             </Grid>
             <Grid item xs={12} sm={8} md={6}>
-              {highestOffer && (
+              {!highestOffer && (
                 <Box mb={3}>
                   <Typography align="left" variant="body1" color="secondary">
                     Highest Offer
                   </Typography>
                   <Typography align="left" variant="body2" color="textPrimary">
-                    <Link
-                      style={{ color: "#fff" }}
-                      href={`/gallery?address=${highestOffer}`}
-                    >
-                      {highestOffer}
-                    </Link>
+                    {highestOffer.toFixed(4)}Ξ
                   </Typography>
                 </Box>
               )}
