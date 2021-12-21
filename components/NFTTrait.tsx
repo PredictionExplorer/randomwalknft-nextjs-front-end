@@ -24,7 +24,6 @@ import NFTVideo from "./NFTVideo";
 import useNFTContract from "../hooks/useNFTContract";
 import useMarketContract from "../hooks/useMarketContract";
 import {
-  useOffer,
   useSellTokenIds,
   useSellOfferIds,
   getOfferById,
@@ -186,19 +185,39 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
     );
   };
 
+  // const convertTimestampToDateTime = (timestamp: any) => {
+  //   var date_ob = new Date(timestamp * 1000);
+  //   var year = date_ob.getFullYear();
+  //   var month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+  //   var date = ("0" + date_ob.getDate()).slice(-2);
+  //   var hours = ("0" + date_ob.getHours()).slice(-2);
+  //   var minutes = ("0" + date_ob.getMinutes()).slice(-2);
+  //   var seconds = ("0" + date_ob.getSeconds()).slice(-2);
+  //   var result =
+  //     year +
+  //     "-" +
+  //     month +
+  //     "-" +
+  //     date +
+  //     " " +
+  //     hours +
+  //     ":" +
+  //     minutes +
+  //     ":" +
+  //     seconds;
+  //   return result;
+  // };
+  
   useEffect(() => {
     let maxOffer;
     offers.map(async (id, i) => {
       const offer = await getOfferById(nftContract, marketContract, id);
       if (!maxOffer || maxOffer.price < offer.price) {
         maxOffer = offer;
+        setHighestOffer(maxOffer.price);
       }
     });
-
-    if (offers.length > 0) {
-      setHighestOffer(maxOffer.price);
-    }
-  }, [offers]);
+  }, [marketContract, nftContract, offers]);
 
   useEffect(() => {
     const getOwner = async () => {
@@ -234,13 +253,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
         hash.includes("black") ? black_triple_video_url : white_triple_video_url
       );
     }
-  }, [
-    location,
-    black_single_video_url,
-    white_single_video_url,
-    black_triple_video_url,
-    white_triple_video_url,
-  ]);
+  }, [black_single_video_url, white_single_video_url, black_triple_video_url, white_triple_video_url]);
 
   useEffect(() => {
     const getSellOffer = async (id) => {
@@ -252,7 +265,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
     }
 
     return () => setSellPrice(null);
-  }, [library, sellOfferIds]);
+  }, [library, marketContract, nftContract, sellOfferIds]);
 
   useEffect(() => {
     const getAccountTokenIds = async () => {
@@ -262,7 +275,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
     if (account) {
       getAccountTokenIds();
     }
-  }, [account, library]);
+  }, [account, library, nftContract]);
 
   return (
     <Container>
@@ -400,6 +413,14 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
               </Box>
             </Grid>
             <Grid item xs={12} sm={8} md={6}>
+              {/* {block && (<Box mb={3}>
+                <Typography align="left" variant="body1" color="secondary">
+                  Minted Date
+                </Typography>
+                <Typography align="left" variant="body2" color="textPrimary">
+                  {convertTimestampToDateTime(block.timestamp)}
+                </Typography>
+              </Box>)} */}
               {highestOffer && (
                 <Box mb={3}>
                   <Typography align="left" variant="body1" color="secondary">
