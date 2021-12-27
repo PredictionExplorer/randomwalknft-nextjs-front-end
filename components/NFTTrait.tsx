@@ -185,28 +185,28 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
     );
   };
 
-  // const convertTimestampToDateTime = (timestamp: any) => {
-  //   var date_ob = new Date(timestamp * 1000);
-  //   var year = date_ob.getFullYear();
-  //   var month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
-  //   var date = ("0" + date_ob.getDate()).slice(-2);
-  //   var hours = ("0" + date_ob.getHours()).slice(-2);
-  //   var minutes = ("0" + date_ob.getMinutes()).slice(-2);
-  //   var seconds = ("0" + date_ob.getSeconds()).slice(-2);
-  //   var result =
-  //     year +
-  //     "-" +
-  //     month +
-  //     "-" +
-  //     date +
-  //     " " +
-  //     hours +
-  //     ":" +
-  //     minutes +
-  //     ":" +
-  //     seconds;
-  //   return result;
-  // };
+  const convertTimestampToDateTime = (timestamp: any) => {
+    var date_ob = new Date(timestamp * 1000);
+    var year = date_ob.getFullYear();
+    var month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+    var date = ("0" + date_ob.getDate()).slice(-2);
+    var hours = ("0" + date_ob.getHours()).slice(-2);
+    var minutes = ("0" + date_ob.getMinutes()).slice(-2);
+    var seconds = ("0" + date_ob.getSeconds()).slice(-2);
+    var result =
+      year +
+      "-" +
+      month +
+      "-" +
+      date +
+      " " +
+      hours +
+      ":" +
+      minutes +
+      ":" +
+      seconds;
+    return result;
+  };
   
   useEffect(() => {
     let maxOffer;
@@ -413,14 +413,14 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
               </Box>
             </Grid>
             <Grid item xs={12} sm={8} md={6}>
-              {/* {block && (<Box mb={3}>
+              {nft.minted_at && (<Box mb={3}>
                 <Typography align="left" variant="body1" color="secondary">
                   Minted Date
                 </Typography>
                 <Typography align="left" variant="body2" color="textPrimary">
-                  {convertTimestampToDateTime(block.timestamp)}
+                  {convertTimestampToDateTime(nft.minted_at)}
                 </Typography>
-              </Box>)} */}
+              </Box>)}
               {highestOffer && (
                 <Box mb={3}>
                   <Typography align="left" variant="body1" color="secondary">
