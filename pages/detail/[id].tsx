@@ -22,7 +22,7 @@ import api from "../../services/api";
 const Detail = ({ nft }) => {
   const router = useRouter();
   const { seller } = router.query;
-  const buyOffers = useBuyOfferIds(nft.id);
+  const buyOffers = useBuyOfferIds(nft?.id);
   const { account } = useActiveWeb3React();
   const sellTokenIds = useSellTokenIds(account);
   const [darkTheme, setDarkTheme] = useState(true);
