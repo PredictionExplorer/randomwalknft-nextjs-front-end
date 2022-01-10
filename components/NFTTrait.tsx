@@ -207,7 +207,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
       seconds;
     return result;
   };
-  
+
   useEffect(() => {
     let maxOffer;
     offers.map(async (id, i) => {
@@ -253,7 +253,12 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
         hash.includes("black") ? black_triple_video_url : white_triple_video_url
       );
     }
-  }, [black_single_video_url, white_single_video_url, black_triple_video_url, white_triple_video_url]);
+  }, [
+    black_single_video_url,
+    white_single_video_url,
+    black_triple_video_url,
+    white_triple_video_url,
+  ]);
 
   useEffect(() => {
     const getSellOffer = async (id) => {
@@ -413,14 +418,18 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
               </Box>
             </Grid>
             <Grid item xs={12} sm={8} md={6}>
-              {nft.minted_at && (<Box mb={3}>
-                <Typography align="left" variant="body1" color="secondary">
-                  Minted Date
-                </Typography>
-                <Typography align="left" variant="body2" color="textPrimary">
-                  {convertTimestampToDateTime(nft.minted_at)}
-                </Typography>
-              </Box>)}
+              {nft.tokenHistory[0]?.Record?.TimeStamp && (
+                <Box mb={3}>
+                  <Typography align="left" variant="body1" color="secondary">
+                    Minted Date
+                  </Typography>
+                  <Typography align="left" variant="body2" color="textPrimary">
+                    {convertTimestampToDateTime(
+                      nft.tokenHistory[0]?.Record?.TimeStamp
+                    )}
+                  </Typography>
+                </Box>
+              )}
               {highestOffer && (
                 <Box mb={3}>
                   <Typography align="left" variant="body1" color="secondary">

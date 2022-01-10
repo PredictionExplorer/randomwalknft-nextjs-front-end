@@ -12,6 +12,7 @@ import {
 
 import NFTTrait from "../../components/NFTTrait";
 import NFTBuyOffers from "../../components/NFTBuyOffers";
+import NFTHistory from "../../components/NFTHistory";
 import { MainWrapper } from "../../components/styled";
 
 import { useBuyOfferIds, useSellTokenIds } from "../../hooks/useOffer";
@@ -98,6 +99,9 @@ const Detail = ({ nft }) => {
           account={account}
           sellTokenIds={sellTokenIds}
         />
+      )}
+      {nft.tokenHistory.length > 0 && (
+        <NFTHistory tokenHistory={nft.tokenHistory} />
       )}
     </MainWrapper>
   );
