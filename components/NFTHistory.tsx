@@ -10,10 +10,11 @@ import {
   TableBody,
   Link,
 } from "@mui/material";
-
 import { SectionWrapper, TablePrimaryContainer } from "./styled";
+import { useTokenPrice } from "../hooks/useTokenInfo";
 
 const HistoryRow = ({ history }) => {
+  const ethPrice = useTokenPrice();
   const eventTypes = [
     "",
     "Mint",
@@ -25,31 +26,32 @@ const HistoryRow = ({ history }) => {
   ];
 
   const convertTimestampToDateTime = (timestamp: any) => {
+    var months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     var date_ob = new Date(timestamp * 1000);
     var year = date_ob.getFullYear();
-    var month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+    var month = date_ob.getMonth();
     var date = ("0" + date_ob.getDate()).slice(-2);
-    var hours = ("0" + date_ob.getHours()).slice(-2);
-    var minutes = ("0" + date_ob.getMinutes()).slice(-2);
-    var seconds = ("0" + date_ob.getSeconds()).slice(-2);
-    var result =
-      year +
-      "-" +
-      month +
-      "-" +
-      date +
-      " " +
-      hours +
-      ":" +
-      minutes +
-      ":" +
-      seconds;
+
+    var result = months[month] + " " + date + ", " + year;
     return result;
   };
 
   const ellipsisAddress = (address: string) => {
     if (address === undefined) return "";
-    return address.slice(0, 16) + "..." + address.slice(-4);
+    return address;
   };
 
   if (!history) {
@@ -58,20 +60,9 @@ const HistoryRow = ({ history }) => {
 
   return (
     <TableRow>
-      <TableCell>{history.Record?.BlockNum}</TableCell>
+      <TableCell>{eventTypes[history.RecordType]}</TableCell>
       <TableCell>
-        {convertTimestampToDateTime(history.Record?.TimeStamp)}
-      </TableCell>
-      <TableCell>
-        <Link
-          href={`/gallery?address=${history.Record?.OwnerAddr}`}
-          style={{ color: "#fff" }}
-        >
-          {ellipsisAddress(history.Record?.OwnerAddr)}
-        </Link>
-      </TableCell>
-      <TableCell>
-        {history.RecordType == 2 ? (
+        {history.RecordType == 2 || history.RecordType == 4 ? (
           <Link
             href={`/gallery?address=${history.Record?.SellerAddr}`}
             style={{ color: "#fff" }}
@@ -88,7 +79,14 @@ const HistoryRow = ({ history }) => {
         )}
       </TableCell>
       <TableCell>
-        {history.RecordType == 2 ? (
+        {history.RecordType == 1 ? (
+          <Link
+            href={`/gallery?address=${history.Record?.OwnerAddr}`}
+            style={{ color: "#fff" }}
+          >
+            {ellipsisAddress(history.Record?.OwnerAddr)}
+          </Link>
+        ) : history.RecordType == 2 || history.RecordType == 4 ? (
           <Link
             href={`/gallery?address=${history.Record?.BuyerAddr}`}
             style={{ color: "#fff" }}
@@ -104,8 +102,15 @@ const HistoryRow = ({ history }) => {
           </Link>
         )}
       </TableCell>
-      <TableCell>{history.Record?.Price}</TableCell>
-      <TableCell>{eventTypes[history.RecordType]}</TableCell>
+      <TableCell>
+        {history.Record?.Price &&
+          `${history.Record?.Price?.toFixed(2)}Ξ ($${(
+            history.Record?.Price * ethPrice
+          ).toFixed(2)})`}
+      </TableCell>
+      <TableCell>
+        {convertTimestampToDateTime(history.Record?.TimeStamp)}
+      </TableCell>
     </TableRow>
   );
 };
@@ -116,13 +121,11 @@ const HistoryTable = ({ tokenHistory }) => {
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Block</TableCell>
-            <TableCell>Datetime</TableCell>
-            <TableCell>Owner</TableCell>
-            <TableCell>From (Seller)</TableCell>
-            <TableCell>To (Buyer)</TableCell>
-            <TableCell>Price</TableCell>
-            <TableCell>Event</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell>From</TableCell>
+            <TableCell>To</TableCell>
+            <TableCell>Amount</TableCell>
+            <TableCell>Txn</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
