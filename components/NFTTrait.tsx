@@ -10,6 +10,8 @@ import {
   Grid,
   Link,
   Container,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -62,6 +64,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
   const [accountTokenIds, setAccountTokenIds] = useState([]);
   const [realOwner, setRealOwner] = useState("");
   const [highestOffer, setHighestOffer] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const router = useRouter();
   const nftContract = useNFTContract();
@@ -183,6 +186,14 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
         accountTokenIds[Math.min(index + 1, accountTokenIds.length - 1)]
       }`
     );
+  };
+
+  const handleMenuOpen = (e) => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  const handleMenuClose = (e) => {
+    setAnchorEl(null);
   };
 
   const convertTimestampToDateTime = (timestamp: any) => {
@@ -311,15 +322,66 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
             <Box mt={2}>
               <Grid container spacing={2}>
                 <Grid item xs={4}>
-                  <CopyToClipboard text={window.location.href}>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      style={{ width: "100%" }}
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    style={{ width: "100%" }}
+                    onClick={handleMenuOpen}
+                  >
+                    Copy link
+                  </Button>
+
+                  <Menu
+                    elevation={0}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "center",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "center",
+                    }}
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                  >
+                    <CopyToClipboard
+                      text={
+                        theme === "black"
+                          ? black_single_video_url
+                          : white_single_video_url
+                      }
                     >
-                      Copy link
-                    </Button>
-                  </CopyToClipboard>
+                      <MenuItem
+                        style={{ minWidth: 166 }}
+                        onClick={handleMenuClose}
+                      >
+                        Single Video
+                      </MenuItem>
+                    </CopyToClipboard>
+                    <CopyToClipboard
+                      text={
+                        theme === "black"
+                          ? black_triple_video_url
+                          : white_triple_video_url
+                      }
+                    >
+                      <MenuItem onClick={handleMenuClose}>
+                        Triple Video
+                      </MenuItem>
+                    </CopyToClipboard>
+                    <CopyToClipboard
+                      text={
+                        theme === "black" ? black_image_url : white_image_url
+                      }
+                    >
+                      <MenuItem onClick={handleMenuClose}>Image</MenuItem>
+                    </CopyToClipboard>
+                    <CopyToClipboard text={window.location.href}>
+                      <MenuItem onClick={handleMenuClose}>Detail Page</MenuItem>
+                    </CopyToClipboard>
+                  </Menu>
                 </Grid>
                 <Grid item xs={4}>
                   <Button
