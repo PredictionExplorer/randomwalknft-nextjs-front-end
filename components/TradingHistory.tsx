@@ -93,7 +93,7 @@ const HistoryTable = ({ tradingHistory }) => {
             ))
           ) : (
             <TableRow>
-              <TablePrimaryCell align="center" colSpan={4}>
+              <TablePrimaryCell align="center" colSpan={5}>
                 No history yet.
               </TablePrimaryCell>
             </TableRow>
