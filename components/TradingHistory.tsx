@@ -7,7 +7,6 @@ import {
   TableRow,
   TableBody,
   Link,
-  CircularProgress,
 } from "@mui/material";
 import { SectionWrapper, TablePrimaryContainer, TablePrimaryCell } from "./styled";
 import { useTokenPrice } from "../hooks/useTokenInfo";
@@ -104,14 +103,9 @@ const HistoryTable = ({ tradingHistory }) => {
   );
 };
 
-const TradingHistory = ({ loading, tradingHistory }) => (
+const TradingHistory = ({ tradingHistory }) => (
   <SectionWrapper>
     <Container>
-      {loading && (
-        <Box display="flex" justifyContent="center">
-          <CircularProgress color="secondary" />
-        </Box>
-      )}
       <HistoryTable tradingHistory={tradingHistory} />
     </Container>
   </SectionWrapper>
