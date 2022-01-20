@@ -45,7 +45,7 @@ const Header = () => {
       <Toolbar disableGutters>
         <Image src="/images/logo2.png" width={93} height={93} alt="logo" />
         {NAV_SECTIONS.map((nav, i) => (
-          <Box ml={3} key={i}>
+          <Box ml={3} fontSize={16} key={i}>
             <NavLink href={nav.route}>{nav.title}</NavLink>
           </Box>
         ))}

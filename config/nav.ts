@@ -8,6 +8,7 @@ const NAVS: NavItem[] = [
   { title: 'Mint', route: '/mint' },
   { title: 'Gallery', route: '/gallery' },
   { title: 'Marketplace', route: '/marketplace' },
+  { title: 'Trading', route: '/trading' },
   // { title: "Giveaway", route: "/giveaway" },
   { title: 'Redeem', route: '/redeem' },
   { title: 'FAQ', route: '/faq' },
