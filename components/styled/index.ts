@@ -14,6 +14,7 @@ import {
   Skeleton,
   Typography,
   TableContainer,
+  TableCell,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { isMobile } from 'react-device-detect'
@@ -31,6 +32,10 @@ export const StyledCard = styled(Card)({
 
 export const TablePrimaryContainer = styled(TableContainer)({
   backgroundColor: '#121212',
+})
+
+export const TablePrimaryCell = styled(TableCell)({
+  fontSize: 15,
 })
 
 export const NavLink = styled(StyledLink)({

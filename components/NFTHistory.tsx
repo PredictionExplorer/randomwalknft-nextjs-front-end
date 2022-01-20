@@ -49,11 +49,6 @@ const HistoryRow = ({ history }) => {
     return result;
   };
 
-  const ellipsisAddress = (address: string) => {
-    if (address === undefined) return "";
-    return address;
-  };
-
   if (!history) {
     return <TableRow></TableRow>;
   }
@@ -67,14 +62,14 @@ const HistoryRow = ({ history }) => {
             href={`/gallery?address=${history.Record?.SellerAddr}`}
             style={{ color: "#fff" }}
           >
-            {ellipsisAddress(history.Record?.SellerAddr)}
+            {history.Record?.SellerAddr}
           </Link>
         ) : (
           <Link
             href={`/gallery?address=${history.Record?.FromAddr}`}
             style={{ color: "#fff" }}
           >
-            {ellipsisAddress(history.Record?.FromAddr)}
+            {history.Record?.FromAddr}
           </Link>
         )}
       </TableCell>
@@ -84,21 +79,21 @@ const HistoryRow = ({ history }) => {
             href={`/gallery?address=${history.Record?.OwnerAddr}`}
             style={{ color: "#fff" }}
           >
-            {ellipsisAddress(history.Record?.OwnerAddr)}
+            {history.Record?.OwnerAddr}
           </Link>
         ) : history.RecordType == 2 || history.RecordType == 4 ? (
           <Link
             href={`/gallery?address=${history.Record?.BuyerAddr}`}
             style={{ color: "#fff" }}
           >
-            {ellipsisAddress(history.Record?.BuyerAddr)}
+            {history.Record?.BuyerAddr}
           </Link>
         ) : (
           <Link
             href={`/gallery?address=${history.Record?.ToAddr}`}
             style={{ color: "#fff" }}
           >
-            {ellipsisAddress(history.Record?.ToAddr)}
+            {history.Record?.ToAddr}
           </Link>
         )}
       </TableCell>
