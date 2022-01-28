@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Menu, MenuItem, Box } from "@mui/material";
 import { NavLink } from "./styled";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
 const ListNavItem = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -18,7 +18,7 @@ const ListNavItem = (props) => {
         {props.nav.children ? (
           <NavLink href="#" onClick={handleMenuOpen} display="flex" alignItems="center">
             {props.nav.title}
-            <ExpandMoreIcon />
+            {anchorEl ? <ExpandLess /> : <ExpandMore />}
           </NavLink>
         ) : (
           <NavLink href={props.nav.route}>{props.nav.title}</NavLink>

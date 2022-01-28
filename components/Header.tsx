@@ -15,6 +15,7 @@ import ConnectWalletButton from "../components/ConnectWalletButton";
 
 import { NavLink, AppBarWrapper, DrawerList } from "./styled";
 import ListNavItem from  "./ListNavItem";
+import ListItemButton from  "./ListItemButton";
 
 const Header = () => {
   const [state, setState] = useState({
@@ -78,14 +79,14 @@ const Header = () => {
               <ConnectWalletButton isMobileView />
             </ListItem>
             {NAV_SECTIONS.map((nav, i) => (
-              <ListItem key={i} sx={{ justifyContent: "center" }}>
+              <ListItemButton key={i} nav={nav} sx={{ justifyContent: "center" }}>
                 <NavLink href={nav.route}>{nav.title}</NavLink>
-              </ListItem>
+              </ListItemButton>
             ))}
-            <ListItem style={{ justifyContent: "center" }}>
+            <ListItem>
               <NavLink href="/my-nfts">My NFTs</NavLink>
             </ListItem>
-            <ListItem style={{ justifyContent: "center" }}>
+            <ListItem>
               <NavLink href="/my-offers">My Offers</NavLink>
             </ListItem>
           </DrawerList>

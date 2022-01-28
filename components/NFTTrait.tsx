@@ -498,7 +498,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
                   Rating
                 </Typography>
                 <Typography align="left" variant="body2" color="textPrimary">
-                  {rating}
+                  {rating.toFixed(2)}
                 </Typography>
               </Box>
               {highestOffer && (

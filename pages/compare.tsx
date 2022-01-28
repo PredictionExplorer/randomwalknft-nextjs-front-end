@@ -16,14 +16,17 @@ const Compare = () => {
   const onConfirmHandler = async () => {
     setConfirmed(true);
     await api.add_game(firstId, secondId, selectedNFT == "first" ? 1 : 0);
+    getToken();
+    setConfirmed(false);
+  };
+
+  const getToken = async () => {
+    const tokenIds = await api.random();
+    setFirstId(tokenIds[0]);
+    setSecondId(tokenIds[1]);
   };
 
   useEffect(() => {
-    const getToken = async () => {
-      const tokenIds = await api.random();
-      setFirstId(tokenIds[0]);
-      setSecondId(tokenIds[1]);
-    };
     getToken();
   }, []);
 
