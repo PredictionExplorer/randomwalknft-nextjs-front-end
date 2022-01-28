@@ -3,9 +3,7 @@ import { ethers } from "ethers";
 
 import { NFT_ADDRESS } from "../config/app";
 import marketABI from "../contracts/Market.json";
-import nftABI from "../contracts/NFT.json";
 import useMarketContract from "./useMarketContract";
-import useNFTContract from "./useNFTContract";
 
 export const useTransactions = () => {
   const marketContract = useMarketContract();

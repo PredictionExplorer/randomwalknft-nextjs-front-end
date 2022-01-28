@@ -86,7 +86,7 @@ export const MobileConnectButton = styled(ConnectButton)({
 })
 
 export const MainWrapper = styled(Container)(({ theme }) => ({
-  paddingTop: theme.spacing(28),
+  paddingTop: theme.spacing(20),
   paddingBottom: theme.spacing(24),
   overflow: 'hidden',
   lineHeight: 1,

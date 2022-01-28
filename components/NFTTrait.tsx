@@ -51,6 +51,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
     black_single_video_url,
     white_triple_video_url,
     black_triple_video_url,
+    rating,
   } = nft;
 
   const [open, setOpen] = useState(false);
@@ -492,6 +493,14 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
                   </Typography>
                 </Box>
               )}
+              <Box mb={3}>
+                <Typography align="left" variant="body1" color="secondary">
+                  Rating
+                </Typography>
+                <Typography align="left" variant="body2" color="textPrimary">
+                  {rating}
+                </Typography>
+              </Box>
               {highestOffer && (
                 <Box mb={3}>
                   <Typography align="left" variant="body1" color="secondary">

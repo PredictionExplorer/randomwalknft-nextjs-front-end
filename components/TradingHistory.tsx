@@ -8,8 +8,14 @@ import {
   TableBody,
   Link,
 } from "@mui/material";
-import { SectionWrapper, TablePrimaryContainer, TablePrimaryCell } from "./styled";
+import {
+  SectionWrapper,
+  TablePrimaryContainer,
+  TablePrimaryCell,
+} from "./styled";
 import { useTokenPrice } from "../hooks/useTokenInfo";
+import Pagination from "@mui/material/Pagination";
+import { useRouter } from "next/router";
 
 const HistoryRow = ({ history }) => {
   const ethPrice = useTokenPrice();
@@ -44,7 +50,9 @@ const HistoryRow = ({ history }) => {
 
   return (
     <TableRow>
-      <TablePrimaryCell>{convertTimestampToDateTime(history.TimeStamp)}</TablePrimaryCell>
+      <TablePrimaryCell>
+        {convertTimestampToDateTime(history.TimeStamp)}
+      </TablePrimaryCell>
       <TablePrimaryCell>
         {history.Price &&
           `${history.Price?.toFixed(3)}Ξ ($${(history.Price * ethPrice).toFixed(
@@ -103,12 +111,31 @@ const HistoryTable = ({ tradingHistory }) => {
   );
 };
 
-const TradingHistory = ({ tradingHistory }) => (
-  <SectionWrapper>
-    <Container>
-      <HistoryTable tradingHistory={tradingHistory} />
-    </Container>
-  </SectionWrapper>
-);
+const TradingHistory = ({ curPage, tradingHistory, totalCount }) => {
+  const perPage = 20;
+  const router = useRouter();
+  const handleNextPage = (page) => {
+    router.query["page"] = page;
+    router.push({ pathname: router.pathname, query: router.query });
+  };
+
+  return (
+    <SectionWrapper>
+      <Container>
+        <HistoryTable tradingHistory={tradingHistory} />
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            color="primary"
+            page={parseInt(curPage)}
+            onChange={(e, page) => handleNextPage(page)}
+            count={Math.ceil(totalCount / perPage)}
+            showFirstButton
+            showLastButton
+          />
+        </Box>
+      </Container>
+    </SectionWrapper>
+  );
+};
 
 export default TradingHistory;

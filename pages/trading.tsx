@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Box, Typography } from "@mui/material";
 import TradingHistory from "../components/TradingHistory";
 import { MainWrapper } from "../components/styled";
 import api from "../services/api";
 
-const Trading = ({tradingHistory}) => {
-
+const Trading = ({ tradingHistory, totalCount, page }) => {
   return (
     <MainWrapper>
       <Box
@@ -37,15 +36,16 @@ const Trading = ({tradingHistory}) => {
           TRADING HISTORY
         </Typography>
       </Box>
-      <TradingHistory tradingHistory={tradingHistory} />
+      <TradingHistory curPage={page} tradingHistory={tradingHistory} totalCount={totalCount} />
     </MainWrapper>
   );
 };
 
-export async function getServerSideProps() {
-  const tradingHistory = await api.tradingHistory();
+export async function getServerSideProps(context) {
+  const page = context.query.page ?? 1;
+  const res = await api.tradingHistory(page);
   return {
-    props: { tradingHistory },
+    props: { tradingHistory: res.tradingHistory, totalCount: res.totalCount, page },
   };
 }
 
