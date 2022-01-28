@@ -495,7 +495,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
               )}
               <Box mb={3}>
                 <Typography align="left" variant="body1" color="secondary">
-                  Rating
+                  Beauty Score
                 </Typography>
                 <Typography align="left" variant="body2" color="textPrimary">
                   {rating.toFixed(2)}
