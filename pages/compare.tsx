@@ -36,7 +36,7 @@ const Compare = () => {
         flexWrap="wrap"
       >
         <Typography variant="h4" component="span">
-          RANDOM
+          WHICH
         </Typography>
         <Typography
           variant="h4"
@@ -44,18 +44,10 @@ const Compare = () => {
           color="primary"
           sx={{ ml: 1.5 }}
         >
-          WALK
-        </Typography>
-        <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
           NFT
         </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="secondary"
-          sx={{ ml: 1.5 }}
-        >
-          BEAUTY CONTEST
+        <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
+          IS MORE BEAUTIFUL?
         </Typography>
       </Box>
       <Grid
