@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Typography, CardActionArea, Grid } from "@mui/material";
-
-import Lightbox from "react-awesome-lightbox";
-import "react-awesome-lightbox/build/style.css";
-import "react-modal-video/css/modal-video.min.css";
-import { formatId } from "../utils";
+import { Typography, CardActionArea, Grid, Button, Box } from "@mui/material";
 import { StyledCard, NFTImage, NFTInfoWrapper } from "./styled";
 
-const NFTTrait2 = ({ id }) => {
-  const [imageOpen, setImageOpen] = useState(false);
+const NFTTrait2 = ({ id, clickHandler }) => {
   const [black_image_url, setBlackImage] = useState(null);
+
+  const handleDetails = async () => {
+    window.open(`/detail/${id}`);
+  };
 
   useEffect(() => {
     const getToken = async () => {
@@ -24,7 +22,7 @@ const NFTTrait2 = ({ id }) => {
   return (
     <>
       <StyledCard>
-        <CardActionArea onClick={() => setImageOpen(true)}>
+        <CardActionArea onClick={clickHandler}>
           {black_image_url && <NFTImage image={black_image_url} />}
           <NFTInfoWrapper>
             <Typography
@@ -33,15 +31,24 @@ const NFTTrait2 = ({ id }) => {
               sx={{
                 color: "#FFFFFF",
               }}
-            >
-              {formatId(id)}
-            </Typography>
+            ></Typography>
           </NFTInfoWrapper>
         </CardActionArea>
       </StyledCard>
-      {imageOpen && (
-        <Lightbox image={black_image_url} onClose={() => setImageOpen(false)} />
-      )}
+      <Box mt={2}>
+        <Grid container spacing={2} justifyContent="center">
+          <Grid item xs={4}>
+            <Button
+              variant="outlined"
+              color="primary"
+              style={{ width: "100%" }}
+              onClick={handleDetails}
+            >
+              Details
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
     </>
   );
 };

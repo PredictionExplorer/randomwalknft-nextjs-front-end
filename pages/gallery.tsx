@@ -1,52 +1,64 @@
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
-import { Box, Typography } from '@mui/material'
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { Box, Typography, FormControl, Select, MenuItem } from "@mui/material";
 
-import PaginationGrid from '../components/PaginationGrid'
-import { MainWrapper } from '../components/styled'
+import PaginationGrid from "../components/PaginationGrid";
+import { MainWrapper } from "../components/styled";
 
-import useNFTContract from '../hooks/useNFTContract'
+import useNFTContract from "../hooks/useNFTContract";
+import api from "../services/api";
 
 const Gallery = () => {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [collection, setCollection] = useState([])
-  const [address, setAddress] = useState(null)
-
-  const contract = useNFTContract()
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [collection, setCollection] = useState([]);
+  const [address, setAddress] = useState(null);
+  const [sortBy, setSortBy] = useState("0");
+  const contract = useNFTContract();
+  
+  const handleChange = async (e: any) => {
+    setSortBy(e.target.value);
+  };
 
   useEffect(() => {
-    const address = router.query['address'] as string
+    const address = router.query["address"] as string;
 
     const getTokens = async () => {
       try {
-        setLoading(true)
-        let tokenIds = []
-        if (address) {
-          const tokens = await contract.walletOfOwner(address)
-          tokenIds = tokens.map((t) => t.toNumber()).reverse()
+        setLoading(true);
+        let tokenIds = [];
+        if (sortBy == "0") {
+          if (address) {
+            const tokens = await contract.walletOfOwner(address);
+            tokenIds = tokens.map((t) => t.toNumber()).reverse();
+          } else {
+            const balance = await contract.totalSupply();
+            tokenIds = Object.keys(new Array(balance.toNumber()).fill(0));
+            tokenIds = tokenIds.reverse();
+          }
         } else {
-          const balance = await contract.totalSupply()
-          tokenIds = Object.keys(new Array(balance.toNumber()).fill(0))
-          tokenIds = tokenIds.reverse()
+          if (address) {
+            const tokens = await contract.walletOfOwner(address);
+            let total_ids = await api.ratingOrder();
+            tokenIds = tokens.map((t) => t.toNumber()).reverse();
+            tokenIds = total_ids.filter(x => tokenIds.includes(x));
+          } else {
+            tokenIds = await api.ratingOrder();
+            tokenIds = tokenIds.reverse();
+          }
         }
 
-        setAddress(address)
-        setCollection(tokenIds)
-        setLoading(false)
+        setAddress(address);
+        setCollection(tokenIds);
+        setLoading(false);
       } catch (err) {
-        console.log(err)
-        setLoading(false)
+        console.log(err);
+        setLoading(false);
       }
-    }
+    };
 
-    getTokens()
-
-    return () => {
-      setCollection([])
-      setLoading(false)
-    }
-  }, [contract, router])
+    getTokens();
+  }, [contract, router, sortBy]);
 
   return (
     <MainWrapper>
@@ -83,18 +95,37 @@ const Gallery = () => {
         <Typography
           variant="body2"
           sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexWrap: 'wrap',
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexWrap: "wrap",
           }}
         >
           Owned by {address}
         </Typography>
       )}
+      
+      <Box sx={{ mt: 1.5, display: "flex", alignItems: "center" }}>
+        <Typography align="left" variant="body1" color="secondary" display="inline">
+          Sort By
+        </Typography>
+        <FormControl sx={{ m: 1, minWidth: 80, display: "inline" }}>
+          <Select
+            value={sortBy}
+            onChange={handleChange}
+            displayEmpty
+            autoWidth
+            inputProps={{ "aria-label": "Without label" }}
+          >
+            <MenuItem value={0}>Token Id</MenuItem>
+            <MenuItem value={1}>Beauty</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
       <PaginationGrid loading={loading} data={collection} />
     </MainWrapper>
-  )
-}
+  );
+};
 
-export default Gallery
+export default Gallery;
