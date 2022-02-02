@@ -41,7 +41,7 @@ export const useNFT = (tokenId) => {
       }
     }
 
-    if (tokenId != null) {
+    if (contract != null && tokenId != null) {
       getNFT()
     }
   }, [contract, tokenId])
