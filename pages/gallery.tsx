@@ -13,21 +13,26 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
   const [collection, setCollection] = useState([]);
   const [address, setAddress] = useState(null);
-  const [sortBy, setSortBy] = useState("0");
+  const [sortBy, setSortBy] = useState("tokenId");
   const contract = useNFTContract();
-  
+
   const handleChange = async (e: any) => {
     setSortBy(e.target.value);
+    router.query["sortBy"] = e.target.value;
+    router.push({ pathname: router.pathname, query: router.query });
   };
 
   useEffect(() => {
     const address = router.query["address"] as string;
+    let s = router.query["sortBy"] as string;
+    s = s || "tokenId";
+    setSortBy(s);
 
     const getTokens = async () => {
       try {
         setLoading(true);
         let tokenIds = [];
-        if (sortBy == "0") {
+        if (s == "tokenId") {
           if (address) {
             const tokens = await contract.walletOfOwner(address);
             tokenIds = tokens.map((t) => t.toNumber()).reverse();
@@ -36,16 +41,19 @@ const Gallery = () => {
             tokenIds = Object.keys(new Array(balance.toNumber()).fill(0));
             tokenIds = tokenIds.reverse();
           }
-        } else {
+        } else if (s == "beauty") {
           if (address) {
             const tokens = await contract.walletOfOwner(address);
             let total_ids = await api.ratingOrder();
             tokenIds = tokens.map((t) => t.toNumber()).reverse();
-            tokenIds = total_ids.filter(x => tokenIds.includes(x));
+            tokenIds = total_ids.filter((x) => tokenIds.includes(x));
           } else {
             tokenIds = await api.ratingOrder();
             tokenIds = tokenIds.reverse();
           }
+          tokenIds = tokenIds.filter(
+            (element, i) => i === tokenIds.indexOf(element)
+          );
         }
 
         setAddress(address);
@@ -58,7 +66,7 @@ const Gallery = () => {
     };
 
     getTokens();
-  }, [contract, router, sortBy]);
+  }, [contract, router]);
 
   return (
     <MainWrapper>
@@ -104,9 +112,14 @@ const Gallery = () => {
           Owned by {address}
         </Typography>
       )}
-      
+
       <Box sx={{ mt: 1.5, display: "flex", alignItems: "center" }}>
-        <Typography align="left" variant="body1" color="secondary" display="inline">
+        <Typography
+          align="left"
+          variant="body1"
+          color="secondary"
+          display="inline"
+        >
           Sort By
         </Typography>
         <FormControl sx={{ m: 1, minWidth: 80, display: "inline" }}>
@@ -117,8 +130,8 @@ const Gallery = () => {
             autoWidth
             inputProps={{ "aria-label": "Without label" }}
           >
-            <MenuItem value={0}>Token Id</MenuItem>
-            <MenuItem value={1}>Beauty</MenuItem>
+            <MenuItem value="tokenId">Token Id</MenuItem>
+            <MenuItem value="beauty">Beauty</MenuItem>
           </Select>
         </FormControl>
       </Box>

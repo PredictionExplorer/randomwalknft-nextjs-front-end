@@ -17,8 +17,6 @@ const NAVS: NavItem[] = [
     ],
   },
   { title: "Redeem", route: "/redeem" },
-  { title: "FAQ", route: "/faq" },
-  { title: "Generation Code", route: "/code" },
   {
     title: "Random",
     route: "",
@@ -28,6 +26,14 @@ const NAVS: NavItem[] = [
     ],
   },
   { title: "Beauty Contest", route: "/compare" },
+  {
+    title: "About",
+    route: "",
+    children: [
+      { title: "Generation Code", route: "/code" },
+      { title: "FAQ", route: "/faq" },
+    ],
+  },
 ];
 
 export default NAVS;
