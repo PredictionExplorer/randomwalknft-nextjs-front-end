@@ -35,7 +35,10 @@ const Gallery = () => {
         if (s == "tokenId") {
           if (address) {
             const tokens = await contract.walletOfOwner(address);
-            tokenIds = tokens.map((t) => t.toNumber()).reverse();
+            tokenIds = tokens.map((t) => t.toNumber());
+            tokenIds = tokenIds.sort((a, b) => {
+              return parseInt(b) - parseInt(a);
+            });
           } else {
             const balance = await contract.totalSupply();
             tokenIds = Object.keys(new Array(balance.toNumber()).fill(0));
@@ -45,15 +48,14 @@ const Gallery = () => {
           if (address) {
             const tokens = await contract.walletOfOwner(address);
             let total_ids = await api.ratingOrder();
-            tokenIds = tokens.map((t) => t.toNumber()).reverse();
+            tokenIds = tokens.map((t) => t.toNumber());
             tokenIds = total_ids.filter((x) => tokenIds.includes(x));
           } else {
             tokenIds = await api.ratingOrder();
-            tokenIds = tokenIds.reverse();
           }
-          tokenIds = tokenIds.filter(
-            (element, i) => i === tokenIds.indexOf(element)
-          );
+          tokenIds = tokenIds
+            .filter((element, i) => i === tokenIds.indexOf(element))
+            .reverse();
         }
 
         setAddress(address);

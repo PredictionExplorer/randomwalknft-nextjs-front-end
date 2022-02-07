@@ -59,7 +59,14 @@ const HistoryRow = ({ history }) => {
             3
           )})`}
       </TablePrimaryCell>
-      <TablePrimaryCell>{history.TokenId}</TablePrimaryCell>
+      <TablePrimaryCell>
+        <Link
+          href={`/detail/${history.TokenId}`}
+          style={{ color: "#fff" }}
+        >
+          {history.TokenId}
+        </Link>
+      </TablePrimaryCell>
       <TablePrimaryCell>
         <Link
           href={`/gallery?address=${history.BuyerAddr}`}

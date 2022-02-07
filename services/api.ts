@@ -40,19 +40,24 @@ class ApiService {
   }
 
   public async tradingHistory(page: number) {
-    const perPage = 20;
-    let url = `http://198.58.105.159:9094/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/${perPage *
-      (page - 1)}/${perPage}`;
+    let perPage = 20;
+    let url = `http://198.58.105.159:9094/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/0/1000000`;
     let res = await axios.get(url);
+    let totalCount = res.data.Trading.length ?? 0;
+    let start = totalCount - perPage * page;
+    if (start < 0) {
+      perPage += start;
+      start = 0;
+    }
+    url = `http://198.58.105.159:9094/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/${start}/${perPage}`;
+    res = await axios.get(url);
     let data = res?.data?.Trading;
-    data.sort((a: { TimeStamp: number; }, b: { TimeStamp: number; }) => {
+    data.sort((a: { TimeStamp: number }, b: { TimeStamp: number }) => {
       return b.TimeStamp - a.TimeStamp;
     });
-    url = `http://198.58.105.159:9094/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/0/1000000`;
-    res = await axios.get(url);
     let result = {
       tradingHistory: data,
-      totalCount: res.data.Trading.length ?? 0,
+      totalCount,
     };
     return result;
   }
