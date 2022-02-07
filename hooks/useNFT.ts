@@ -9,7 +9,10 @@ export const useNFT = (tokenId) => {
   useEffect(() => {
     const getNFT = async () => {
       try {
-        const nft = await api.get_info(tokenId);
+        // const nft = await api.get_info(tokenId);
+        const owner = await contract.ownerOf(tokenId);
+        const seed = await contract.seeds(tokenId);
+        const name = await contract.tokenNames(tokenId);
         const fileName = tokenId.toString().padStart(6, "0");
         const white_image = `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_white.png`;
         const white_image_thumb = `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_white_thumb.jpg`;
@@ -22,9 +25,9 @@ export const useNFT = (tokenId) => {
 
         setNft({
           id: parseInt(tokenId),
-          name: nft.CurName,
-          owner: nft.CurOwnerAddr,
-          seed: nft.SeedHex,
+          name,
+          owner,
+          seed,
           white_image,
           white_image_thumb,
           white_single_video,
