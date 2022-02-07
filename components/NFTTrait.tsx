@@ -39,6 +39,7 @@ import {
   NFTInfoWrapper,
   NFTPrice,
 } from "./styled";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
 const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
   const {
@@ -330,6 +331,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
                     onClick={handleMenuOpen}
                   >
                     Copy link
+                    {anchorEl ? <ExpandLess /> : <ExpandMore />}
                   </Button>
 
                   <Menu
