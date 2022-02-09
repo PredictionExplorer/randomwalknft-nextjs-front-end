@@ -20,8 +20,7 @@ class ApiService {
   }
 
   public async get_info(token_id: number | string) {
-    const url = `http://198.58.105.159:9094/api/rwalk/tokens/info/0x895a6F444BE4ba9d124F61DF736605792B35D66b/${token_id}`;
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(baseUrl + "token_info/" + token_id);
     return data;
   }
 
