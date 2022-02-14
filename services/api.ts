@@ -24,6 +24,16 @@ class ApiService {
     return data;
   }
 
+  public async get_sell() {
+    const { data } = await axios.get(baseUrl + "sell_offer");
+    return data;
+  }
+
+  public async get_buy() {
+    const { data } = await axios.get(baseUrl + "buy_offer");
+    return data;
+  }
+
   public async result() {
     const { data } = await axios.get(baseUrl + "result");
     return data;

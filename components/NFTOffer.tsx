@@ -1,23 +1,29 @@
-import React from 'react'
-import { Typography, CardActionArea } from '@mui/material'
+import React from "react";
+import { Typography, CardActionArea } from "@mui/material";
 
-import { NFTImage, NFTInfoWrapper, NFTPrice, StyledCard } from './styled'
-import { formatId } from '../utils'
+import { NFTImage, NFTInfoWrapper, NFTPrice, StyledCard } from "./styled";
+import { formatId } from "../utils";
+import { useNFT } from "../hooks/useNFT";
 
 const NFTOffer = ({ offer }) => {
+  const fileName = offer.TokenId.toString().padStart(6, "0");
+  const image_thumb = `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_thumb.jpg`;
+
   return (
     <StyledCard>
-      <CardActionArea href={`/detail/${offer.tokenId}?seller=${offer.seller}`}>
-        <NFTImage image={offer.image_thumb} />
+      <CardActionArea
+        href={`/detail/${offer.TokenId}?seller=${offer.SellerAddr}`}
+      >
+        <NFTImage image={image_thumb} />
         <NFTInfoWrapper>
           <Typography variant="body1" gutterBottom>
-            {formatId(offer.tokenId)}
+            {formatId(offer.TokenId)}
           </Typography>
-          <NFTPrice variant="body1">{offer.price.toFixed(4)}Ξ</NFTPrice>
+          <NFTPrice variant="body1">{offer.Price.toFixed(4)}Ξ</NFTPrice>
         </NFTInfoWrapper>
       </CardActionArea>
     </StyledCard>
-  )
-}
+  );
+};
 
-export default NFTOffer
+export default NFTOffer;

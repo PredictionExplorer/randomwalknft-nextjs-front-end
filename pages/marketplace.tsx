@@ -11,6 +11,7 @@ import useNFTContract from "../hooks/useNFTContract";
 import useMarketContract from "../hooks/useMarketContract";
 import { NFT_ADDRESS } from "../config/app";
 import { useTransactions } from "../hooks/useTransactions";
+import api from "../services/api";
 
 const Marketplace = () => {
   const [loading, setLoading] = useState(true);
@@ -43,34 +44,11 @@ const Marketplace = () => {
     const getTokens = async () => {
       try {
         setLoading(true);
-        const numOffers = await marketContract.numOffers();
-        const offerIds = Object.keys(new Array(numOffers.toNumber()).fill(0));
-        let offers = await Promise.all(
-          offerIds.map((offerId) =>
-            getOfferById(nftContract, marketContract, offerId)
-          )
-        );
-        const zeroAddress = ethers.constants.AddressZero;
-        offers = offers
-          .filter(
-            (offer) => offer && offer.active && offer.buyer === zeroAddress
-          )
-          .sort((x, y) => x.price - y.price);
+        let offers = await api.get_sell();
 
         // if filterMode == "With Offers"
         if (filterMode == "1") {
-          offers = await Promise.all(
-            offers.map(async (offer) => {
-              const buyOfferIds = await marketContract.getBuyOffers(
-                NFT_ADDRESS,
-                offer.id
-              );
-              return buyOfferIds.length > 0 ? offer : null;
-            })
-          );
-          offers = offers.reverse().filter((e) => {
-            return e != null;
-          });
+          offers = await api.get_buy();
         }
         setCollection(offers);
         setLoading(false);
