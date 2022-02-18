@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, MenuItem, FormControl } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { ethers } from "ethers";
 
 import PaginationOfferGrid from "../components/PaginationOfferGrid";
 import NFTSalesHistory from "../components/NFTSalesHistory";
 import { MainWrapper } from "../components/styled";
-import { getOfferById } from "../hooks/useOffer";
 import useNFTContract from "../hooks/useNFTContract";
 import useMarketContract from "../hooks/useMarketContract";
-import { NFT_ADDRESS } from "../config/app";
 import { useTransactions } from "../hooks/useTransactions";
 import api from "../services/api";
 

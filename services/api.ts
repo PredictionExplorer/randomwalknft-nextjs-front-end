@@ -24,14 +24,22 @@ class ApiService {
     return data;
   }
 
-  public async get_sell() {
+  public async get_sell(id = -1) {
     const { data } = await axios.get(baseUrl + "sell_offer");
-    return data;
+    if (id == -1) return data;
+    const result = data.filter((x) => {
+      return x.TokenId == id;
+    });
+    return result;
   }
 
-  public async get_buy() {
+  public async get_buy(id = -1) {
     const { data } = await axios.get(baseUrl + "buy_offer");
-    return data;
+    if (id == -1) return data;
+    const result = data.filter((x) => {
+      return x.TokenId == id;
+    });
+    return result;
   }
 
   public async result() {

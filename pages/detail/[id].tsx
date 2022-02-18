@@ -14,8 +14,6 @@ import NFTTrait from "../../components/NFTTrait";
 import NFTBuyOffers from "../../components/NFTBuyOffers";
 import NFTHistory from "../../components/NFTHistory";
 import { MainWrapper } from "../../components/styled";
-
-import { useBuyOfferIds, useSellTokenIds } from "../../hooks/useOffer";
 import { useActiveWeb3React } from "../../hooks/web3";
 
 import api from "../../services/api";
@@ -23,12 +21,25 @@ import api from "../../services/api";
 const Detail = ({ nft }) => {
   const router = useRouter();
   const { seller } = router.query;
-  const buyOffers = useBuyOfferIds(nft?.id);
+  // const buyOffers = useBuyOfferIds(nft?.id);
   const { account } = useActiveWeb3React();
-  const sellTokenIds = useSellTokenIds(account);
   const [darkTheme, setDarkTheme] = useState(true);
+  const [buyOffers, setBuyOffers] = useState([]);
+  const [sellOffers, setSellOffers] = useState([]);
+  const [userSellOffers, setUserSellOffers] = useState([]);
 
   useEffect(() => {
+    const getOffers = async () => {
+      const buy_offers = await api.get_buy(nft.id);
+      setBuyOffers(buy_offers);
+      const sell_offers = await api.get_sell(nft.id);
+      setSellOffers(sell_offers);
+      const userSellOffers = sell_offers.filter((x) => {
+        return x.SellerAddr == account;
+      });
+      setUserSellOffers(userSellOffers);
+    };
+
     let hash = router.asPath.match(/#([a-z0-9]+)/gi);
     const darkModes = [
       "#black_image",
@@ -48,7 +59,8 @@ const Detail = ({ nft }) => {
         setDarkTheme(false);
       }
     }
-  }, [router]);
+    getOffers();
+  }, [account, nft, router]);
 
   if (!nft) return <></>;
 
@@ -90,14 +102,16 @@ const Detail = ({ nft }) => {
         nft={nft}
         darkTheme={darkTheme}
         seller={seller}
-        offers={buyOffers}
+        buy_offers={buyOffers}
+        sell_offers={sellOffers}
+        user_sell_offers={userSellOffers}
       />
       {buyOffers.length > 0 && (
         <NFTBuyOffers
           offers={buyOffers}
           nft={nft}
           account={account}
-          sellTokenIds={sellTokenIds}
+          userSellOffers={userSellOffers}
         />
       )}
       {nft.tokenHistory.length > 0 && (

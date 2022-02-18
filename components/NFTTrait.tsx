@@ -25,11 +25,6 @@ import { MARKET_ADDRESS, NFT_ADDRESS } from "../config/app";
 import NFTVideo from "./NFTVideo";
 import useNFTContract from "../hooks/useNFTContract";
 import useMarketContract from "../hooks/useMarketContract";
-import {
-  useSellTokenIds,
-  useSellOfferIds,
-  getOfferById,
-} from "../hooks/useOffer";
 import { useActiveWeb3React } from "../hooks/web3";
 import { formatId } from "../utils";
 import {
@@ -41,7 +36,14 @@ import {
 } from "./styled";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
-const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
+const NFTTrait = ({
+  nft,
+  darkTheme,
+  seller,
+  buy_offers,
+  sell_offers,
+  user_sell_offers,
+}) => {
   const {
     id,
     name,
@@ -64,18 +66,13 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
   const [tokenName, setTokenName] = useState(name);
   const [address, setAddress] = useState("");
   const [accountTokenIds, setAccountTokenIds] = useState([]);
-  const [realOwner, setRealOwner] = useState("");
+  const realOwner = nft.owner;
   const [highestOffer, setHighestOffer] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-
   const router = useRouter();
   const nftContract = useNFTContract();
   const marketContract = useMarketContract();
-
   const { account, library } = useActiveWeb3React();
-
-  const sellOfferIds = useSellOfferIds(id);
-  const sellTokenIds = useSellTokenIds(account);
 
   const handlePlay = (videoPath) => {
     fetch(videoPath).then((res) => {
@@ -124,7 +121,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
   const handleCancelSell = async () => {
     try {
       await marketContract
-        .cancelSellOffer(sellOfferIds[0])
+        .cancelSellOffer(sell_offers[0].OfferId)
         .then((tx) => tx.wait());
       window.location.reload();
     } catch (err) {
@@ -134,7 +131,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
 
   const handleAcceptSell = async () => {
     try {
-      const offerId = sellOfferIds[0];
+      const offerId = sell_offers[0].OfferId;
       const offer = await marketContract.offers(offerId);
       await marketContract
         .acceptSellOffer(offerId, {
@@ -222,23 +219,14 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
   };
 
   useEffect(() => {
-    let maxOffer;
-    offers.map(async (id, i) => {
-      const offer = await getOfferById(nftContract, marketContract, id);
-      if (!maxOffer || maxOffer.price < offer.price) {
-        maxOffer = offer;
-        setHighestOffer(maxOffer.price);
+    let maxOfferPrice = 0;
+    buy_offers.map(async (offer) => {
+      if (!maxOfferPrice || maxOfferPrice < offer.Price) {
+        maxOfferPrice = offer.Price;
+        setHighestOffer(maxOfferPrice);
       }
     });
-  }, [marketContract, nftContract, offers]);
-
-  useEffect(() => {
-    const getOwner = async () => {
-      const owner = await nftContract.ownerOf(nft.id);
-      setRealOwner(owner);
-    };
-    getOwner();
-  }, [nftContract, nft]);
+  }, [marketContract, nftContract, buy_offers]);
 
   useEffect(() => {
     setTheme(darkTheme ? "black" : "white");
@@ -274,16 +262,11 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
   ]);
 
   useEffect(() => {
-    const getSellOffer = async (id) => {
-      const offer = await getOfferById(nftContract, marketContract, id);
-      setSellPrice(offer.price);
-    };
-    if (sellOfferIds.length > 0) {
-      getSellOffer(sellOfferIds[0]);
+    if (sell_offers.length > 0) {
+      setSellPrice(sell_offers[0].Price);
     }
-
     return () => setSellPrice(null);
-  }, [library, marketContract, nftContract, sellOfferIds]);
+  }, [account, sell_offers]);
 
   useEffect(() => {
     const getAccountTokenIds = async () => {
@@ -620,7 +603,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
                   </>
                 ) : (
                   <>
-                    {!sellTokenIds.includes(id) && (
+                    {!user_sell_offers.length && (
                       <Box mb={3}>
                         <Typography gutterBottom variant="h6" align="left">
                           BID
@@ -646,7 +629,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
                         </Box>
                       </Box>
                     )}
-                    {sellTokenIds.includes(id) ? (
+                    {user_sell_offers.length ? (
                       <Box mb={3}>
                         <Button
                           color="secondary"
@@ -659,6 +642,7 @@ const NFTTrait = ({ nft, darkTheme, seller, offers }) => {
                         </Button>
                       </Box>
                     ) : (
+                      realOwner &&
                       realOwner.toLowerCase() ===
                         MARKET_ADDRESS.toLowerCase() && (
                         <Box mb={3}>

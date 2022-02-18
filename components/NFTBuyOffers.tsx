@@ -1,5 +1,4 @@
-import React from 'react'
-import { ethers } from 'ethers'
+import React from "react";
 import {
   Box,
   Container,
@@ -10,48 +9,47 @@ import {
   TableCell,
   TableBody,
   Button,
-} from '@mui/material'
+} from "@mui/material";
 
-import { useOffer } from '../hooks/useOffer'
-import useMarketContract from '../hooks/useMarketContract'
+import useMarketContract from "../hooks/useMarketContract";
 
-import { SectionWrapper, TablePrimaryContainer } from './styled'
+import { SectionWrapper, TablePrimaryContainer } from "./styled";
 
-const OfferRow = ({ offerId, isOwner, account }) => {
-  const offer = useOffer(offerId)
-  const contract = useMarketContract()
+const OfferRow = ({ offer, isOwner, account }) => {
+  const contract = useMarketContract();
 
   const handleAcceptBuy = async () => {
     try {
-      await contract.acceptBuyOffer(offerId).then((tx) => tx.wait())
-      window.location.reload()
+      await contract.acceptBuyOffer(offer.OfferId).then((tx) => tx.wait());
+      window.location.reload();
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const handleCancelBuy = async () => {
     try {
-      await contract.cancelBuyOffer(offerId).then((tx) => tx.wait())
-      window.location.reload()
+      await contract.cancelBuyOffer(offer.OfferId).then((tx) => tx.wait());
+      window.location.reload();
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   if (!offer) {
-    return <TableRow></TableRow>
+    return <TableRow></TableRow>;
   }
 
   return (
     <TableRow>
-      <TableCell>{offer.id}</TableCell>
-      <TableCell>{offer.buyer}</TableCell>
-      <TableCell>{offer.price.toFixed(4)}Ξ</TableCell>
+      <TableCell>{offer.OfferId}</TableCell>
+      <TableCell>{offer.BuyerAddr}</TableCell>
+      <TableCell>{offer.Price.toFixed(4)}Ξ</TableCell>
       {account ? (
         <TableCell>
-          {(isOwner && offer.buyer.toLowerCase() !== account.toLowerCase()) ||
-          offer.seller.toLowerCase() === account.toLowerCase() ? (
+          {(isOwner &&
+            offer.BuyerAddr.toLowerCase() !== account.toLowerCase()) ||
+          offer.SellerAddr.toLowerCase() === account.toLowerCase() ? (
             <Button
               variant="contained"
               color="secondary"
@@ -60,7 +58,7 @@ const OfferRow = ({ offerId, isOwner, account }) => {
               Accept
             </Button>
           ) : (
-            offer.buyer.toLowerCase() === account.toLowerCase() && (
+            offer.BuyerAddr.toLowerCase() === account.toLowerCase() && (
               <Button
                 variant="contained"
                 color="primary"
@@ -75,8 +73,8 @@ const OfferRow = ({ offerId, isOwner, account }) => {
         <TableCell></TableCell>
       )}
     </TableRow>
-  )
-}
+  );
+};
 
 const OfferTable = ({ offers, isOwner, account }) => {
   return (
@@ -92,9 +90,9 @@ const OfferTable = ({ offers, isOwner, account }) => {
         </TableHead>
         <TableBody>
           {offers.length > 0 ? (
-            offers.map((id, i) => (
+            offers.map((offer, i) => (
               <OfferRow
-                offerId={id}
+                offer={offer}
                 key={i}
                 isOwner={isOwner}
                 account={account}
@@ -110,10 +108,10 @@ const OfferTable = ({ offers, isOwner, account }) => {
         </TableBody>
       </Table>
     </TablePrimaryContainer>
-  )
-}
+  );
+};
 
-const NFTBuyOffers = ({ offers, nft, account, sellTokenIds }) => (
+const NFTBuyOffers = ({ offers, nft, account, userSellOffers }) => (
   <SectionWrapper>
     <Container>
       <Box mb={4}>
@@ -131,12 +129,12 @@ const NFTBuyOffers = ({ offers, nft, account, sellTokenIds }) => (
         offers={offers}
         isOwner={
           (account && nft.owner.toLowerCase() === account.toLowerCase()) ||
-          sellTokenIds.includes(nft.id)
+          userSellOffers.length
         }
         account={account}
       />
     </Container>
   </SectionWrapper>
-)
+);
 
-export default NFTBuyOffers
+export default NFTBuyOffers;
