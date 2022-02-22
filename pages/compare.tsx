@@ -7,6 +7,7 @@ import api from "../services/api";
 const Compare = () => {
   const [firstId, setFirstId] = useState(0);
   const [secondId, setSecondId] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   const onSelectNFT = async (id: Number) => {
     await api.add_game(firstId, secondId, id == firstId ? 1 : 0);
@@ -17,6 +18,8 @@ const Compare = () => {
     const tokenIds = await api.random();
     setFirstId(tokenIds[0]);
     setSecondId(tokenIds[1]);
+    const res = await api.voteCount();
+    setTotalCount(res.total_count);
   };
 
   useEffect(() => {
@@ -46,16 +49,12 @@ const Compare = () => {
           IS MORE BEAUTIFUL?
         </Typography>
       </Box>
-      <Grid
-        container
-        mt={4}
-        textAlign="center"
-        justifyContent="center"
-      >
-        <Grid xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
+      <Box mt={2}>{totalCount && `${totalCount} votes`}</Box>
+      <Grid container mt={2} textAlign="center" justifyContent="center">
+        <Grid item xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
           <NFTTrait2 id={firstId} clickHandler={() => onSelectNFT(firstId)} />
         </Grid>
-        <Grid xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
+        <Grid item xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
           <NFTTrait2 id={secondId} clickHandler={() => onSelectNFT(secondId)} />
         </Grid>
       </Grid>

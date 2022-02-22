@@ -62,6 +62,11 @@ class ApiService {
     return data;
   }
 
+  public async voteCount() {
+    const { data } = await axios.get(baseUrl + "vote_count");
+    return data;
+  }
+
   public async tradingHistory(page: number) {
     let perPage = 20;
     let url = `http://198.58.105.159:9094/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/0/1000000`;
