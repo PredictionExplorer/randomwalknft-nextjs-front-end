@@ -66,7 +66,7 @@ const NFTTrait = ({
   const [tokenName, setTokenName] = useState(name);
   const [address, setAddress] = useState("");
   const [accountTokenIds, setAccountTokenIds] = useState([]);
-  const realOwner = nft.owner;
+  const [realOwner, setRealOwner] = useState("");
   const [highestOffer, setHighestOffer] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const router = useRouter();
@@ -227,6 +227,14 @@ const NFTTrait = ({
       }
     });
   }, [marketContract, nftContract, buy_offers]);
+
+  useEffect(() => {
+    const getOwner = async () => {
+      const owner = await nftContract.ownerOf(nft.id);
+      setRealOwner(owner);
+    };
+    getOwner();
+  }, [nftContract, nft]);
 
   useEffect(() => {
     setTheme(darkTheme ? "black" : "white");
