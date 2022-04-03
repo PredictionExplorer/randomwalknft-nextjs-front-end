@@ -91,6 +91,16 @@ class ApiService {
     };
     return result;
   }
+
+  // auth
+  public async register(username: string, email: string, password: string) {
+    await axios.post(baseUrl + "register", { username, email, password });
+  }
+
+  public async login(email: string, password: string) {
+    const { data } = await axios.post(baseUrl + "login", { email, password });
+    return data;
+  }
 }
 
 export default new ApiService();

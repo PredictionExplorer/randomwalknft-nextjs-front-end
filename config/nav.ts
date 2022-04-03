@@ -32,6 +32,7 @@ const NAVS: NavItem[] = [
     children: [
       { title: "Generation Code", route: "/code" },
       { title: "FAQ", route: "/faq" },
+      { title: "Blog", route: "/blog" },
     ],
   },
 ];
