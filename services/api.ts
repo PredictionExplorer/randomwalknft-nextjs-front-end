@@ -111,11 +111,10 @@ class ApiService {
   }
 
   public async create_blog(formData: any) {
-    const { data } = await axios({
-      method: "post",
-      url: baseUrl + "create_blog",
-      data: formData,
-      headers: { "Content-Type": "multipart/form-data" },
+    const { data } = await axios.post(baseUrl + "create_blog", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
     return data;
   }
