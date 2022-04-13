@@ -101,6 +101,34 @@ class ApiService {
     const { data } = await axios.post(baseUrl + "login", { email, password });
     return data;
   }
+
+  public async check_token(email: string, token: string) {
+    const { data } = await axios.post(baseUrl + "check_token", {
+      email,
+      token,
+    });
+    return data;
+  }
+
+  public async create_blog(formData: any) {
+    const { data } = await axios({
+      method: "post",
+      url: baseUrl + "create_blog",
+      data: formData,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  }
+
+  public async get_all_blogs() {
+    const { data } = await axios.get(baseUrl + "get_all_blogs");
+    return data;
+  }
+
+  public async get_blog(blog_id: string) {
+    const { data } = await axios.get(baseUrl + `get_blog/${blog_id}`);
+    return data;
+  }
 }
 
 export default new ApiService();

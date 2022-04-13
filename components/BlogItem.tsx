@@ -9,13 +9,34 @@ import {
 } from "@mui/material";
 
 const BlogItem = ({ blog }) => {
+  const getDateFromTimestamp = (timestamp: number) => {
+    const month_names = [
+      "January",
+      "Feburary",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const date = new Date(timestamp * 1000);
+    const day = date.getDate();
+    const month = month_names[date.getMonth()];
+    const year = date.getFullYear();
+    return `${month} ${day}, ${year}`;
+  };
   return (
     <Card>
       <CardMedia
         component="img"
         height="230"
-        image="https://via.placeholder.com/150"
-        alt="green iguana"
+        image={blog.thumb_image}
+        alt="blog thumbnail"
       />
       <CardContent>
         <Typography
@@ -28,18 +49,15 @@ const BlogItem = ({ blog }) => {
             py: "3px",
           }}
         >
-          March 22, 2022
+          {getDateFromTimestamp(blog.created_at)}
         </Typography>
         <Typography gutterBottom variant="h5" component="div" marginTop="10px">
-          Lizard
+          {blog.title || "No Title"}
         </Typography>
-        <Typography variant="body2">
-          Lizards are a widespread group of squamate reptiles, with over 6,000
-          species, ranging across all continents except Antarctica
-        </Typography>
+        <Typography variant="body2">{blog.epic || "No description"}</Typography>
       </CardContent>
       <CardActions>
-        <Button size="small" color="primary" href="/blogdetail/1">
+        <Button size="small" color="primary" href={`/blogdetail/${blog.id}`}>
           Read more...
         </Button>
       </CardActions>

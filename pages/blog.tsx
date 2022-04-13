@@ -5,9 +5,17 @@ import api from "../services/api";
 import PaginationBlogGrid from "../components/PaginationBlogGrid";
 
 const Blog = () => {
-  const [loading, setLoading] = useState(false);
-  // const [collection, setCollection] = useState([]);
-  const collection = [1, 2, 3, 4, 5, 6, 7, 8];
+  const [loading, setLoading] = useState(true);
+  const [blogs, setBlogs] = useState([]);
+
+  useEffect(() => {
+    const getAllBlogs = async () => {
+      const data = await api.get_all_blogs();
+      setBlogs(data);
+      setLoading(false);
+    };
+    getAllBlogs();
+  }, []);
   return (
     <MainWrapper>
       <Box display="flex" flexWrap="wrap">
@@ -24,7 +32,7 @@ const Blog = () => {
         </Typography>
       </Box>
 
-      <PaginationBlogGrid loading={loading} data={collection} />
+      <PaginationBlogGrid loading={loading} data={blogs} />
     </MainWrapper>
   );
 };
