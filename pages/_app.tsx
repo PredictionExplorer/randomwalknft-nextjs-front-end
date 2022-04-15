@@ -47,7 +47,7 @@ function MyApp(props: MyAppProps) {
       router.events.off('routeChangeComplete', handleRouteChange)
     }
   }, [router.events])
-  
+  const canonicalUrl = (`https://www.randomwalknft.com` + (router.asPath === "/" ? "": router.asPath)).split("?")[0];
   return (
     <>
       <Head>
@@ -56,6 +56,7 @@ function MyApp(props: MyAppProps) {
           name="description"
           content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
         />
+        <link rel="canonical" href={canonicalUrl} />
         {pageProps.nft && (
           <>
             <meta
