@@ -1,5 +1,5 @@
-import React from 'react'
-import { ethers } from 'ethers'
+import React from "react";
+import { ethers } from "ethers";
 
 import {
   Typography,
@@ -10,47 +10,47 @@ import {
   TableBody,
   Button,
   Link,
-} from '@mui/material'
+} from "@mui/material";
 
 import {
   useAccountBuyOfferIds,
   useAccountSellOfferIds,
   useOffer,
-} from '../hooks/useOffer'
-import { useActiveWeb3React } from '../hooks/web3'
-import useMarketContract from '../hooks/useMarketContract'
+} from "../hooks/useOffer";
+import { useActiveWeb3React } from "../hooks/web3";
+import useMarketContract from "../hooks/useMarketContract";
 
-import { formatId } from '../utils'
-import { MainWrapper, TablePrimaryContainer } from '../components/styled'
+import { formatId } from "../utils";
+import { MainWrapper, TablePrimaryContainer } from "../components/styled";
 
 const OfferRow = ({ offerId }) => {
-  const offer = useOffer(offerId)
-  const contract = useMarketContract()
+  const offer = useOffer(offerId);
+  const contract = useMarketContract();
 
   if (!offer) {
-    return <TableRow></TableRow>
+    return <TableRow></TableRow>;
   }
 
-  const isBuy = offer.buyer !== ethers.constants.AddressZero
+  const isBuy = offer.buyer !== ethers.constants.AddressZero;
 
   const handleCancel = async () => {
     try {
       if (isBuy) {
-        await contract.cancelBuyOffer(offerId).then((tx) => tx.wait())
+        await contract.cancelBuyOffer(offerId).then((tx) => tx.wait());
       } else {
-        await contract.cancelSellOffer(offerId).then((tx) => tx.wait())
+        await contract.cancelSellOffer(offerId).then((tx) => tx.wait());
       }
-      window.location.reload()
+      window.location.reload();
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   return (
     <TableRow>
-      <TableCell>{isBuy ? 'BUY' : 'SELL'}</TableCell>
+      <TableCell>{isBuy ? "BUY" : "SELL"}</TableCell>
       <TableCell>
-        <Link style={{ color: '#fff' }} href={`/detail/${offer.tokenId}`}>
+        <Link style={{ color: "#fff" }} href={`/detail/${offer.tokenId}`}>
           {offer.tokenName || formatId(offer.tokenId)}
         </Link>
       </TableCell>
@@ -61,8 +61,8 @@ const OfferRow = ({ offerId }) => {
         </Button>
       </TableCell>
     </TableRow>
-  )
-}
+  );
+};
 
 const OfferTable = ({ offers }) => {
   return (
@@ -89,15 +89,15 @@ const OfferTable = ({ offers }) => {
         </TableBody>
       </Table>
     </TablePrimaryContainer>
-  )
-}
+  );
+};
 
 const MyOffers = () => {
-  const { account } = useActiveWeb3React()
+  const { account } = useActiveWeb3React();
 
-  const buyOffers = useAccountBuyOfferIds(account)
-  const sellOffers = useAccountSellOfferIds(account)
-  const offers = buyOffers.concat(sellOffers).sort((x, y) => x - y)
+  const buyOffers = useAccountBuyOfferIds(account);
+  const sellOffers = useAccountSellOfferIds(account);
+  const offers = buyOffers.concat(sellOffers).sort((x, y) => x - y);
 
   return account ? (
     <MainWrapper>
@@ -106,7 +106,13 @@ const MyOffers = () => {
       </Typography>
       <OfferTable offers={offers} />
     </MainWrapper>
-  ) : null
+  ) : null;
+};
+
+export async function getStaticProps() {
+  return {
+    props: { title: "My Offers", description: "My Offers Page - " },
+  };
 }
 
-export default MyOffers
+export default MyOffers;

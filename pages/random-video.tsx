@@ -1,39 +1,39 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { Typography, Link } from '@mui/material'
+import React, { useEffect, useState, useRef } from "react";
+import { Typography, Link } from "@mui/material";
 
-import ApiService from '../services/api'
-import { formatId } from '../utils'
+import ApiService from "../services/api";
+import { formatId } from "../utils";
 
 const RandomVideo = (props) => {
-  const [tokenId, setTokenId] = useState(null)
-  const [blackVideo, setBlackVideo] = useState(null)
-  const ref = useRef(null)
+  const [tokenId, setTokenId] = useState(null);
+  const [blackVideo, setBlackVideo] = useState(null);
+  const ref = useRef(null);
 
   const setRandomVideo = async () => {
-    const tokenIds = await ApiService.random()
-    const fileName = tokenIds[0].toString().padStart(6, '0')
-    setTokenId(tokenIds[0])
+    const tokenIds = await ApiService.random();
+    const fileName = tokenIds[0].toString().padStart(6, "0");
+    setTokenId(tokenIds[0]);
     setBlackVideo(
-      `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_single.mp4`,
-    )
-  }
+      `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_single.mp4`
+    );
+  };
 
   useEffect(() => {
-    setRandomVideo()
-  }, [])
+    setRandomVideo();
+  }, []);
 
   useEffect(() => {
     if (blackVideo) {
-      ref.current.load()
+      ref.current.load();
     }
-  }, [blackVideo])
+  }, [blackVideo]);
 
   return (
     <>
       {blackVideo && (
         <div
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 125,
             bottom: 64,
             left: 0,
@@ -45,12 +45,12 @@ const RandomVideo = (props) => {
             muted
             playsInline
             style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
             }}
             onEnded={setRandomVideo}
             ref={ref}
@@ -63,19 +63,25 @@ const RandomVideo = (props) => {
         <Typography
           variant="h6"
           style={{
-            position: 'absolute',
+            position: "absolute",
             bottom: 80,
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: "50%",
+            transform: "translateX(-50%)",
           }}
         >
-          <Link style={{ color: '#fff' }} href={`/detail/${tokenId}`}>
+          <Link style={{ color: "#fff" }} href={`/detail/${tokenId}`}>
             {formatId(tokenId)}
           </Link>
         </Typography>
       )}
     </>
-  )
+  );
+};
+
+export async function getStaticProps() {
+  return {
+    props: { title: "Random Videos", description: "Random Videos Page - " },
+  };
 }
 
-export default RandomVideo
+export default RandomVideo;

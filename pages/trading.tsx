@@ -36,7 +36,11 @@ const Trading = ({ tradingHistory, totalCount, page }) => {
           TRADING HISTORY
         </Typography>
       </Box>
-      <TradingHistory curPage={page} tradingHistory={tradingHistory} totalCount={totalCount} />
+      <TradingHistory
+        curPage={page}
+        tradingHistory={tradingHistory}
+        totalCount={totalCount}
+      />
     </MainWrapper>
   );
 };
@@ -45,7 +49,17 @@ export async function getServerSideProps(context) {
   const page = context.query.page ?? 1;
   const res = await api.tradingHistory(page);
   return {
-    props: { tradingHistory: res.tradingHistory, totalCount: res.totalCount, page },
+    props: {
+      tradingHistory: res.tradingHistory,
+      totalCount: res.totalCount,
+      page,
+    },
+  };
+}
+
+export async function getStaticProps() {
+  return {
+    props: { title: "Trading", description: "Trading Page - " },
   };
 }
 

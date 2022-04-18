@@ -51,10 +51,19 @@ function MyApp(props: MyAppProps) {
   return (
     <>
       <Head>
-        <title>Random Walk NFT</title>
+        {pageProps.title ? 
+          <title>{pageProps.title} | Random Walk NFT</title> : 
+          <title>Random Walk NFT</title>
+        }
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="theme-color" content={theme.palette.primary.main} />
+        <meta
+          name="google-site-verification"
+          content="ZUw5gzqw7CFIEZgCJ2pLy-MhDe7Fdotpc31fS75v3dE"
+        />
         <meta
           name="description"
-          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+          content={pageProps.description + "Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."}
         />
         <link rel="canonical" href={canonicalUrl} />
         {pageProps.nft && (

@@ -1,7 +1,7 @@
-import React from 'react'
-import Image from 'next/image'
-import { Box, Typography, Button, Link, Hidden } from '@mui/material'
-import { MainWrapper, CenterBox, MintButton } from '../components/styled'
+import React from "react";
+import Image from "next/image";
+import { Box, Typography, Button, Link, Hidden } from "@mui/material";
+import { MainWrapper, CenterBox, MintButton } from "../components/styled";
 
 function Home() {
   return (
@@ -10,20 +10,20 @@ function Home() {
         src="images/curves.png"
         alt="curves"
         style={{
-          position: 'fixed',
+          position: "fixed",
           bottom: 100,
-          objectFit: 'fill',
+          objectFit: "fill",
           height: 400,
-          minWidth: '100%',
+          minWidth: "100%",
         }}
       />
       <div
         style={{
           backgroundImage: `url('images/background.jpg')`,
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center center',
-          height: '100vh',
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+          height: "100vh",
         }}
       >
         <MainWrapper>
@@ -50,9 +50,9 @@ function Home() {
               <Link
                 href="/redeem"
                 style={{
-                  cursor: 'pointer',
-                  color: 'white',
-                  textDecoration: 'underline',
+                  cursor: "pointer",
+                  color: "white",
+                  textDecoration: "underline",
                 }}
               >
                 novel incentive structure
@@ -78,7 +78,13 @@ function Home() {
         </MainWrapper>
       </div>
     </>
-  )
+  );
 }
 
-export default Home
+export async function getStaticProps() {
+  return {
+    props: { title: "", description: "HomePage - " },
+  };
+}
+
+export default Home;

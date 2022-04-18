@@ -126,7 +126,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const tokenId = Array.isArray(id) ? id[0] : id;
   const nft = await api.get(tokenId);
   return {
-    props: { nft },
+    props: { nft, title: "Detail", description: `NFT#${nft.id} Details - ` },
   };
 }
 

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
-import { ethers } from 'ethers'
-import { Typography, Box, Grid, CardActionArea, Hidden } from '@mui/material'
-import Countdown from 'react-countdown'
-import { Fade } from 'react-slideshow-image'
-import 'react-slideshow-image/dist/styles.css'
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { ethers } from "ethers";
+import { Typography, Box, Grid, CardActionArea, Hidden } from "@mui/material";
+import Countdown from "react-countdown";
+import { Fade } from "react-slideshow-image";
+import "react-slideshow-image/dist/styles.css";
 
-import { NFT_ADDRESS, MARKET_ADDRESS } from '../config/app'
+import { NFT_ADDRESS, MARKET_ADDRESS } from "../config/app";
 import {
   MainWrapper,
   CenterBox,
@@ -15,84 +15,84 @@ import {
   NFTInfoWrapper,
   StyledLink,
   StyledCard,
-} from '../components/styled'
-import Counter from '../components/Counter'
+} from "../components/styled";
+import Counter from "../components/Counter";
 
-import useNFTContract from '../hooks/useNFTContract'
-import useMarketContract from '../hooks/useMarketContract'
+import useNFTContract from "../hooks/useNFTContract";
+import useMarketContract from "../hooks/useMarketContract";
 
-import api from '../services/api'
-import { formatId, parseBalance } from '../utils'
+import api from "../services/api";
+import { formatId, parseBalance } from "../utils";
 
 const Mint = () => {
-  const [saleSeconds, setSaleSeconds] = useState(null)
-  const [countdownCompleted, setCountdownCompleted] = useState(false)
-  const [mintPrice, setMintPrice] = useState('0')
-  const [withdrawalAmount, setWithdrawalAmount] = useState('0')
-  const [tokenIds, setTokenIds] = useState([])
+  const [saleSeconds, setSaleSeconds] = useState(null);
+  const [countdownCompleted, setCountdownCompleted] = useState(false);
+  const [mintPrice, setMintPrice] = useState("0");
+  const [withdrawalAmount, setWithdrawalAmount] = useState("0");
+  const [tokenIds, setTokenIds] = useState([]);
 
-  const nftContract = useNFTContract()
-  const marketContract = useMarketContract()
+  const nftContract = useNFTContract();
+  const marketContract = useMarketContract();
 
-  const router = useRouter()
+  const router = useRouter();
 
   const handleMint = async () => {
     if (nftContract) {
       try {
         if (saleSeconds > 0 && !countdownCompleted) {
-          alert('The sale is not open yet.')
-          return
+          alert("The sale is not open yet.");
+          return;
         }
 
-        const mintPrice = await nftContract.getMintPrice()
-        const newPrice = parseFloat(ethers.utils.formatEther(mintPrice)) * 1.01
+        const mintPrice = await nftContract.getMintPrice();
+        const newPrice = parseFloat(ethers.utils.formatEther(mintPrice)) * 1.01;
 
         const receipt = await nftContract
           .mint({ value: ethers.utils.parseEther(newPrice.toFixed(4)) })
-          .then((tx) => tx.wait())
+          .then((tx) => tx.wait());
 
-        const token_id = receipt.events[0].args.tokenId.toNumber()
+        const token_id = receipt.events[0].args.tokenId.toNumber();
 
-        await api.create(token_id)
+        await api.create(token_id);
 
-        router.push({ 
+        router.push({
           pathname: `/detail/${token_id}`,
           query: {
-            message: "success"
-          }
-        })
+            message: "success",
+          },
+        });
       } catch (err) {
-        const { data } = err
+        const { data } = err;
         if (data && data.message) {
-          alert(data.message)
+          alert(data.message);
         } else {
-          alert("There's an error")
+          alert("There's an error");
         }
       }
     } else {
-      alert('Please connect your wallet on Arbitrum network')
+      alert("Please connect your wallet on Arbitrum network");
     }
-  }
+  };
 
   useEffect(() => {
     const getData = async () => {
-      const mintPrice = await nftContract.getMintPrice()
+      const mintPrice = await nftContract.getMintPrice();
       setMintPrice(
-        (parseFloat(parseBalance(mintPrice)) * 1.01 + 0.008).toFixed(4),
-      )
+        (parseFloat(parseBalance(mintPrice)) * 1.01 + 0.008).toFixed(4)
+      );
 
-      const withdrawalAmount = await nftContract.withdrawalAmount()
-      setWithdrawalAmount(parseBalance(withdrawalAmount))
+      const withdrawalAmount = await nftContract.withdrawalAmount();
+      setWithdrawalAmount(parseBalance(withdrawalAmount));
 
-      let seconds = (await nftContract.timeUntilSale()).toNumber()
-      setSaleSeconds(seconds)
+      let seconds = (await nftContract.timeUntilSale()).toNumber();
+      setSaleSeconds(seconds);
 
-      const tokenIds = await api.random()
-      setTokenIds(tokenIds)
-    }
+      const tokenIds = await api.random();
+      setTokenIds(tokenIds);
+    };
 
-    getData()
-  }, [nftContract, marketContract])
+    getData();
+  }, [nftContract, marketContract]);
 
   return (
     <MainWrapper>
@@ -205,7 +205,7 @@ const Mint = () => {
             <Grid item xs={12} sm={12} md={6} lg={5}>
               <Fade autoplay arrows={false}>
                 {tokenIds.map((id, i) => {
-                  const fileName = id.toString().padStart(6, '0')
+                  const fileName = id.toString().padStart(6, "0");
                   return (
                     <StyledCard key={i} style={{ margin: 2 }}>
                       <CardActionArea href={`/detail/${id}`}>
@@ -219,7 +219,7 @@ const Mint = () => {
                         </NFTInfoWrapper>
                       </CardActionArea>
                     </StyledCard>
-                  )
+                  );
                 })}
               </Fade>
             </Grid>
@@ -227,7 +227,13 @@ const Mint = () => {
         </Grid>
       </Box>
     </MainWrapper>
-  )
+  );
+};
+
+export async function getStaticProps() {
+  return {
+    props: { title: "Mint", description: "Mint Page - " },
+  };
 }
 
-export default Mint
+export default Mint;

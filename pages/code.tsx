@@ -1,15 +1,15 @@
-import React from 'react'
-import { Box, Typography, Grid, Link } from '@mui/material'
+import React from "react";
+import { Box, Typography, Grid, Link } from "@mui/material";
 
-import { MainWrapper, StyledLink } from '../components/styled'
+import { MainWrapper, StyledLink } from "../components/styled";
 
 // Workaround
 const { Controlled: CodeMirror } =
-  (typeof window !== 'undefined' && require('react-codemirror2')) || {}
+  (typeof window !== "undefined" && require("react-codemirror2")) || {};
 
 // Workaround
-if (typeof window !== 'undefined') {
-  import('codemirror/mode/python/python.js')
+if (typeof window !== "undefined") {
+  import("codemirror/mode/python/python.js");
 }
 
 const CodeViewer = () => (
@@ -270,8 +270,8 @@ if __name__ == "__main__":
     create_media("out", seed, "black")
     create_media("out", seed, "white")`}
             options={{
-              mode: 'python',
-              theme: 'material',
+              mode: "python",
+              theme: "material",
               lineNumbers: true,
               readOnly: true,
             }}
@@ -280,6 +280,12 @@ if __name__ == "__main__":
       </Grid>
     </Grid>
   </MainWrapper>
-)
+);
 
-export default CodeViewer
+export async function getStaticProps() {
+  return {
+    props: { title: "Code", description: "Code Page - " },
+  };
+}
+
+export default CodeViewer;

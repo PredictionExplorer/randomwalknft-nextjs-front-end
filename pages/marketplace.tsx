@@ -111,4 +111,10 @@ const Marketplace = () => {
   );
 };
 
+export async function getStaticProps() {
+  return {
+    props: { title: "Marketplace", description: "Marketplace Page - " },
+  };
+}
+
 export default Marketplace;

@@ -1,54 +1,54 @@
-import React, { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
-import moment from 'moment'
-import { Button, Box, Typography, Grid, Paper } from '@mui/material'
-import Countdown from 'react-countdown'
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import moment from "moment";
+import { Button, Box, Typography, Grid, Paper } from "@mui/material";
+import Countdown from "react-countdown";
 
-import { CenterBox, MainWrapper, StyledLink } from '../components/styled'
-import Counter from '../components/Counter'
-import useNFTContract from '../hooks/useNFTContract'
+import { CenterBox, MainWrapper, StyledLink } from "../components/styled";
+import Counter from "../components/Counter";
+import useNFTContract from "../hooks/useNFTContract";
 
 const Redeem = () => {
-  const [withdrawalSeconds, setWithdrawalSeconds] = useState(null)
-  const [lastMinter, setLastMinter] = useState(null)
-  const [withdrawalAmount, setWithdrawalAmount] = useState(null)
+  const [withdrawalSeconds, setWithdrawalSeconds] = useState(null);
+  const [lastMinter, setLastMinter] = useState(null);
+  const [withdrawalAmount, setWithdrawalAmount] = useState(null);
 
-  const contract = useNFTContract()
+  const contract = useNFTContract();
 
   const handleWithdraw = async () => {
     try {
-      const receipt = await contract.withdraw().then((tx) => tx.wait())
+      const receipt = await contract.withdraw().then((tx) => tx.wait());
 
-      console.log(receipt)
+      console.log(receipt);
     } catch (err) {
       if (err.data.code === -32000) {
-        alert('The withdrawal is not open yet.')
+        alert("The withdrawal is not open yet.");
       } else {
         alert(
-          'You are not the last minter, you need to mint to become the last minter',
-        )
+          "You are not the last minter, you need to mint to become the last minter"
+        );
       }
     }
-  }
+  };
 
   useEffect(() => {
     const getData = async () => {
-      const seconds = (await contract.timeUntilWithdrawal()).toNumber()
-      setWithdrawalSeconds(seconds)
+      const seconds = (await contract.timeUntilWithdrawal()).toNumber();
+      setWithdrawalSeconds(seconds);
 
-      const lastMinter = await contract.lastMinter()
-      setLastMinter(lastMinter)
+      const lastMinter = await contract.lastMinter();
+      setLastMinter(lastMinter);
 
-      const amount = await contract.withdrawalAmount()
+      const amount = await contract.withdrawalAmount();
       setWithdrawalAmount(
-        parseFloat(ethers.utils.formatEther(amount)).toFixed(1),
-      )
-    }
+        parseFloat(ethers.utils.formatEther(amount)).toFixed(1)
+      );
+    };
 
-    getData()
-  }, [contract])
+    getData();
+  }, [contract]);
 
-  if (withdrawalSeconds === null) return null
+  if (withdrawalSeconds === null) return null;
 
   return (
     <MainWrapper>
@@ -91,7 +91,9 @@ const Redeem = () => {
                 Withdrawal Date
               </Typography>
               <Typography variant="body2">
-                {moment().add(withdrawalSeconds, 'seconds').format('llll')}
+                {moment()
+                  .add(withdrawalSeconds, "seconds")
+                  .format("llll")}
               </Typography>
             </Box>
             <Box mt={2}>
@@ -122,7 +124,13 @@ const Redeem = () => {
         Withdraw Now
       </Button>
     </MainWrapper>
-  )
+  );
+};
+
+export async function getStaticProps() {
+  return {
+    props: { title: "Redeem", description: "Redeem Page - " },
+  };
 }
 
-export default Redeem
+export default Redeem;

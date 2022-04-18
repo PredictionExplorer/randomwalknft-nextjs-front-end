@@ -143,4 +143,10 @@ const Gallery = () => {
   );
 };
 
+export async function getStaticProps() {
+  return {
+    props: { title: "Gallery", description: "Gallery Page - " },
+  };
+}
+
 export default Gallery;

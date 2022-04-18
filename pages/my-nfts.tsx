@@ -1,36 +1,36 @@
-import React, { useState, useEffect } from 'react'
-import { Typography, Box } from '@mui/material'
+import React, { useState, useEffect } from "react";
+import { Typography, Box } from "@mui/material";
 
-import PaginationGrid from '../components/PaginationGrid'
-import { MainWrapper } from '../components/styled'
+import PaginationGrid from "../components/PaginationGrid";
+import { MainWrapper } from "../components/styled";
 
-import { useActiveWeb3React } from '../hooks/web3'
-import useNFTContract from '../hooks/useNFTContract'
+import { useActiveWeb3React } from "../hooks/web3";
+import useNFTContract from "../hooks/useNFTContract";
 
 const MyNFTs = () => {
-  const [loading, setLoading] = useState(true)
-  const [nftIds, setNftIds] = useState([])
-  const { account } = useActiveWeb3React()
-  const contract = useNFTContract()
+  const [loading, setLoading] = useState(true);
+  const [nftIds, setNftIds] = useState([]);
+  const { account } = useActiveWeb3React();
+  const contract = useNFTContract();
 
   useEffect(() => {
     const getTokens = async () => {
       try {
-        setLoading(true)
-        const tokens = await contract.walletOfOwner(account)
-        const nftIds = tokens.map((t) => t.toNumber()).reverse()
-        setNftIds(nftIds)
-        setLoading(false)
+        setLoading(true);
+        const tokens = await contract.walletOfOwner(account);
+        const nftIds = tokens.map((t) => t.toNumber()).reverse();
+        setNftIds(nftIds);
+        setLoading(false);
       } catch (err) {
-        console.log(err)
-        setLoading(false)
+        console.log(err);
+        setLoading(false);
       }
-    }
+    };
 
     if (account) {
-      getTokens()
+      getTokens();
     }
-  }, [contract, account])
+  }, [contract, account]);
 
   return (
     <MainWrapper>
@@ -60,7 +60,13 @@ const MyNFTs = () => {
       </Box>
       <PaginationGrid loading={loading} data={nftIds} />
     </MainWrapper>
-  )
+  );
+};
+
+export async function getStaticProps() {
+  return {
+    props: { title: "My NFTs", description: "My NFTs Page - " },
+  };
 }
 
-export default MyNFTs
+export default MyNFTs;

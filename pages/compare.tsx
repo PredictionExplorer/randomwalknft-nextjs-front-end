@@ -62,4 +62,10 @@ const Compare = () => {
   );
 };
 
+export async function getStaticProps() {
+  return {
+    props: { title: "Beauty Contest", description: "Beauty Contest Page - " },
+  };
+}
+
 export default Compare;
