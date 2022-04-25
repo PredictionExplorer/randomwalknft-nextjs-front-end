@@ -9,6 +9,7 @@ import {
   ToggleButtonGroup,
   Alert,
 } from "@mui/material";
+import Head from "next/head";
 
 import NFTTrait from "../../components/NFTTrait";
 import NFTBuyOffers from "../../components/NFTBuyOffers";
@@ -65,59 +66,64 @@ const Detail = ({ nft }) => {
   if (!nft) return <></>;
 
   return (
-    <MainWrapper
-      maxWidth={false}
-      style={{
-        paddingLeft: 0,
-        paddingRight: 0,
-      }}
-    >
-      {router.query && router.query.message && (
-        <Box px={8} mb={2}>
-          <Alert variant="outlined" severity="success">
-            {router.query.message === "success"
-              ? "Media files are being generated. Please refrersh the page in a few minutes."
-              : ""}
-          </Alert>
-        </Box>
-      )}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        style={{ position: "relative", height: 60 }}
+    <>
+      <Head>
+        <title>NFT #{nft.id} | Random Walk NFT</title>
+      </Head>
+      <MainWrapper
+        maxWidth={false}
+        style={{
+          paddingLeft: 0,
+          paddingRight: 0,
+        }}
       >
-        <Divider style={{ background: "#121212", width: "100%" }} />
-        <ToggleButtonGroup
-          value={darkTheme}
-          exclusive
-          onChange={() => setDarkTheme(!darkTheme)}
-          style={{ position: "absolute" }}
+        {router.query && router.query.message && (
+          <Box px={8} mb={2}>
+            <Alert variant="outlined" severity="success">
+              {router.query.message === "success"
+                ? "Media files are being generated. Please refrersh the page in a few minutes."
+                : ""}
+            </Alert>
+          </Box>
+        )}
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          style={{ position: "relative", height: 60 }}
         >
-          <ToggleButton value={true}>Dark theme</ToggleButton>
-          <ToggleButton value={false}>White theme</ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-      <NFTTrait
-        nft={nft}
-        darkTheme={darkTheme}
-        seller={seller}
-        buy_offers={buyOffers}
-        sell_offers={sellOffers}
-        user_sell_offers={userSellOffers}
-      />
-      {buyOffers.length > 0 && (
-        <NFTBuyOffers
-          offers={buyOffers}
+          <Divider style={{ background: "#121212", width: "100%" }} />
+          <ToggleButtonGroup
+            value={darkTheme}
+            exclusive
+            onChange={() => setDarkTheme(!darkTheme)}
+            style={{ position: "absolute" }}
+          >
+            <ToggleButton value={true}>Dark theme</ToggleButton>
+            <ToggleButton value={false}>White theme</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+        <NFTTrait
           nft={nft}
-          account={account}
-          userSellOffers={userSellOffers}
+          darkTheme={darkTheme}
+          seller={seller}
+          buy_offers={buyOffers}
+          sell_offers={sellOffers}
+          user_sell_offers={userSellOffers}
         />
-      )}
-      {nft.tokenHistory.length > 0 && (
-        <NFTHistory tokenHistory={nft.tokenHistory} />
-      )}
-    </MainWrapper>
+        {buyOffers.length > 0 && (
+          <NFTBuyOffers
+            offers={buyOffers}
+            nft={nft}
+            account={account}
+            userSellOffers={userSellOffers}
+          />
+        )}
+        {nft.tokenHistory.length > 0 && (
+          <NFTHistory tokenHistory={nft.tokenHistory} />
+        )}
+      </MainWrapper>
+    </>
   );
 };
 
