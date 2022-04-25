@@ -3,7 +3,6 @@ import { Typography, CardActionArea } from "@mui/material";
 
 import { NFTImage, NFTInfoWrapper, NFTPrice, StyledCard } from "./styled";
 import { formatId } from "../utils";
-import { useNFT } from "../hooks/useNFT";
 
 const NFTOffer = ({ offer }) => {
   const fileName = offer.TokenId.toString().padStart(6, "0");
