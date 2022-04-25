@@ -433,7 +433,11 @@ const NFTTrait = ({
             )}
             {imageOpen && (
               <Lightbox
-                image={theme === "black" ? black_image_url : white_image_url}
+                image={
+                  theme === "black"
+                    ? black_image_thumb_url
+                    : white_image_thumb_url
+                }
                 onClose={() => setImageOpen(false)}
               />
             )}
