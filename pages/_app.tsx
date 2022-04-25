@@ -71,7 +71,7 @@ function MyApp(props: MyAppProps) {
                 pageProps.nft.id,
               )}`}
             />
-            <meta property="og:image" content={pageProps.nft.black_image_url} />
+            <meta property="og:image" content={pageProps.nft.black_image_thumb_url} />
             <meta
               property="og:description"
               content={`Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters. These are the details for ${formatId(
@@ -88,7 +88,7 @@ function MyApp(props: MyAppProps) {
             />
             <meta
               name="twitter:image"
-              content={pageProps.nft.black_image_url}
+              content={pageProps.nft.black_image_thumb_url}
             />
             <meta
               name="twitter:description"

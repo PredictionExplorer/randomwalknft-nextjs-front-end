@@ -445,7 +445,9 @@ const NFTTrait = ({
           <Grid item xs={12} sm={8} md={6}>
             <NFTVideo
               image_thumb={
-                theme === "black" ? black_image_url : white_image_url
+                theme === "black"
+                  ? black_image_thumb_url
+                  : black_image_thumb_url
               }
               onClick={() =>
                 handlePlay(
@@ -467,7 +469,9 @@ const NFTTrait = ({
             <Grid item xs={12} sm={8} md={6}>
               <NFTVideo
                 image_thumb={
-                  theme === "black" ? black_image_url : white_image_url
+                  theme === "black"
+                    ? black_image_thumb_url
+                    : black_image_thumb_url
                 }
                 onClick={() =>
                   handlePlay(
