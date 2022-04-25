@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Grid } from "@mui/material";
+import Head from "next/head";
 import { MainWrapper } from "../components/styled";
 import NFTTrait2 from "../components/NFTTrait2";
 import api from "../services/api";
@@ -27,45 +28,51 @@ const Compare = () => {
   }, []);
 
   return (
-    <MainWrapper>
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexWrap="wrap"
-      >
-        <Typography variant="h4" component="span">
-          WHICH
-        </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="primary"
-          sx={{ ml: 1.5 }}
+    <>
+      <Head>
+        <title>Beauty Contest | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <MainWrapper>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexWrap="wrap"
         >
-          NFT
-        </Typography>
-        <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
-          IS MORE BEAUTIFUL?
-        </Typography>
-      </Box>
-      <Box mt={2}>{totalCount && `${totalCount} votes`}</Box>
-      <Grid container mt={2} textAlign="center" justifyContent="center">
-        <Grid item xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
-          <NFTTrait2 id={firstId} clickHandler={() => onSelectNFT(firstId)} />
+          <Typography variant="h4" component="span">
+            WHICH
+          </Typography>
+          <Typography
+            variant="h4"
+            component="span"
+            color="primary"
+            sx={{ ml: 1.5 }}
+          >
+            NFT
+          </Typography>
+          <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
+            IS MORE BEAUTIFUL?
+          </Typography>
+        </Box>
+        <Box mt={2}>{totalCount && `${totalCount} votes`}</Box>
+        <Grid container mt={2} textAlign="center" justifyContent="center">
+          <Grid item xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
+            <NFTTrait2 id={firstId} clickHandler={() => onSelectNFT(firstId)} />
+          </Grid>
+          <Grid item xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
+            <NFTTrait2
+              id={secondId}
+              clickHandler={() => onSelectNFT(secondId)}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
-          <NFTTrait2 id={secondId} clickHandler={() => onSelectNFT(secondId)} />
-        </Grid>
-      </Grid>
-    </MainWrapper>
+      </MainWrapper>
+    </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "Beauty Contest", description: "Beauty Contest Page - " },
-  };
-}
 
 export default Compare;

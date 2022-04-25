@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Box } from "@mui/material";
+import Head from "next/head";
 
 import PaginationGrid from "../components/PaginationGrid";
 import { MainWrapper } from "../components/styled";
@@ -33,40 +34,43 @@ const MyNFTs = () => {
   }, [contract, account]);
 
   return (
-    <MainWrapper>
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexWrap="wrap"
-      >
-        <Typography variant="h4" component="span" color="secondary">
-          MY
-        </Typography>
-        <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
-          RANDOM
-        </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="primary"
-          sx={{ ml: 1.5 }}
+    <>
+      <Head>
+        <title>My NFTs | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <MainWrapper>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexWrap="wrap"
         >
-          WALK
-        </Typography>
-        <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
-          NFTS
-        </Typography>
-      </Box>
-      <PaginationGrid loading={loading} data={nftIds} />
-    </MainWrapper>
+          <Typography variant="h4" component="span" color="secondary">
+            MY
+          </Typography>
+          <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
+            RANDOM
+          </Typography>
+          <Typography
+            variant="h4"
+            component="span"
+            color="primary"
+            sx={{ ml: 1.5 }}
+          >
+            WALK
+          </Typography>
+          <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
+            NFTS
+          </Typography>
+        </Box>
+        <PaginationGrid loading={loading} data={nftIds} />
+      </MainWrapper>
+    </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "My NFTs", description: "My NFTs Page - " },
-  };
-}
 
 export default MyNFTs;

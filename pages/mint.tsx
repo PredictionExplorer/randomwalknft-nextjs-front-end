@@ -5,6 +5,7 @@ import { Typography, Box, Grid, CardActionArea, Hidden } from "@mui/material";
 import Countdown from "react-countdown";
 import { Fade } from "react-slideshow-image";
 import "react-slideshow-image/dist/styles.css";
+import Head from "next/head";
 
 import { NFT_ADDRESS, MARKET_ADDRESS } from "../config/app";
 import {
@@ -95,145 +96,150 @@ const Mint = () => {
   }, [nftContract, marketContract]);
 
   return (
-    <MainWrapper>
-      {saleSeconds > 0 && !countdownCompleted ? (
-        <CenterBox>
-          <Typography variant="h4" component="span">
-            SALE
-          </Typography>
-          <Typography
-            variant="h4"
-            component="span"
-            color="primary"
-            sx={{ ml: 1.5 }}
-          >
-            OPENS IN
-          </Typography>
-        </CenterBox>
-      ) : (
-        <CenterBox>
-          <Typography variant="h4" component="span">
-            GET A
-          </Typography>
-          <Typography
-            variant="h4"
-            component="span"
-            color="primary"
-            sx={{ ml: 1.5 }}
-          >
-            RANDOM WALK
-          </Typography>
-          <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
-            NFT FOR
-          </Typography>
-          <Typography
-            variant="h4"
-            component="span"
-            color="primary"
-            sx={{ ml: 1.5 }}
-          >
-            {mintPrice}Ξ
-          </Typography>
-        </CenterBox>
-      )}
-      <Box mt={3}>
-        <Grid container spacing={4}>
-          {saleSeconds > 0 && !countdownCompleted && (
-            <Grid item xs={12} sm={12} md={6} lg={6}>
-              <Box mb={2}>
-                <Countdown
-                  date={Date.now() + saleSeconds * 1000}
-                  renderer={Counter}
-                  onComplete={() => setCountdownCompleted(true)}
-                />
+    <>
+      <Head>
+        <title>Mint | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <MainWrapper>
+        {saleSeconds > 0 && !countdownCompleted ? (
+          <CenterBox>
+            <Typography variant="h4" component="span">
+              SALE
+            </Typography>
+            <Typography
+              variant="h4"
+              component="span"
+              color="primary"
+              sx={{ ml: 1.5 }}
+            >
+              OPENS IN
+            </Typography>
+          </CenterBox>
+        ) : (
+          <CenterBox>
+            <Typography variant="h4" component="span">
+              GET A
+            </Typography>
+            <Typography
+              variant="h4"
+              component="span"
+              color="primary"
+              sx={{ ml: 1.5 }}
+            >
+              RANDOM WALK
+            </Typography>
+            <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
+              NFT FOR
+            </Typography>
+            <Typography
+              variant="h4"
+              component="span"
+              color="primary"
+              sx={{ ml: 1.5 }}
+            >
+              {mintPrice}Ξ
+            </Typography>
+          </CenterBox>
+        )}
+        <Box mt={3}>
+          <Grid container spacing={4}>
+            {saleSeconds > 0 && !countdownCompleted && (
+              <Grid item xs={12} sm={12} md={6} lg={6}>
+                <Box mb={2}>
+                  <Countdown
+                    date={Date.now() + saleSeconds * 1000}
+                    renderer={Counter}
+                    onComplete={() => setCountdownCompleted(true)}
+                  />
+                </Box>
+              </Grid>
+            )}
+            <Grid item xs={12} sm={12} md={6} lg={saleSeconds <= 0 ? 7 : 6}>
+              <Box mb={3}>
+                <Typography variant="body1" color="secondary" gutterBottom>
+                  Withdrawal to mint ratio
+                </Typography>
+                <Typography variant="body2" gutterBottom>
+                  <span>
+                    {(
+                      parseFloat(withdrawalAmount) / parseFloat(mintPrice)
+                    ).toFixed(2)}
+                  </span>
+                </Typography>
               </Box>
+              <Box mb={3}>
+                <Typography variant="body1" color="secondary" gutterBottom>
+                  Verified NFT Contract
+                </Typography>
+                <Typography variant="body2" gutterBottom>
+                  <StyledLink
+                    target="_blank"
+                    href={`https://arbiscan.io/address/${NFT_ADDRESS}#code`}
+                  >
+                    {NFT_ADDRESS}
+                  </StyledLink>
+                </Typography>
+              </Box>
+              <Box mb={3}>
+                <Typography variant="body1" color="secondary" gutterBottom>
+                  Verified Market Contract
+                </Typography>
+                <Typography variant="body2" gutterBottom>
+                  <StyledLink
+                    target="_blank"
+                    href={`https://arbiscan.io/address/${MARKET_ADDRESS}#code`}
+                  >
+                    {MARKET_ADDRESS}
+                  </StyledLink>
+                </Typography>
+              </Box>
+              <CenterBox>
+                <Hidden smDown>
+                  <div
+                    style={{
+                      background: `url('images/pink_line.png') left top`,
+                      width: 64,
+                      height: 8,
+                    }}
+                  ></div>
+                </Hidden>
+                <MintActiveButton onClick={handleMint}>
+                  Mint now
+                </MintActiveButton>
+              </CenterBox>
             </Grid>
-          )}
-          <Grid item xs={12} sm={12} md={6} lg={saleSeconds <= 0 ? 7 : 6}>
-            <Box mb={3}>
-              <Typography variant="body1" color="secondary" gutterBottom>
-                Withdrawal to mint ratio
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                <span>
-                  {(
-                    parseFloat(withdrawalAmount) / parseFloat(mintPrice)
-                  ).toFixed(2)}
-                </span>
-              </Typography>
-            </Box>
-            <Box mb={3}>
-              <Typography variant="body1" color="secondary" gutterBottom>
-                Verified NFT Contract
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                <StyledLink
-                  target="_blank"
-                  href={`https://arbiscan.io/address/${NFT_ADDRESS}#code`}
-                >
-                  {NFT_ADDRESS}
-                </StyledLink>
-              </Typography>
-            </Box>
-            <Box mb={3}>
-              <Typography variant="body1" color="secondary" gutterBottom>
-                Verified Market Contract
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                <StyledLink
-                  target="_blank"
-                  href={`https://arbiscan.io/address/${MARKET_ADDRESS}#code`}
-                >
-                  {MARKET_ADDRESS}
-                </StyledLink>
-              </Typography>
-            </Box>
-            <CenterBox>
-              <Hidden smDown>
-                <div
-                  style={{
-                    background: `url('images/pink_line.png') left top`,
-                    width: 64,
-                    height: 8,
-                  }}
-                ></div>
-              </Hidden>
-              <MintActiveButton onClick={handleMint}>Mint now</MintActiveButton>
-            </CenterBox>
+            {(saleSeconds <= 0 || countdownCompleted) && tokenIds.length > 0 && (
+              <Grid item xs={12} sm={12} md={6} lg={5}>
+                <Fade autoplay arrows={false}>
+                  {tokenIds.map((id, i) => {
+                    const fileName = id.toString().padStart(6, "0");
+                    return (
+                      <StyledCard key={i} style={{ margin: 2 }}>
+                        <CardActionArea href={`/detail/${id}`}>
+                          <NFTImage
+                            image={`https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_thumb.jpg`}
+                          />
+                          <NFTInfoWrapper>
+                            <Typography variant="body1">
+                              {formatId(id)}
+                            </Typography>
+                          </NFTInfoWrapper>
+                        </CardActionArea>
+                      </StyledCard>
+                    );
+                  })}
+                </Fade>
+              </Grid>
+            )}
           </Grid>
-          {(saleSeconds <= 0 || countdownCompleted) && tokenIds.length > 0 && (
-            <Grid item xs={12} sm={12} md={6} lg={5}>
-              <Fade autoplay arrows={false}>
-                {tokenIds.map((id, i) => {
-                  const fileName = id.toString().padStart(6, "0");
-                  return (
-                    <StyledCard key={i} style={{ margin: 2 }}>
-                      <CardActionArea href={`/detail/${id}`}>
-                        <NFTImage
-                          image={`https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_thumb.jpg`}
-                        />
-                        <NFTInfoWrapper>
-                          <Typography variant="body1">
-                            {formatId(id)}
-                          </Typography>
-                        </NFTInfoWrapper>
-                      </CardActionArea>
-                    </StyledCard>
-                  );
-                })}
-              </Fade>
-            </Grid>
-          )}
-        </Grid>
-      </Box>
-    </MainWrapper>
+        </Box>
+      </MainWrapper>
+    </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "Mint", description: "Mint Page - " },
-  };
-}
 
 export default Mint;

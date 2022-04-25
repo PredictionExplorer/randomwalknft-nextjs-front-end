@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Box, Typography, FormControl, Select, MenuItem } from "@mui/material";
+import Head from "next/head";
 
 import PaginationGrid from "../components/PaginationGrid";
 import { MainWrapper } from "../components/styled";
@@ -71,82 +72,85 @@ const Gallery = () => {
   }, [contract, router]);
 
   return (
-    <MainWrapper>
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexWrap="wrap"
-      >
-        <Typography variant="h4" component="span">
-          RANDOM
-        </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="primary"
-          sx={{ ml: 1.5 }}
+    <>
+      <Head>
+        <title>Gallery | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <MainWrapper>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexWrap="wrap"
         >
-          WALK
-        </Typography>
-        <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
-          NFT
-        </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="secondary"
-          sx={{ ml: 1.5 }}
-        >
-          GALLERY
-        </Typography>
-      </Box>
-      {address && (
-        <Typography
-          variant="body2"
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          Owned by {address}
-        </Typography>
-      )}
-
-      <Box sx={{ mt: 1.5, display: "flex", alignItems: "center" }}>
-        <Typography
-          align="left"
-          variant="body1"
-          color="secondary"
-          display="inline"
-        >
-          Sort By
-        </Typography>
-        <FormControl sx={{ m: 1, minWidth: 80, display: "inline" }}>
-          <Select
-            value={sortBy}
-            onChange={handleChange}
-            displayEmpty
-            autoWidth
-            inputProps={{ "aria-label": "Without label" }}
+          <Typography variant="h4" component="span">
+            RANDOM
+          </Typography>
+          <Typography
+            variant="h4"
+            component="span"
+            color="primary"
+            sx={{ ml: 1.5 }}
           >
-            <MenuItem value="tokenId">Token Id</MenuItem>
-            <MenuItem value="beauty">Beauty</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+            WALK
+          </Typography>
+          <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
+            NFT
+          </Typography>
+          <Typography
+            variant="h4"
+            component="span"
+            color="secondary"
+            sx={{ ml: 1.5 }}
+          >
+            GALLERY
+          </Typography>
+        </Box>
+        {address && (
+          <Typography
+            variant="body2"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            Owned by {address}
+          </Typography>
+        )}
 
-      <PaginationGrid loading={loading} data={collection} />
-    </MainWrapper>
+        <Box sx={{ mt: 1.5, display: "flex", alignItems: "center" }}>
+          <Typography
+            align="left"
+            variant="body1"
+            color="secondary"
+            display="inline"
+          >
+            Sort By
+          </Typography>
+          <FormControl sx={{ m: 1, minWidth: 80, display: "inline" }}>
+            <Select
+              value={sortBy}
+              onChange={handleChange}
+              displayEmpty
+              autoWidth
+              inputProps={{ "aria-label": "Without label" }}
+            >
+              <MenuItem value="tokenId">Token Id</MenuItem>
+              <MenuItem value="beauty">Beauty</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <PaginationGrid loading={loading} data={collection} />
+      </MainWrapper>
+    </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "Gallery", description: "Gallery Page - " },
-  };
-}
 
 export default Gallery;

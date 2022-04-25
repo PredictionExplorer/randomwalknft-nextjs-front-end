@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Typography } from "@mui/material";
+import Head from "next/head";
 
 import { StyledLink } from "../components/styled";
 import api from "../services/api";
@@ -22,42 +23,45 @@ const Random = (props) => {
   }, []);
 
   return (
-    <div
-      style={{
-        backgroundImage: `url(${blackImage})`,
-        backgroundSize: "contain",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center center",
-        position: "absolute",
-        top: 125,
-        bottom: 64,
-        left: 0,
-        right: 0,
-      }}
-    >
-      {tokenId && (
-        <Typography
-          variant="h6"
-          sx={{
-            position: "absolute",
-            bottom: 80,
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        >
-          <StyledLink href={`/detail/${tokenId}`}>
-            {formatId(tokenId)}
-          </StyledLink>
-        </Typography>
-      )}
-    </div>
+    <>
+      <Head>
+        <title>Random Image | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <div
+        style={{
+          backgroundImage: `url(${blackImage})`,
+          backgroundSize: "contain",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+          position: "absolute",
+          top: 125,
+          bottom: 64,
+          left: 0,
+          right: 0,
+        }}
+      >
+        {tokenId && (
+          <Typography
+            variant="h6"
+            sx={{
+              position: "absolute",
+              bottom: 80,
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
+            <StyledLink href={`/detail/${tokenId}`}>
+              {formatId(tokenId)}
+            </StyledLink>
+          </Typography>
+        )}
+      </div>
+    </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "Random Images", description: "Random Images Page - " },
-  };
-}
 
 export default Random;

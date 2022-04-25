@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, MenuItem, FormControl } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Head from "next/head";
 
 import PaginationOfferGrid from "../components/PaginationOfferGrid";
 import NFTSalesHistory from "../components/NFTSalesHistory";
@@ -59,62 +60,65 @@ const Marketplace = () => {
   }, [nftContract, marketContract, filterMode]);
 
   return (
-    <MainWrapper>
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexWrap="wrap"
-      >
-        <Typography variant="h4" component="span">
-          RANDOM
-        </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="primary"
-          sx={{ ml: 1.5 }}
+    <>
+      <Head>
+        <title>Marketplace | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <MainWrapper>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexWrap="wrap"
         >
-          WALK
-        </Typography>
-        <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
-          NFTS
-        </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="secondary"
-          sx={{ ml: 1.5 }}
-        >
-          MARKETPLACE
-        </Typography>
-      </Box>
-
-      <Box sx={{ mt: 1.5 }}>
-        <FormControl sx={{ m: 1, minWidth: 80 }}>
-          <Select
-            value={filterMode}
-            onChange={handleChange}
-            displayEmpty
-            autoWidth
-            inputProps={{ "aria-label": "Without label" }}
+          <Typography variant="h4" component="span">
+            RANDOM
+          </Typography>
+          <Typography
+            variant="h4"
+            component="span"
+            color="primary"
+            sx={{ ml: 1.5 }}
           >
-            <MenuItem value={0}>All</MenuItem>
-            <MenuItem value={1}>With Offers</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+            WALK
+          </Typography>
+          <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
+            NFTS
+          </Typography>
+          <Typography
+            variant="h4"
+            component="span"
+            color="secondary"
+            sx={{ ml: 1.5 }}
+          >
+            MARKETPLACE
+          </Typography>
+        </Box>
 
-      <PaginationOfferGrid loading={loading} data={collection} />
-      {salesHistory.length > 0 && <NFTSalesHistory data={salesHistory} />}
-    </MainWrapper>
+        <Box sx={{ mt: 1.5 }}>
+          <FormControl sx={{ m: 1, minWidth: 80 }}>
+            <Select
+              value={filterMode}
+              onChange={handleChange}
+              displayEmpty
+              autoWidth
+              inputProps={{ "aria-label": "Without label" }}
+            >
+              <MenuItem value={0}>All</MenuItem>
+              <MenuItem value={1}>With Offers</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <PaginationOfferGrid loading={loading} data={collection} />
+        {salesHistory.length > 0 && <NFTSalesHistory data={salesHistory} />}
+      </MainWrapper>
+    </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "Marketplace", description: "Marketplace Page - " },
-  };
-}
 
 export default Marketplace;

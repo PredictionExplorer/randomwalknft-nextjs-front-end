@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import moment from "moment";
 import { Button, Box, Typography, Grid, Paper } from "@mui/material";
 import Countdown from "react-countdown";
+import Head from "next/head";
 
 import { CenterBox, MainWrapper, StyledLink } from "../components/styled";
 import Counter from "../components/Counter";
@@ -51,86 +52,89 @@ const Redeem = () => {
   if (withdrawalSeconds === null) return null;
 
   return (
-    <MainWrapper>
-      {withdrawalSeconds > 0 && (
-        <CenterBox>
-          <Typography variant="h4" component="span">
-            WITHDRAWAL
-          </Typography>
-          &nbsp;
-          <Typography variant="h4" component="span" color="primary">
-            OPENS IN
-          </Typography>
-        </CenterBox>
-      )}
-      <Box mt={3}>
-        <Grid container spacing={4}>
-          {withdrawalSeconds > 0 && (
+    <>
+      <Head>
+        <title>Redeem | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <MainWrapper>
+        {withdrawalSeconds > 0 && (
+          <CenterBox>
+            <Typography variant="h4" component="span">
+              WITHDRAWAL
+            </Typography>
+            &nbsp;
+            <Typography variant="h4" component="span" color="primary">
+              OPENS IN
+            </Typography>
+          </CenterBox>
+        )}
+        <Box mt={3}>
+          <Grid container spacing={4}>
+            {withdrawalSeconds > 0 && (
+              <Grid item xs={12} sm={12} md={6}>
+                <Box mb={2}>
+                  <Countdown
+                    date={Date.now() + withdrawalSeconds * 1000}
+                    renderer={Counter}
+                  />
+                </Box>
+              </Grid>
+            )}
             <Grid item xs={12} sm={12} md={6}>
-              <Box mb={2}>
-                <Countdown
-                  date={Date.now() + withdrawalSeconds * 1000}
-                  renderer={Counter}
-                />
+              <Box>
+                <Typography variant="body1" color="primary">
+                  Last Minter Address
+                </Typography>
+                <Typography variant="body2">
+                  <StyledLink href={`/gallery?address=${lastMinter}`}>
+                    {lastMinter}
+                  </StyledLink>
+                </Typography>
+              </Box>
+              <Box mt={2}>
+                <Typography variant="body1" color="primary">
+                  Withdrawal Date
+                </Typography>
+                <Typography variant="body2">
+                  {moment()
+                    .add(withdrawalSeconds, "seconds")
+                    .format("llll")}
+                </Typography>
+              </Box>
+              <Box mt={2}>
+                <Typography variant="body1" color="primary">
+                  Withdrawal Amount
+                </Typography>
+                <Typography variant="body2">{withdrawalAmount}Ξ</Typography>
               </Box>
             </Grid>
-          )}
-          <Grid item xs={12} sm={12} md={6}>
-            <Box>
-              <Typography variant="body1" color="primary">
-                Last Minter Address
-              </Typography>
-              <Typography variant="body2">
-                <StyledLink href={`/gallery?address=${lastMinter}`}>
-                  {lastMinter}
-                </StyledLink>
-              </Typography>
-            </Box>
-            <Box mt={2}>
-              <Typography variant="body1" color="primary">
-                Withdrawal Date
-              </Typography>
-              <Typography variant="body2">
-                {moment()
-                  .add(withdrawalSeconds, "seconds")
-                  .format("llll")}
-              </Typography>
-            </Box>
-            <Box mt={2}>
-              <Typography variant="body1" color="primary">
-                Withdrawal Amount
-              </Typography>
-              <Typography variant="body2">{withdrawalAmount}Ξ</Typography>
-            </Box>
           </Grid>
-        </Grid>
-      </Box>
-      <Paper>
-        <Box my={4} p={3}>
-          <Typography variant="body2" style={{ lineHeight: 2 }}>
-            If nobody mints for 30 days after the last mint, the last minter can
-            withdraw 50% of all the ETH that was spent on minting up to that
-            point. In this way, ETH spent on minting goes to the minters, not
-            the creators of Random Walk NFT.
-          </Typography>
         </Box>
-      </Paper>
-      <Button
-        onClick={handleWithdraw}
-        color="primary"
-        variant="contained"
-        size="large"
-      >
-        Withdraw Now
-      </Button>
-    </MainWrapper>
+        <Paper>
+          <Box my={4} p={3}>
+            <Typography variant="body2" style={{ lineHeight: 2 }}>
+              If nobody mints for 30 days after the last mint, the last minter
+              can withdraw 50% of all the ETH that was spent on minting up to
+              that point. In this way, ETH spent on minting goes to the minters,
+              not the creators of Random Walk NFT.
+            </Typography>
+          </Box>
+        </Paper>
+        <Button
+          onClick={handleWithdraw}
+          color="primary"
+          variant="contained"
+          size="large"
+        >
+          Withdraw Now
+        </Button>
+      </MainWrapper>
+    </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "Redeem", description: "Redeem Page - " },
-  };
-}
 
 export default Redeem;

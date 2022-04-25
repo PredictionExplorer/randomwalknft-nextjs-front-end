@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Typography, Link } from "@mui/material";
+import Head from "next/head";
 
 import ApiService from "../services/api";
 import { formatId } from "../utils";
@@ -30,6 +31,13 @@ const RandomVideo = (props) => {
 
   return (
     <>
+      <Head>
+        <title>Random Video | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
       {blackVideo && (
         <div
           style={{
@@ -77,11 +85,5 @@ const RandomVideo = (props) => {
     </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "Random Videos", description: "Random Videos Page - " },
-  };
-}
 
 export default RandomVideo;

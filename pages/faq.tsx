@@ -12,6 +12,7 @@ import {
 
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import Head from "next/head";
 
 import { MainWrapper, FaqAccordion, QuestionIcon } from "../components/styled";
 
@@ -86,87 +87,90 @@ const FAQ = () => {
   };
 
   return (
-    <MainWrapper>
-      <Typography variant="h4" color="secondary" gutterBottom>
-        FAQ
-      </Typography>
-      <Typography variant="body1" gutterBottom>
-        Get answers to the most common questions
-      </Typography>
-      <Box mt={4}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} md={8}>
-            {items.map(({ summary, detail }, i) => (
-              <FaqAccordion
-                key={i}
-                expanded={expanded === i}
-                onChange={handleChange(i)}
-              >
-                <AccordionSummary
-                  expandIcon={
-                    expanded === i ? (
-                      <RemoveIcon color="primary" fontSize="small" />
-                    ) : (
-                      <AddIcon color="primary" fontSize="small" />
-                    )
-                  }
+    <>
+      <Head>
+        <title>FAQ | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <MainWrapper>
+        <Typography variant="h4" color="secondary" gutterBottom>
+          FAQ
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          Get answers to the most common questions
+        </Typography>
+        <Box mt={4}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={12} md={8}>
+              {items.map(({ summary, detail }, i) => (
+                <FaqAccordion
+                  key={i}
+                  expanded={expanded === i}
+                  onChange={handleChange(i)}
                 >
-                  <Box display="flex" alignItems="center">
-                    <QuestionIcon src="images/question.svg" />
-                    <Typography variant="body2">{summary}</Typography>
-                  </Box>
-                </AccordionSummary>
-                <AccordionDetails>
+                  <AccordionSummary
+                    expandIcon={
+                      expanded === i ? (
+                        <RemoveIcon color="primary" fontSize="small" />
+                      ) : (
+                        <AddIcon color="primary" fontSize="small" />
+                      )
+                    }
+                  >
+                    <Box display="flex" alignItems="center">
+                      <QuestionIcon src="images/question.svg" />
+                      <Typography variant="body2">{summary}</Typography>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography
+                      variant="body2"
+                      align="left"
+                      dangerouslySetInnerHTML={{ __html: detail }}
+                    />
+                  </AccordionDetails>
+                </FaqAccordion>
+              ))}
+            </Grid>
+            <Grid item xs={12} sm={12} md={4}>
+              <Paper>
+                <Box p={4}>
+                  <Typography variant="h5" gutterBottom>
+                    Have a question?
+                  </Typography>
                   <Typography
                     variant="body2"
-                    align="left"
-                    dangerouslySetInnerHTML={{ __html: detail }}
-                  />
-                </AccordionDetails>
-              </FaqAccordion>
-            ))}
-          </Grid>
-          <Grid item xs={12} sm={12} md={4}>
-            <Paper>
-              <Box p={4}>
-                <Typography variant="h5" gutterBottom>
-                  Have a question?
-                </Typography>
-                <Typography
-                  variant="body2"
-                  gutterBottom
-                  style={{ lineHeight: 2 }}
-                >
-                  For any other questions, reach out to us on&nbsp;
-                  <Link
-                    color="primary"
-                    style={{ textDecoration: "underline" }}
-                    href="https://twitter.com/RandomWalkNFT"
+                    gutterBottom
+                    style={{ lineHeight: 2 }}
                   >
-                    Twitter
-                  </Link>
-                  &nbsp;or&nbsp;
-                  <Link
-                    color="primary"
-                    style={{ textDecoration: "underline" }}
-                    href="https://discord.gg/bGnPn96Qwt"
-                  >
-                    Discord
-                  </Link>
-                </Typography>
-              </Box>
-            </Paper>
+                    For any other questions, reach out to us on&nbsp;
+                    <Link
+                      color="primary"
+                      style={{ textDecoration: "underline" }}
+                      href="https://twitter.com/RandomWalkNFT"
+                    >
+                      Twitter
+                    </Link>
+                    &nbsp;or&nbsp;
+                    <Link
+                      color="primary"
+                      style={{ textDecoration: "underline" }}
+                      href="https://discord.gg/bGnPn96Qwt"
+                    >
+                      Discord
+                    </Link>
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
           </Grid>
-        </Grid>
-      </Box>
-    </MainWrapper>
+        </Box>
+      </MainWrapper>
+    </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "FAQ", description: "FAQ Page - " },
-  };
-}
 
 export default FAQ;

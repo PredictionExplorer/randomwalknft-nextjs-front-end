@@ -1,6 +1,5 @@
 import React from "react";
-import Image from "next/image";
-import { Box, Typography, Button, Link, Hidden } from "@mui/material";
+import { Box, Typography, Link, Hidden } from "@mui/material";
 import { MainWrapper, CenterBox, MintButton } from "../components/styled";
 
 function Home() {
@@ -79,12 +78,6 @@ function Home() {
       </div>
     </>
   );
-}
-
-export async function getStaticProps() {
-  return {
-    props: { title: "", description: "HomePage - " },
-  };
 }
 
 export default Home;

@@ -11,6 +11,7 @@ import {
   Button,
   Link,
 } from "@mui/material";
+import Head from "next/head";
 
 import {
   useAccountBuyOfferIds,
@@ -100,19 +101,22 @@ const MyOffers = () => {
   const offers = buyOffers.concat(sellOffers).sort((x, y) => x - y);
 
   return account ? (
-    <MainWrapper>
-      <Typography color="primary" variant="h4" gutterBottom align="center">
-        MY OFFERS
-      </Typography>
-      <OfferTable offers={offers} />
-    </MainWrapper>
+    <>
+      <Head>
+        <title>My Offers | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+      <MainWrapper>
+        <Typography color="primary" variant="h4" gutterBottom align="center">
+          MY OFFERS
+        </Typography>
+        <OfferTable offers={offers} />
+      </MainWrapper>
+    </>
   ) : null;
 };
-
-export async function getStaticProps() {
-  return {
-    props: { title: "My Offers", description: "My Offers Page - " },
-  };
-}
 
 export default MyOffers;

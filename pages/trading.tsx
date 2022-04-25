@@ -1,47 +1,58 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
+import Head from "next/head";
 import TradingHistory from "../components/TradingHistory";
 import { MainWrapper } from "../components/styled";
 import api from "../services/api";
 
 const Trading = ({ tradingHistory, totalCount, page }) => {
   return (
-    <MainWrapper>
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexWrap="wrap"
-      >
-        <Typography variant="h4" component="span">
-          RANDOM
-        </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="primary"
-          sx={{ ml: 1.5 }}
+    <>
+      <Head>
+        <title>Trading | Random Walk NFT</title>
+        <meta
+          name="description"
+          content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
+        />
+      </Head>
+
+      <MainWrapper>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          flexWrap="wrap"
         >
-          WALK
-        </Typography>
-        <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
-          NFT
-        </Typography>
-        <Typography
-          variant="h4"
-          component="span"
-          color="secondary"
-          sx={{ ml: 1.5 }}
-        >
-          TRADING HISTORY
-        </Typography>
-      </Box>
-      <TradingHistory
-        curPage={page}
-        tradingHistory={tradingHistory}
-        totalCount={totalCount}
-      />
-    </MainWrapper>
+          <Typography variant="h4" component="span">
+            RANDOM
+          </Typography>
+          <Typography
+            variant="h4"
+            component="span"
+            color="primary"
+            sx={{ ml: 1.5 }}
+          >
+            WALK
+          </Typography>
+          <Typography variant="h4" component="span" sx={{ ml: 1.5 }}>
+            NFT
+          </Typography>
+          <Typography
+            variant="h4"
+            component="span"
+            color="secondary"
+            sx={{ ml: 1.5 }}
+          >
+            TRADING HISTORY
+          </Typography>
+        </Box>
+        <TradingHistory
+          curPage={page}
+          tradingHistory={tradingHistory}
+          totalCount={totalCount}
+        />
+      </MainWrapper>
+    </>
   );
 };
 
@@ -54,12 +65,6 @@ export async function getServerSideProps(context) {
       totalCount: res.totalCount,
       page,
     },
-  };
-}
-
-export async function getStaticProps() {
-  return {
-    props: { title: "Trading", description: "Trading Page - " },
   };
 }
 
