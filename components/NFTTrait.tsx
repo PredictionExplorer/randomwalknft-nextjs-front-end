@@ -443,7 +443,7 @@ const NFTTrait = ({
             )}
           </Grid>
           <Grid item xs={12} sm={8} md={6}>
-            <NFTVideo
+            {/* <NFTVideo
               image_thumb={
                 theme === "black"
                   ? black_image_thumb_url
@@ -456,7 +456,7 @@ const NFTTrait = ({
                     : white_single_video_url
                 )
               }
-            />
+            /> */}
             <Box mt={2}>
               <Typography variant="body1" align="center">
                 Single Video
@@ -467,7 +467,7 @@ const NFTTrait = ({
         <Box mt={3}>
           <Grid container spacing={4} justifyContent="center">
             <Grid item xs={12} sm={8} md={6}>
-              <NFTVideo
+              {/* <NFTVideo
                 image_thumb={
                   theme === "black"
                     ? black_image_thumb_url
@@ -480,7 +480,7 @@ const NFTTrait = ({
                       : white_triple_video_url
                   )
                 }
-              />
+              /> */}
               <Box mt={2}>
                 <Typography variant="body1" align="center">
                   Triple Video
