@@ -50,6 +50,8 @@ const NFTTrait = ({
     seed,
     white_image_url,
     black_image_url,
+    black_image_thumb_url,
+    white_image_thumb_url,
     white_single_video_url,
     black_single_video_url,
     white_triple_video_url,
@@ -294,7 +296,11 @@ const NFTTrait = ({
             <StyledCard>
               <CardActionArea onClick={() => setImageOpen(true)}>
                 <NFTImage
-                  image={theme === "black" ? black_image_url : white_image_url}
+                  image={
+                    theme === "black"
+                      ? black_image_thumb_url
+                      : white_image_thumb_url
+                  }
                 />
                 <NFTInfoWrapper>
                   <Typography
