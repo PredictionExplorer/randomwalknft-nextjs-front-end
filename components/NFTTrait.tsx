@@ -295,13 +295,13 @@ const NFTTrait = ({
           <Grid item xs={12} sm={8} md={6}>
             <StyledCard>
               <CardActionArea onClick={() => setImageOpen(true)}>
-                <NFTImage
+                {/* <NFTImage
                   image={
                     theme === "black"
                       ? black_image_thumb_url
                       : white_image_thumb_url
                   }
-                />
+                /> */}
                 <NFTInfoWrapper>
                   <Typography
                     variant="body1"
