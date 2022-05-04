@@ -4,39 +4,37 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Head from "next/head";
 
 import PaginationOfferGrid from "../components/PaginationOfferGrid";
-import NFTSalesHistory from "../components/NFTSalesHistory";
 import { MainWrapper } from "../components/styled";
 import useNFTContract from "../hooks/useNFTContract";
 import useMarketContract from "../hooks/useMarketContract";
-import { useTransactions } from "../hooks/useTransactions";
 import api from "../services/api";
 
 const Marketplace = () => {
   const [loading, setLoading] = useState(true);
   const [collection, setCollection] = useState([]);
-  const [salesHistory, setSalesHistory] = useState([]);
+  // const [salesHistory, setSalesHistory] = useState([]);
 
   const [filterMode, setFilterMode] = useState("0");
 
   const nftContract = useNFTContract();
   const marketContract = useMarketContract();
-  const transactions = useTransactions();
+  // const transactions = useTransactions();
 
   const handleChange = async (e: SelectChangeEvent) => {
     setFilterMode(e.target.value);
   };
 
-  useEffect(() => {
-    const getSalesHistory = async () => {
-      try {
-        setSalesHistory(transactions || []);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+  // useEffect(() => {
+  //   const getSalesHistory = async () => {
+  //     try {
+  //       setSalesHistory(transactions || []);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   };
 
-    getSalesHistory();
-  }, [transactions]);
+  //   getSalesHistory();
+  // }, [transactions]);
 
   useEffect(() => {
     const getTokens = async () => {
@@ -115,7 +113,7 @@ const Marketplace = () => {
         </Box>
 
         <PaginationOfferGrid loading={loading} data={collection} />
-        {salesHistory.length > 0 && <NFTSalesHistory data={salesHistory} />}
+        {/* {salesHistory.length > 0 && <NFTSalesHistory data={salesHistory} />} */}
       </MainWrapper>
     </>
   );
