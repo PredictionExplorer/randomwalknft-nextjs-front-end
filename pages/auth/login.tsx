@@ -6,17 +6,17 @@ import api from "../../services/api";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const setCookie = (cname: string, cvalue: string, exdays: number) => {
+  const setCookie = (cname: string, cvalue: string, exhours: number) => {
     const d = new Date();
-    d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+    d.setTime(d.getTime() + exhours * 60 * 60 * 1000);
     let expires = "expires=" + d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
   };
   const handleLogin = async () => {
     const data = await api.login(email, password);
     if (data.result === "success") {
-      setCookie("randomwalknft_token", data.token, 3600000);
-      setCookie("randomwalknft_email", email, 3600000);
+      setCookie("randomwalknft_token", data.token, 1);
+      setCookie("randomwalknft_email", email, 1);
       window.location.href = "/admin";
     }
   };

@@ -128,6 +128,19 @@ class ApiService {
     const { data } = await axios.get(baseUrl + `get_blog/${blog_id}`);
     return data;
   }
+
+  public async delete_blog(blog_id: number) {
+    const { data } = await axios.post(baseUrl + "delete_blog", { blog_id });
+    return data;
+  }
+
+  public async toggle_blog(blog_id: number, status: boolean) {
+    const { data } = await axios.post(baseUrl + "toggle_blog", {
+      blog_id,
+      status,
+    });
+    return data;
+  }
 }
 
 export default new ApiService();
