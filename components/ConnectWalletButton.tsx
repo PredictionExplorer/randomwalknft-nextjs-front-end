@@ -81,9 +81,9 @@ const ConnectWalletButton = ({ isMobileView }) => {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem style={{ minWidth: 166 }} onClick={handleMenuClose}>
+          {/* <MenuItem style={{ minWidth: 166 }} onClick={handleMenuClose}>
             <NavLink href="/admin">ADMIN</NavLink>
-          </MenuItem>
+          </MenuItem> */}
           <MenuItem style={{ minWidth: 166 }} onClick={handleMenuClose}>
             <NavLink href="/my-nfts">MY NFTS</NavLink>
           </MenuItem>
