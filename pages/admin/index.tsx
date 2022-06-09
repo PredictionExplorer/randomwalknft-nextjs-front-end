@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Pagination, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Pagination,
+  CircularProgress,
+  Button,
+} from "@mui/material";
 import { MainWrapper } from "../../components/styled";
 import api from "../../services/api";
 import { GetServerSidePropsContext } from "next";
@@ -14,18 +20,47 @@ const BlogList = () => {
   useEffect(() => {
     const getAllBlogs = async () => {
       const data = await api.get_all_blogs();
-      console.log(data);
       setBlogs(data);
       setLoading(false);
     };
     getAllBlogs();
   }, []);
+  const onDelete = async (id: number) => {
+    let arr = blogs;
+    const res = await api.delete_blog(id);
+    if (res.result === "success") {
+      const indexOfObject = arr.findIndex((object) => {
+        return object.id === id;
+      });
+      if (indexOfObject !== -1) {
+        arr.splice(indexOfObject, 1);
+        setBlogs([...arr]);
+      }
+    }
+  };
   return (
     <MainWrapper>
       <Box display="flex" flexDirection="column">
-        <Typography variant="h4" component="span" marginBottom="20px">
-          BLOGS
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h4" component="span" marginBottom="20px">
+            BLOGS
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => {
+              window.location.href = "/admin/create";
+            }}
+          >
+            Create
+          </Button>
+        </Box>
+
         {loading && (
           <Box display="flex" justifyContent="center">
             <CircularProgress color="secondary" />
@@ -37,7 +72,7 @@ const BlogList = () => {
               {blogs
                 .slice(perPage * (curPage - 1), perPage * curPage)
                 .map((blog, i) => (
-                  <BlogListItem key={i} blog={blog} />
+                  <BlogListItem key={i} blog={blog} onDelete={onDelete} />
                 ))}
             </Box>
             <Box display="flex" justifyContent="center" py={3}>

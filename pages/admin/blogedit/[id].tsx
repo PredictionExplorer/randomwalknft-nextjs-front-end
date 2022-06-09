@@ -7,46 +7,44 @@ import {
   TextareaAutosize,
   styled,
 } from "@mui/material";
-import { MainWrapper } from "../../components/styled";
-import api from "../../services/api";
 import { GetServerSidePropsContext } from "next";
+import { MainWrapper } from "../../../components/styled";
+import api from "../../../services/api";
 
 const Input = styled("input")({
   display: "none",
 });
 
-const CreateBlog = () => {
-  const [title, setTitle] = useState("");
-  const [epic, setEpic] = useState("");
-  const [content, setContent] = useState("");
-  const [thumbnailImage, setThumbnailImage] = useState(null);
-  const [bannerImage, setBannerImage] = useState(null);
+const BlogEdit = ({ blog }) => {
+  const [title, setTitle] = useState(blog.title);
+  const [epic, setEpic] = useState(blog.epic);
+  const [content, setContent] = useState(blog.content);
+  const [thumbnailImage, setThumbnailImage] = useState(blog.thumb_image);
+  const [bannerImage, setBannerImage] = useState(blog.banner_image);
   const [notification, setNotification] = useState("");
-  const handleAdd = async () => {
+
+  const handleEdit = async () => {
     const formData = new FormData();
+    formData.append("blog_id", blog.id);
     formData.append("title", title);
     formData.append("epic", epic);
     formData.append("content", content);
-    formData.append("thumbnailImage", thumbnailImage);
-    formData.append("bannerImage", bannerImage);
-    const data = await api.create_blog(formData);
+    if (typeof thumbnailImage !== "string") {
+      formData.append("thumbnailImage", thumbnailImage);
+    }
+    if (typeof bannerImage !== "string") {
+      formData.append("bannerImage", bannerImage);
+    }
+    const data = await api.edit_blog(formData);
     if (data.result === "success") {
-      setNotification("Blog is created successfully!");
-      setTimeout(() => {
-        setNotification("");
-        setTitle("");
-        setEpic("");
-        setContent("");
-        setThumbnailImage(null);
-        setBannerImage(null);
-      }, 3000);
+      setNotification("Blog is updated successfully!");
     }
   };
   return (
     <MainWrapper>
       <Box display="flex" flexDirection="column">
         <Typography variant="h4" component="span" marginBottom="20px">
-          ADD BLOG
+          EDIT BLOG
         </Typography>
         {notification && (
           <Typography
@@ -104,7 +102,11 @@ const CreateBlog = () => {
                 alt="not fount"
                 width={"32px"}
                 height={"32px"}
-                src={URL.createObjectURL(thumbnailImage)}
+                src={
+                  typeof thumbnailImage === "string"
+                    ? thumbnailImage
+                    : URL.createObjectURL(thumbnailImage)
+                }
                 style={{ verticalAlign: "middle" }}
               />
             )}
@@ -130,7 +132,11 @@ const CreateBlog = () => {
                 alt="not fount"
                 width={"32px"}
                 height={"32px"}
-                src={URL.createObjectURL(bannerImage)}
+                src={
+                  typeof bannerImage === "string"
+                    ? bannerImage
+                    : URL.createObjectURL(bannerImage)
+                }
                 style={{ verticalAlign: "middle" }}
               />
             )}
@@ -154,8 +160,8 @@ const CreateBlog = () => {
           >
             Go To List
           </Button>
-          <Button variant="contained" color="primary" onClick={handleAdd}>
-            Add
+          <Button variant="contained" color="primary" onClick={handleEdit}>
+            Update
           </Button>
         </Box>
       </Box>
@@ -175,9 +181,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     };
   }
+  const id = context.params!.id;
+  const blogId = Array.isArray(id) ? id[0] : id;
+  const blog = await api.get_blog(blogId);
   return {
-    props: {},
+    props: { blog },
   };
 }
 
-export default CreateBlog;
+export default BlogEdit;

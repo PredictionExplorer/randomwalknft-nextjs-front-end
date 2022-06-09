@@ -141,6 +141,15 @@ class ApiService {
     });
     return data;
   }
+
+  public async edit_blog(formData: any) {
+    const { data } = await axios.post(baseUrl + "edit_blog", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return data;
+  }
 }
 
 export default new ApiService();

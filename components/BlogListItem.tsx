@@ -1,13 +1,31 @@
 import React, { useState } from "react";
-import { Typography, Button, Box, Divider } from "@mui/material";
+import {
+  Typography,
+  Button,
+  Box,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import api from "../services/api";
 
-const BlogListItem = ({ blog }) => {
+const BlogListItem = ({ blog, onDelete }) => {
   const [status, setStatus] = useState(blog.status);
+  const [open, setOpen] = React.useState(false);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   const getDateFromTimestamp = (timestamp: number) => {
     const month_names = [
       "January",
@@ -29,15 +47,14 @@ const BlogListItem = ({ blog }) => {
     const year = date.getFullYear();
     return `${month} ${day}, ${year}`;
   };
-  const onDelete = async () => {
-    const res = await api.delete_blog(blog.id);
-    console.log(res);
-  };
   const onShowOrHide = async () => {
-    setStatus(!status);
-    console.log(status);
-    const res = await api.toggle_blog(blog.id, status);
-    console.log(res);
+    const res = await api.toggle_blog(blog.id, !status);
+    if (res.result === "success") {
+      setStatus(!status);
+    }
+  };
+  const onEdit = async () => {
+    window.location.href = `/admin/blogedit/${blog.id}`;
   };
   return (
     <Box>
@@ -97,15 +114,6 @@ const BlogListItem = ({ blog }) => {
             justifyContent: "center",
           }}
         >
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<VisibilityIcon />}
-            color="success"
-            size="small"
-          >
-            Show
-          </Button>
           {status ? (
             <Button
               fullWidth
@@ -121,28 +129,67 @@ const BlogListItem = ({ blog }) => {
             <Button
               fullWidth
               variant="outlined"
-              startIcon={<EditIcon />}
-              color="primary"
+              startIcon={<VisibilityIcon />}
+              color="success"
               size="small"
               onClick={onShowOrHide}
             >
-              Edit
+              Show
             </Button>
           )}
-
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<EditIcon />}
+            color="primary"
+            size="small"
+            onClick={onEdit}
+          >
+            Edit
+          </Button>
           <Button
             fullWidth
             variant="outlined"
             startIcon={<DeleteIcon />}
             color="error"
             size="small"
-            onClick={onDelete}
+            onClick={handleClickOpen}
           >
             Delete
           </Button>
         </Box>
       </Box>
       <Divider />
+
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Warning</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Do you want to delete this blog?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="primary" onClick={handleClose}>
+            Disagree
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={async () => {
+              await onDelete(blog.id);
+              handleClose();
+            }}
+            autoFocus
+          >
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
