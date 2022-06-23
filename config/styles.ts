@@ -1,31 +1,40 @@
-import { createTheme } from '@mui/material/styles'
+import { createTheme } from "@mui/material/styles";
 
 // Create a theme instance.
 const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: "dark",
     primary: {
-      main: '#C676D7',
+      main: "#C676D7",
     },
     secondary: {
-      main: '#F4BFFF',
+      main: "#F4BFFF",
     },
     info: {
-      main: '#FFFFFF',
+      main: "#FFFFFF",
     },
     text: {
-      primary: '#FFFFFF',
-      secondary: '#C676D7',
+      primary: "#FFFFFF",
+      secondary: "#C676D7",
     },
     background: {
-      default: '#000000',
-      paper: '#121212',
+      default: "#000000",
+      paper: "#121212",
     },
   },
   typography: {
-    fontFamily: 'Kelson Sans',
+    fontFamily: "Kelson Sans",
     fontSize: 16,
   },
-})
+  components: {
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          fontFamily: "Kelson Sans",
+        },
+      },
+    },
+  },
+});
 
-export default theme
+export default theme;

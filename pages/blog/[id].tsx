@@ -4,6 +4,11 @@ import { Twitter, Facebook, Instagram, Share } from "@mui/icons-material";
 import { MainWrapper } from "../../components/styled";
 import api from "../../services/api";
 import { GetServerSidePropsContext } from "next";
+import dynamic from "next/dynamic";
+
+const RTViewer = dynamic(() => import("../../components/RTViewer"), {
+  ssr: false,
+});
 
 const BlogDetail = ({ blog }) => {
   const getDateFromTimestamp = (timestamp: number) => {
@@ -44,7 +49,11 @@ const BlogDetail = ({ blog }) => {
       >
         Published on {getDateFromTimestamp(blog.created_at)}
       </Typography>
-      <CardMedia sx={{ mt: "30px" }} component="img" src={blog.banner_image} />
+      <CardMedia
+        sx={{ mt: "30px", maxHeight: "400px", objectFit: "contain" }}
+        component="img"
+        src={blog.banner_image}
+      />
       <Box display="flex" marginTop="40px">
         <Box
           display="flex"
@@ -78,7 +87,7 @@ const BlogDetail = ({ blog }) => {
           </IconButton>
         </Box>
         <Box>
-          <Typography variant="body1">{blog.content}</Typography>
+          <RTViewer content={blog.content} />
         </Box>
       </Box>
     </MainWrapper>
@@ -86,8 +95,9 @@ const BlogDetail = ({ blog }) => {
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const id = context.params!.id;
-  const blogId = Array.isArray(id) ? id[0] : id;
+  let id = context.params!.id;
+  id = Array.isArray(id) ? id[0] : id;
+  let blogId = id.split("-").pop();
   const blog = await api.get_blog(blogId);
   return {
     props: { blog },

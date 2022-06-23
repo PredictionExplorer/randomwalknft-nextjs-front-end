@@ -10,6 +10,11 @@ import {
 import { MainWrapper } from "../../components/styled";
 import api from "../../services/api";
 import { GetServerSidePropsContext } from "next";
+import dynamic from "next/dynamic";
+
+const RTEditor = dynamic(() => import("../../components/RTEditor"), {
+  ssr: false,
+});
 
 const Input = styled("input")({
   display: "none",
@@ -22,7 +27,9 @@ const CreateBlog = () => {
   const [thumbnailImage, setThumbnailImage] = useState(null);
   const [bannerImage, setBannerImage] = useState(null);
   const [notification, setNotification] = useState("");
+  const [isAdding, setAdding] = useState(false);
   const handleAdd = async () => {
+    setAdding(true);
     const formData = new FormData();
     formData.append("title", title);
     formData.append("epic", epic);
@@ -30,7 +37,7 @@ const CreateBlog = () => {
     formData.append("thumbnailImage", thumbnailImage);
     formData.append("bannerImage", bannerImage);
     const data = await api.create_blog(formData);
-    if (data.result === "success") {
+    if (data && data.result === "success") {
       setNotification("Blog is created successfully!");
       setTimeout(() => {
         setNotification("");
@@ -40,7 +47,10 @@ const CreateBlog = () => {
         setThumbnailImage(null);
         setBannerImage(null);
       }, 3000);
+    } else {
+      setNotification("An error was occuried while adding blog!");
     }
+    setAdding(false);
   };
   return (
     <MainWrapper>
@@ -136,17 +146,14 @@ const CreateBlog = () => {
             )}
           </label>
         </Box>
-        <TextareaAutosize
-          minRows={10}
-          placeholder="Content"
-          style={{ margin: "10px 0" }}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
+
+        <RTEditor content={content} setContent={setContent} />
+
         <Box sx={{ display: "flex", justifyContent: "end" }}>
           <Button
             variant="contained"
             color="primary"
+            disabled={isAdding}
             onClick={() => {
               window.location.href = "/admin";
             }}
@@ -154,7 +161,12 @@ const CreateBlog = () => {
           >
             Go To List
           </Button>
-          <Button variant="contained" color="primary" onClick={handleAdd}>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={isAdding}
+            onClick={handleAdd}
+          >
             Add
           </Button>
         </Box>

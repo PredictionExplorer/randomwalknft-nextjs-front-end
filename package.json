@@ -12,6 +12,12 @@
     "postinstall": "yarn compile-contract-types"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-basic-styles": "^34.1.0",
+    "@ckeditor/ckeditor5-build-classic": "^34.1.0",
+    "@ckeditor/ckeditor5-clipboard": "^34.1.0",
+    "@ckeditor/ckeditor5-essentials": "^34.1.0",
+    "@ckeditor/ckeditor5-paragraph": "^34.1.0",
+    "@ckeditor/ckeditor5-react": "^5.0.2",
     "@emotion/cache": "^11.6.0",
     "@emotion/react": "^11.7.0",
     "@emotion/server": "^11.4.0",

@@ -8,8 +8,13 @@ import {
   styled,
 } from "@mui/material";
 import { GetServerSidePropsContext } from "next";
+import dynamic from "next/dynamic";
 import { MainWrapper } from "../../../components/styled";
 import api from "../../../services/api";
+
+const RTEditor = dynamic(() => import("../../../components/RTEditor"), {
+  ssr: false,
+});
 
 const Input = styled("input")({
   display: "none",
@@ -22,8 +27,10 @@ const BlogEdit = ({ blog }) => {
   const [thumbnailImage, setThumbnailImage] = useState(blog.thumb_image);
   const [bannerImage, setBannerImage] = useState(blog.banner_image);
   const [notification, setNotification] = useState("");
+  const [isUpdating, setUpdating] = useState(false);
 
   const handleEdit = async () => {
+    setUpdating(true);
     const formData = new FormData();
     formData.append("blog_id", blog.id);
     formData.append("title", title);
@@ -36,9 +43,13 @@ const BlogEdit = ({ blog }) => {
       formData.append("bannerImage", bannerImage);
     }
     const data = await api.edit_blog(formData);
-    if (data.result === "success") {
+    if (data && data.result === "success") {
       setNotification("Blog is updated successfully!");
+    } else {
+      setNotification("An error was occured while updating the blog!");
     }
+
+    setUpdating(false);
   };
   return (
     <MainWrapper>
@@ -142,17 +153,14 @@ const BlogEdit = ({ blog }) => {
             )}
           </label>
         </Box>
-        <TextareaAutosize
-          minRows={10}
-          placeholder="Content"
-          style={{ margin: "10px 0" }}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
+
+        <RTEditor content={content} setContent={setContent} />
+
         <Box sx={{ display: "flex", justifyContent: "end" }}>
           <Button
             variant="contained"
             color="primary"
+            disabled={isUpdating}
             onClick={() => {
               window.location.href = "/admin";
             }}
@@ -160,7 +168,12 @@ const BlogEdit = ({ blog }) => {
           >
             Go To List
           </Button>
-          <Button variant="contained" color="primary" onClick={handleEdit}>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={isUpdating}
+            onClick={handleEdit}
+          >
             Update
           </Button>
         </Box>

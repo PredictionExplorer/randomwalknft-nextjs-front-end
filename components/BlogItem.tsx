@@ -30,6 +30,14 @@ const BlogItem = ({ blog }) => {
     const year = date.getFullYear();
     return `${month} ${day}, ${year}`;
   };
+
+  const getUrl = (blog) => {
+    const slug = blog.title
+      .toLowerCase()
+      .replace(/[^\w ]+/g, "")
+      .replace(/ +/g, "-");
+    return "/blog/" + slug + "-" + blog.id;
+  };
   return (
     <Card>
       <CardMedia
@@ -57,7 +65,7 @@ const BlogItem = ({ blog }) => {
         <Typography variant="body2">{blog.epic || "No description"}</Typography>
       </CardContent>
       <CardActions>
-        <Button size="small" color="primary" href={`/blogdetail/${blog.id}`}>
+        <Button size="small" color="primary" href={getUrl(blog)}>
           Read more...
         </Button>
       </CardActions>
