@@ -34,9 +34,9 @@ const BlogItem = ({ blog }) => {
   const getUrl = (blog) => {
     const slug = blog.title
       .toLowerCase()
-      .replace(/[^\w ]+/g, "")
+      .replace(/[^\w ]+/g, " ")
       .replace(/ +/g, "-");
-    return "/blog/" + slug + "-" + blog.id;
+    return "/blog/" + slug;
   };
   return (
     <Card>

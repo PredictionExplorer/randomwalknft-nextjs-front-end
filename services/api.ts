@@ -129,6 +129,13 @@ class ApiService {
     return data;
   }
 
+  public async get_blog_by_title(blog_title: string) {
+    const { data } = await axios.get(
+      baseUrl + `get_blog_by_title/${blog_title}`
+    );
+    return data;
+  }
+
   public async delete_blog(blog_id: number) {
     const { data } = await axios.post(baseUrl + "delete_blog", { blog_id });
     return data;

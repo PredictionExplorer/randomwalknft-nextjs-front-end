@@ -1,6 +1,5 @@
 import React from "react";
-import { Box, Typography, CardMedia, IconButton } from "@mui/material";
-import { Twitter, Facebook, Instagram, Share } from "@mui/icons-material";
+import { Box, Typography, CardMedia } from "@mui/material";
 import { MainWrapper } from "../../components/styled";
 import api from "../../services/api";
 import { GetServerSidePropsContext } from "next";
@@ -54,41 +53,8 @@ const BlogDetail = ({ blog }) => {
         component="img"
         src={blog.banner_image}
       />
-      <Box display="flex" marginTop="40px">
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          marginRight="50px"
-        >
-          <Typography variant="h6" color="#A8A8A8" marginBottom="12px">
-            Share
-          </Typography>
-          <IconButton
-            color="primary"
-            sx={{ background: "#200C31", mb: "30px" }}
-          >
-            <Twitter />
-          </IconButton>
-          <IconButton
-            color="primary"
-            sx={{ background: "#200C31", mb: "30px" }}
-          >
-            <Facebook />
-          </IconButton>
-          <IconButton
-            color="primary"
-            sx={{ background: "#200C31", mb: "30px" }}
-          >
-            <Instagram />
-          </IconButton>
-          <IconButton color="primary" sx={{ background: "#200C31" }}>
-            <Share />
-          </IconButton>
-        </Box>
-        <Box>
-          <RTViewer content={blog.content} />
-        </Box>
+      <Box marginTop="40px">
+        <RTViewer content={blog.content} />
       </Box>
     </MainWrapper>
   );
@@ -97,8 +63,7 @@ const BlogDetail = ({ blog }) => {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   let id = context.params!.id;
   id = Array.isArray(id) ? id[0] : id;
-  let blogId = id.split("-").pop();
-  const blog = await api.get_blog(blogId);
+  const blog = await api.get_blog_by_title(id);
   return {
     props: { blog },
   };

@@ -29,6 +29,15 @@ const CreateBlog = () => {
   const [notification, setNotification] = useState("");
   const [isAdding, setAdding] = useState(false);
   const handleAdd = async () => {
+    const slug = title
+      .toLowerCase()
+      .replace(/[^\w ]+/g, " ")
+      .replace(/ +/g, "-");
+    const res = await api.get_blog_by_title(slug);
+    if (res && res.id) {
+      setNotification("This title already exists on the database!");
+      return;
+    }
     setAdding(true);
     const formData = new FormData();
     formData.append("title", title);

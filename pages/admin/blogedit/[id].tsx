@@ -30,6 +30,15 @@ const BlogEdit = ({ blog }) => {
   const [isUpdating, setUpdating] = useState(false);
 
   const handleEdit = async () => {
+    const slug = title
+      .toLowerCase()
+      .replace(/[^\w ]+/g, " ")
+      .replace(/ +/g, "-");
+    const res = await api.get_blog_by_title(slug);
+    if (res && res.id) {
+      setNotification("This title already exists on the database!");
+      return;
+    }
     setUpdating(true);
     const formData = new FormData();
     formData.append("blog_id", blog.id);
