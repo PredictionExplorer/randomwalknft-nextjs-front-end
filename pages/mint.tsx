@@ -88,7 +88,7 @@ const Mint = () => {
       let seconds = (await nftContract.timeUntilSale()).toNumber();
       setSaleSeconds(seconds);
 
-      const tokenIds = await api.random();
+      const tokenIds = await api.random_token();
       setTokenIds(tokenIds);
     };
 

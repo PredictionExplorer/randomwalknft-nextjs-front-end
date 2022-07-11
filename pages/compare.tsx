@@ -61,13 +61,13 @@ const Compare = () => {
         <Box mt={2}>{totalCount && `${totalCount} votes`}</Box>
         <Grid container mt={2} textAlign="center" justifyContent="center">
           <Grid item xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
-            <NFTTrait2 id={firstId} clickHandler={() => onSelectNFT(firstId)} />
+            {!!firstId && (<NFTTrait2 id={firstId} clickHandler={() => onSelectNFT(firstId)} />)}
           </Grid>
           <Grid item xs={12} sm={8} md={6} pt={4} pl={2} pr={2}>
-            <NFTTrait2
+            {!!secondId && (<NFTTrait2
               id={secondId}
               clickHandler={() => onSelectNFT(secondId)}
-            />
+            />)}
           </Grid>
         </Grid>
       </MainWrapper>

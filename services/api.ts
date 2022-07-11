@@ -59,6 +59,11 @@ class ApiService {
     return data;
   }
 
+  public async random_token() {
+    const { data } = await axios.get(baseUrl + "random_token");
+    return data;
+  }
+
   public async ratingOrder() {
     const { data } = await axios.get(baseUrl + "rating_order");
     return data;

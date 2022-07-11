@@ -12,7 +12,7 @@ const Random = (props) => {
 
   useEffect(() => {
     const getToken = async () => {
-      const tokenIds = await api.random();
+      const tokenIds = await api.random_token();
       const fileName = tokenIds[0].toString().padStart(6, "0");
       setTokenId(tokenIds[0]);
       setBlackImage(
@@ -31,35 +31,36 @@ const Random = (props) => {
           content="Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters."
         />
       </Head>
-      <div
-        style={{
-          backgroundImage: `url(${blackImage})`,
-          backgroundSize: "contain",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center center",
-          position: "absolute",
-          top: 125,
-          bottom: 64,
-          left: 0,
-          right: 0,
-        }}
-      >
-        {tokenId && (
-          <Typography
-            variant="h6"
-            sx={{
-              position: "absolute",
-              bottom: 80,
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          >
-            <StyledLink href={`/detail/${tokenId}`}>
-              {formatId(tokenId)}
-            </StyledLink>
-          </Typography>
-        )}
-      </div>
+      {blackImage && (
+        <div
+          style={{
+            backgroundImage: `url(${blackImage})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            position: "absolute",
+            top: 125,
+            bottom: 64,
+            left: 0,
+            right: 0,
+          }}
+        >
+          {tokenId && (
+            <Typography
+              variant="h6"
+              sx={{
+                position: "absolute",
+                bottom: 80,
+                left: "50%",
+                transform: "translateX(-50%)",
+              }}
+            >
+              <StyledLink href={`/detail/${tokenId}`}>
+                {formatId(tokenId)}
+              </StyledLink>
+            </Typography>
+          )}
+        </div>)}
     </>
   );
 };
