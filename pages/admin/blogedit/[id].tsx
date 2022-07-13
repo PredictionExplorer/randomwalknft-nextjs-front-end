@@ -35,7 +35,7 @@ const BlogEdit = ({ blog }) => {
       .replace(/[^\w ]+/g, " ")
       .replace(/ +/g, "-");
     const res = await api.get_blog_by_title(slug);
-    if (res && res.id) {
+    if (res && res.id !== blog.id) {
       setNotification("This title already exists on the database!");
       return;
     }
