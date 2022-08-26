@@ -1,6 +1,6 @@
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import {
   Box,
@@ -28,6 +28,14 @@ const Detail = ({ nft }) => {
   const [buyOffers, setBuyOffers] = useState([]);
   const [sellOffers, setSellOffers] = useState([]);
   const [userSellOffers, setUserSellOffers] = useState([]);
+  const blackVideo = nft.black_single_video_url;
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (blackVideo) {
+      ref.current.load();
+    }
+  }, [blackVideo]);
 
   useEffect(() => {
     const getOffers = async () => {
@@ -70,6 +78,35 @@ const Detail = ({ nft }) => {
       <Head>
         <title>NFT #{nft.id} | Random Walk NFT</title>
       </Head>
+      {blackVideo && (
+        <div
+          style={{
+            position: "fixed",
+            top: 125,
+            bottom: 64,
+            left: 0,
+            right: 0,
+            zIndex: -1,
+          }}
+        >
+          <video
+            autoPlay
+            muted
+            playsInline
+            loop
+            style={{
+              position: "absolute",
+              width: "100%",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+            ref={ref}
+          >
+            <source src={blackVideo} type="video/mp4"></source>
+          </video>
+        </div>
+      )}
       <MainWrapper
         maxWidth={false}
         style={{
