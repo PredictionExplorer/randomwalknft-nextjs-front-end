@@ -100,6 +100,7 @@ const Detail = ({ nft }) => {
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
+              filter: "blur(3px) opacity(0.5)",
             }}
             ref={ref}
           >
