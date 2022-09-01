@@ -12,7 +12,7 @@ function NewHome() {
     const fileName = tokenIds[0].toString().padStart(6, "0");
     console.log(tokenIds[0]);
     setBlackVideo(
-      `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_single.mp4`
+      `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_triple.mp4`
     );
   };
 
