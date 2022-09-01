@@ -11,7 +11,7 @@ const RandomVideo = (props) => {
   const ref = useRef(null);
 
   const setRandomVideo = async () => {
-    const tokenIds = await ApiService.random();
+    const tokenIds = await ApiService.random_token();
     const fileName = tokenIds[0].toString().padStart(6, "0");
     setTokenId(tokenIds[0]);
     setBlackVideo(
