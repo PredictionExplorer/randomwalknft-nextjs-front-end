@@ -62,7 +62,6 @@ function NewHome() {
               transform: "translate(-50%, -50%)",
             }}
             ref={ref}
-            onEnded={setRandomVideo}
           >
             <source src={blackVideo} type="video/mp4"></source>
           </video>
