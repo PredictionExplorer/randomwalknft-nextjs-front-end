@@ -1,8 +1,31 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Typography, Link, Hidden } from "@mui/material";
 import { MainWrapper, CenterBox, MintButton } from "../components/styled";
+import ApiService from "../services/api";
 
-function Home() {
+function NewHome() {
+  const [blackVideo, setBlackVideo] = useState(null);
+  const ref = useRef(null);
+
+  const setRandomVideo = async () => {
+    const tokenIds = await ApiService.random_token();
+    const fileName = tokenIds[0].toString().padStart(6, "0");
+    console.log(tokenIds[0]);
+    setBlackVideo(
+      `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_triple.mp4`
+    );
+  };
+
+  useEffect(() => {
+    setRandomVideo();
+  }, []);
+
+  useEffect(() => {
+    if (blackVideo) {
+      ref.current.load();
+    }
+  }, [blackVideo]);
+
   return (
     <>
       <img
@@ -16,12 +39,36 @@ function Home() {
           minWidth: "100%",
         }}
       />
+      {blackVideo && (
+        <div
+          style={{
+            position: "fixed",
+            top: 125,
+            bottom: 64,
+            left: 0,
+            right: 0,
+            zIndex: -1,
+          }}
+        >
+          <video
+            autoPlay
+            muted
+            playsInline
+            style={{
+              position: "absolute",
+              width: "100%",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+            ref={ref}
+          >
+            <source src={blackVideo} type="video/mp4"></source>
+          </video>
+        </div>
+      )}
       <div
         style={{
-          backgroundImage: `url('images/background.jpg')`,
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center center",
           height: "100vh",
         }}
       >
@@ -80,4 +127,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default NewHome;
