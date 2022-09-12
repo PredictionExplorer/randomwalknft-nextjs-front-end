@@ -91,7 +91,7 @@ function NewHome() {
           </CenterBox>
           <Box mt={3}>
             <Typography align="left" variant="body1" gutterBottom>
-              On-chain public domain (CC0) NFTs based on the 
+              On-chain public domain (CC0) NFTs based on the&nbsp;
               <Link
                 href="https://en.m.wikipedia.org/wiki/Random_walk"
                 style={{
@@ -103,7 +103,7 @@ function NewHome() {
               >
                 Random Walk
               </Link>
-               mathematical process.
+              &nbsp;mathematical process.
             </Typography>
             <Typography align="left" variant="body1" gutterBottom>
               100% of the ΞTH spent on minting goes back to the minters through
