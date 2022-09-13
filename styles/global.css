@@ -48,3 +48,6 @@
 .MuiToggleButton-root.Mui-selected:hover {
   background-color: #222 !important;
 }
+a {
+  -webkit-text-decoration-color: white !important;
+}
