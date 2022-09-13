@@ -37,6 +37,7 @@ function NewHome() {
           objectFit: "fill",
           height: 400,
           minWidth: "100%",
+          pointerEvents: "none",
         }}
       />
       {blackVideo && (
@@ -97,7 +98,7 @@ function NewHome() {
                 style={{
                   cursor: "pointer",
                   color: "white",
-                  textDecoration: "underline",
+                  textDecoration: "underline #fff",
                 }}
                 target="_blank"
               >
