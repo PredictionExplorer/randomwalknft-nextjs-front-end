@@ -28,7 +28,7 @@ const Detail = ({ nft }) => {
   const [buyOffers, setBuyOffers] = useState([]);
   const [sellOffers, setSellOffers] = useState([]);
   const [userSellOffers, setUserSellOffers] = useState([]);
-  const blackVideo = nft.black_single_video_url;
+  const blackVideo = nft.black_triple_video_url;
   const ref = useRef(null);
 
   useEffect(() => {
@@ -93,7 +93,6 @@ const Detail = ({ nft }) => {
             autoPlay
             muted
             playsInline
-            loop
             style={{
               position: "absolute",
               width: "100%",
