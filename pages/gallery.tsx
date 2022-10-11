@@ -35,15 +35,11 @@ const Gallery = () => {
         let tokenIds = [];
         if (s == "tokenId") {
           if (address) {
-            // const tokens = await contract.walletOfOwner(address);
-            // tokenIds = tokens.map((t) => t.toNumber());
-            // tokenIds = tokenIds.sort((a, b) => {
-            //   return parseInt(b) - parseInt(a);
-            // });
-            
-            const balance = await contract.totalSupply();
-            tokenIds = Object.keys(new Array(balance.toNumber()).fill(0));
-            tokenIds = tokenIds.reverse();
+            const tokens = await contract.walletOfOwner(address);
+            tokenIds = tokens.map((t) => t.toNumber());
+            tokenIds = tokenIds.sort((a, b) => {
+              return parseInt(b) - parseInt(a);
+            });
           } else {
             const balance = await contract.totalSupply();
             tokenIds = Object.keys(new Array(balance.toNumber()).fill(0));
