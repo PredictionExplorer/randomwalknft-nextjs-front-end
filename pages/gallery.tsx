@@ -28,10 +28,10 @@ const Gallery = () => {
     let s = router.query["sortBy"] as string;
     s = s || "tokenId";
     setSortBy(s);
+    setLoading(true);
 
     const getTokens = async () => {
       try {
-        setLoading(false);
         let tokenIds = [];
         if (s == "tokenId") {
           if (address) {
