@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { ethers } from "ethers";
+import axios from "axios";
 import {
   Box,
   Typography,
@@ -77,8 +78,9 @@ const NFTTrait = ({
   const { account, library } = useActiveWeb3React();
 
   const handlePlay = (videoPath) => {
-    fetch(videoPath).then((res) => {
-      if (res.ok) {
+    axios.get(videoPath).then((res) => {
+      console.log(res);
+      if (res.status === 200) {
         setVideoPath(videoPath);
         setOpen(true);
       } else {
