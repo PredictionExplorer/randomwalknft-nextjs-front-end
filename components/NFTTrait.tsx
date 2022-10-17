@@ -78,7 +78,13 @@ const NFTTrait = ({
   const { account, library } = useActiveWeb3React();
 
   const handlePlay = (videoPath) => {
-    axios.get(videoPath).then((res) => {
+    let config = {
+      headers: {
+        'Access-Control-Allow-Origin': '*', 
+        'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
+      }
+    };
+    axios.get("https://cors-anywhere.herokuapp.com/" + videoPath, config).then((res) => {
       console.log(res);
       if (res.status === 200) {
         setVideoPath(videoPath);
