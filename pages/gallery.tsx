@@ -31,7 +31,7 @@ const Gallery = () => {
 
     const getTokens = async () => {
       try {
-        setLoading(true);
+        setLoading(false);
         let tokenIds = [];
         if (s == "tokenId") {
           if (address) {
