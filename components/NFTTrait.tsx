@@ -80,19 +80,22 @@ const NFTTrait = ({
   const handlePlay = (videoPath) => {
     let config = {
       headers: {
-        'Access-Control-Allow-Origin': '*', 
-        'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
-      }
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers":
+          "Origin, X-Requested-With, Content-Type, Accept",
+      },
     };
-    axios.get("https://cors-anywhere.herokuapp.com/" + videoPath, config).then((res) => {
-      console.log(res);
-      if (res.status === 200) {
-        setVideoPath(videoPath);
-        setOpen(true);
-      } else {
-        alert("Video is being generated, come back later");
-      }
-    });
+    axios
+      .get("https://cors-anywhere.herokuapp.com/" + videoPath, config)
+      .then((res) => {
+        console.log(res);
+        if (res.status === 200) {
+          setVideoPath(videoPath);
+          setOpen(true);
+        } else {
+          alert("Video is being generated, come back later");
+        }
+      });
   };
 
   const handleMakeSell = async () => {
@@ -441,11 +444,7 @@ const NFTTrait = ({
             )}
             {imageOpen && (
               <Lightbox
-                image={
-                  theme === "black"
-                    ? black_image_url
-                    : white_image_url
-                }
+                image={theme === "black" ? black_image_url : white_image_url}
                 onClose={() => setImageOpen(false)}
               />
             )}
