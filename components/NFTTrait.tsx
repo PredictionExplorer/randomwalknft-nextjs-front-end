@@ -86,7 +86,7 @@ const NFTTrait = ({
       },
     };
     axios
-      .get("https://cors-anywhere.herokuapp.com/" + videoPath, config)
+      .get(videoPath, config)
       .then((res) => {
         console.log(res);
         if (res.status === 200) {
