@@ -62,11 +62,11 @@ const PaginationGrid = ({ loading, data }) => {
           Search
         </SearchButton>
       </SearchBox>
-      {/* {loading && (
+      {loading && (
         <Box display="flex" justifyContent="center">
           <CircularProgress color="secondary" />
         </Box>
-      )} */}
+      )}
       {data.length > 0 && (
         <>
           <Grid spacing={4} container>
