@@ -68,13 +68,13 @@ export default function Web3ReactManager({
   }
 
   // if neither context is active, spin
-  if (!active && !networkActive) {
-    return showLoader ? (
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <CircularProgress />
-      </Box>
-    ) : null
-  }
+  // if (!active && !networkActive) {
+  //   return showLoader ? (
+  //     <Box display="flex" justifyContent="center" alignItems="center">
+  //       <CircularProgress />
+  //     </Box>
+  //   ) : null
+  // }
 
   return children
 }
