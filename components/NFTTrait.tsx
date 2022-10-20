@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { ethers } from "ethers";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -78,24 +77,14 @@ const NFTTrait = ({
   const { account, library } = useActiveWeb3React();
 
   const handlePlay = (videoPath) => {
-    let config = {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers":
-          "Origin, X-Requested-With, Content-Type, Accept",
-      },
-    };
-    axios
-      .get(videoPath, config)
-      .then((res) => {
-        console.log(res);
-        if (res.status === 200) {
-          setVideoPath(videoPath);
-          setOpen(true);
-        } else {
-          alert("Video is being generated, come back later");
-        }
-      });
+    fetch(videoPath).then((res) => {
+      if (res.ok) {
+        setVideoPath(videoPath);
+        setOpen(true);
+      } else {
+        alert("Video is being generated, come back later");
+      }
+    });
   };
 
   const handleMakeSell = async () => {
