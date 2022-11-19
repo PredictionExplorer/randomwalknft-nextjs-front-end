@@ -231,8 +231,10 @@ const NFTTrait = ({
 
   useEffect(() => {
     const getOwner = async () => {
-      const owner = await nftContract.ownerOf(nft.id);
-      setRealOwner(owner);
+      if (nftContract) {
+        const owner = await nftContract.ownerOf(nft.id);
+        setRealOwner(owner);
+      }
     };
     getOwner();
   }, [nftContract, nft]);
