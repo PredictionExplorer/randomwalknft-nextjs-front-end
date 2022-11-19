@@ -58,7 +58,6 @@ const NFTTrait = ({
     black_triple_video_url,
     rating,
   } = nft;
-
   const [open, setOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
   const [videoPath, setVideoPath] = useState(null);

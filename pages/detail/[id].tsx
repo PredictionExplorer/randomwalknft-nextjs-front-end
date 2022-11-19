@@ -167,7 +167,11 @@ const Detail = ({ nft }) => {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const id = context.params!.id;
   const tokenId = Array.isArray(id) ? id[0] : id;
-  const nft = await api.get(tokenId);
+  let nft = await api.get(tokenId);
+  const info = await api.get_info(tokenId);
+  if (nft) {
+    nft.seed = info.TokenInfo.SeedHex;
+  }
   return {
     props: { nft, title: "Detail", description: `NFT#${nft.id} Details - ` },
   };
