@@ -28,7 +28,7 @@ const Detail = ({ nft }) => {
   const [buyOffers, setBuyOffers] = useState([]);
   const [sellOffers, setSellOffers] = useState([]);
   const [userSellOffers, setUserSellOffers] = useState([]);
-  const blackVideo = nft.black_triple_video_url;
+  const blackVideo = nft?.black_triple_video_url;
   const ref = useRef(null);
 
   useEffect(() => {
@@ -39,9 +39,9 @@ const Detail = ({ nft }) => {
 
   useEffect(() => {
     const getOffers = async () => {
-      const buy_offers = await api.get_buy(nft.id);
+      const buy_offers = await api.get_buy(nft?.id);
       setBuyOffers(buy_offers);
-      const sell_offers = await api.get_sell(nft.id);
+      const sell_offers = await api.get_sell(nft?.id);
       setSellOffers(sell_offers);
       const userSellOffers = sell_offers.filter((x) => {
         return x.SellerAddr == account;
@@ -169,7 +169,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const tokenId = Array.isArray(id) ? id[0] : id;
   const nft = await api.get(tokenId);
   return {
-    props: { nft, title: "Detail", description: `NFT#${nft.id} Details - ` },
+    props: { nft, title: "Detail", description: `NFT#${nft?.id} Details - ` },
   };
 }
 
