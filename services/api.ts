@@ -4,7 +4,8 @@ const baseUrl = "https://randomwalknft-api.com/";
 
 class ApiService {
   public async create(token_id: number) {
-    await axios.post(baseUrl + "tokens", { token_id });
+    const { data } = await axios.post(baseUrl + "tokens", { token_id });
+    return data?.task_id || -1;
   }
 
   public async add_game(nft1: number, nft2: number, nft1_win: number) {

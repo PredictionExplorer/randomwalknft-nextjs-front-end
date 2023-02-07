@@ -54,14 +54,19 @@ const Mint = () => {
 
         const token_id = receipt.events[0].args.tokenId.toNumber();
 
-        await api.create(token_id);
-
-        router.push({
-          pathname: `/detail/${token_id}`,
-          query: {
-            message: "success",
-          },
-        });
+        const task_id = await api.create(token_id);
+        let delay = 2000;
+        if (task_id === -1) {
+          delay = 4000;
+        }
+        setTimeout(() => {
+          router.push({
+            pathname: `/detail/${token_id}`,
+            query: {
+              message: "success",
+            },
+          });
+        }, delay);
       } catch (err) {
         const { data } = err;
         if (data && data.message) {
