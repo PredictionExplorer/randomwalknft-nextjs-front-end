@@ -35,6 +35,7 @@ import {
   NFTPrice,
 } from "./styled";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import { useNFT } from "../hooks/useNFT";
 
 const NFTTrait = ({
   nft,
@@ -44,20 +45,8 @@ const NFTTrait = ({
   sell_offers,
   user_sell_offers,
 }) => {
-  const {
-    id,
-    name,
-    seed,
-    white_image_url,
-    black_image_url,
-    black_image_thumb_url,
-    white_image_thumb_url,
-    white_single_video_url,
-    black_single_video_url,
-    white_triple_video_url,
-    black_triple_video_url,
-    rating,
-  } = nft;
+  const { id, name, seed, rating } = nft;
+  const nft_asset_info = useNFT(id);
   const [open, setOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
   const [videoPath, setVideoPath] = useState(null);
@@ -254,7 +243,9 @@ const NFTTrait = ({
     ) {
       setTheme(hash.includes("black") ? "black" : "white");
       handlePlay(
-        hash.includes("black") ? black_single_video_url : white_single_video_url
+        hash.includes("black")
+          ? nft_asset_info?.black_single_video
+          : nft_asset_info?.white_single_video
       );
     } else if (
       hash === "#black_triple_video" ||
@@ -262,15 +253,12 @@ const NFTTrait = ({
     ) {
       setTheme(hash.includes("black") ? "black" : "white");
       handlePlay(
-        hash.includes("black") ? black_triple_video_url : white_triple_video_url
+        hash.includes("black")
+          ? nft_asset_info?.black_triple_video
+          : nft_asset_info?.white_triple_video
       );
     }
-  }, [
-    black_single_video_url,
-    white_single_video_url,
-    black_triple_video_url,
-    white_triple_video_url,
-  ]);
+  }, []);
 
   useEffect(() => {
     if (sell_offers.length > 0) {
@@ -299,8 +287,8 @@ const NFTTrait = ({
                 <NFTImage
                   image={
                     theme === "black"
-                      ? black_image_thumb_url
-                      : white_image_thumb_url
+                      ? nft_asset_info?.black_image_thumb
+                      : nft_asset_info?.white_image_thumb
                   }
                 />
                 <NFTInfoWrapper>
@@ -350,8 +338,8 @@ const NFTTrait = ({
                     <CopyToClipboard
                       text={
                         theme === "black"
-                          ? black_single_video_url
-                          : white_single_video_url
+                          ? nft_asset_info?.black_single_video
+                          : nft_asset_info?.white_single_video
                       }
                     >
                       <MenuItem
@@ -364,8 +352,8 @@ const NFTTrait = ({
                     <CopyToClipboard
                       text={
                         theme === "black"
-                          ? black_triple_video_url
-                          : white_triple_video_url
+                          ? nft_asset_info?.black_triple_video
+                          : nft_asset_info?.white_triple_video
                       }
                     >
                       <MenuItem onClick={handleMenuClose}>
@@ -374,7 +362,9 @@ const NFTTrait = ({
                     </CopyToClipboard>
                     <CopyToClipboard
                       text={
-                        theme === "black" ? black_image_url : white_image_url
+                        theme === "black"
+                          ? nft_asset_info?.black_image
+                          : nft_asset_info?.white_image
                       }
                     >
                       <MenuItem onClick={handleMenuClose}>Image</MenuItem>
@@ -434,7 +424,11 @@ const NFTTrait = ({
             )}
             {imageOpen && (
               <Lightbox
-                image={theme === "black" ? black_image_url : white_image_url}
+                image={
+                  theme === "black"
+                    ? nft_asset_info?.black_image
+                    : nft_asset_info?.white_image
+                }
                 onClose={() => setImageOpen(false)}
               />
             )}
@@ -443,14 +437,14 @@ const NFTTrait = ({
             <NFTVideo
               image_thumb={
                 theme === "black"
-                  ? black_image_thumb_url
-                  : black_image_thumb_url
+                  ? nft_asset_info?.black_image_thumb
+                  : nft_asset_info?.white_image_thumb
               }
               onClick={() =>
                 handlePlay(
                   theme === "black"
-                    ? black_single_video_url
-                    : white_single_video_url
+                    ? nft_asset_info?.black_single_video
+                    : nft_asset_info?.white_single_video
                 )
               }
             />
@@ -467,14 +461,14 @@ const NFTTrait = ({
               <NFTVideo
                 image_thumb={
                   theme === "black"
-                    ? black_image_thumb_url
-                    : black_image_thumb_url
+                    ? nft_asset_info?.black_image_thumb
+                    : nft_asset_info?.white_image_thumb
                 }
                 onClick={() =>
                   handlePlay(
                     theme === "black"
-                      ? black_triple_video_url
-                      : white_triple_video_url
+                      ? nft_asset_info?.black_triple_video
+                      : nft_asset_info?.white_triple_video
                   )
                 }
               />

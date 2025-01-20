@@ -23,7 +23,6 @@ import axios from "axios";
 const Detail = ({ nft }) => {
   const router = useRouter();
   const { seller } = router.query;
-  // const buyOffers = useBuyOfferIds(nft?.id);
   const { account } = useActiveWeb3React();
   const [darkTheme, setDarkTheme] = useState(true);
   const [buyOffers, setBuyOffers] = useState([]);
@@ -169,7 +168,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const id = context.params!.id;
   const tokenId = Array.isArray(id) ? id[0] : id;
 
-  const { data } = await axios.get(baseUrl +  + `tokens/${tokenId}`);
+  const { data } = await axios.get(baseUrl + `tokens/${tokenId}`);
   const url = `http://69.10.55.2:9291/api/rwalk/tokens/history/${tokenId}/0x895a6F444BE4ba9d124F61DF736605792B35D66b/0/1000`;
   const res = await axios.get(url);
   if (data) {
