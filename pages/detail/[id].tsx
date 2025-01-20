@@ -17,7 +17,8 @@ import NFTHistory from "../../components/NFTHistory";
 import { MainWrapper } from "../../components/styled";
 import { useActiveWeb3React } from "../../hooks/web3";
 
-import api from "../../services/api";
+import api, { baseUrl } from "../../services/api";
+import axios from "axios";
 
 const Detail = ({ nft }) => {
   const router = useRouter();
@@ -167,9 +168,16 @@ const Detail = ({ nft }) => {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const id = context.params!.id;
   const tokenId = Array.isArray(id) ? id[0] : id;
-  const nft = await api.get(tokenId);
+
+  const { data } = await axios.get(baseUrl +  + `tokens/${tokenId}`);
+  const url = `http://69.10.55.2:9291/api/rwalk/tokens/history/${tokenId}/0x895a6F444BE4ba9d124F61DF736605792B35D66b/0/1000`;
+  const res = await axios.get(url);
+  if (data) {
+    data.tokenHistory = res?.data?.TokenHistory;
+  }
+
   return {
-    props: { nft, title: "Detail", description: `NFT#${nft?.id} Details - ` },
+    props: { nft: data, title: "Detail", description: `NFT#${data?.id} Details - ` },
   };
 }
 

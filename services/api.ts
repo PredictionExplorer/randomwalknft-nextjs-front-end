@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const baseUrl = "https://randomwalknft-api.com/";
-const baseUrl = "http://69.10.55.2/";
+export const baseUrl = "http://69.10.55.2/";
 const proxyUrl = "/api/proxy?url=";
 const getAPIUrl = (url: string) => {
   return `${proxyUrl}${encodeURIComponent(baseUrl + url)}`;
@@ -15,16 +15,6 @@ class ApiService {
 
   public async add_game(nft1: number, nft2: number, nft1_win: number) {
     await axios.post(getAPIUrl("add_game"), { nft1, nft2, nft1_win });
-  }
-
-  public async get(token_id: number | string) {
-    const { data } = await axios.get(getAPIUrl(`tokens/${token_id}`));
-    const url = `http://69.10.55.2:9291/api/rwalk/tokens/history/${token_id}/0x895a6F444BE4ba9d124F61DF736605792B35D66b/0/1000`;
-    const res = await axios.get(url);
-    if (data) {
-      data.tokenHistory = res?.data?.TokenHistory;
-    }
-    return data;
   }
 
   public async get_info(token_id: number | string) {
