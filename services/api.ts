@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const baseUrl = "https://randomwalknft-api.com/";
+// const baseUrl = "https://randomwalknft-api.com/";
+const baseUrl = "http://69.10.55.2/";
 const proxyUrl = "/api/proxy?url=";
 const getAPIUrl = (url: string) => {
   return `${proxyUrl}${encodeURIComponent(baseUrl + url)}`;
