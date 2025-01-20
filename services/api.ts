@@ -19,7 +19,7 @@ class ApiService {
 
   public async get(token_id: number | string) {
     const { data } = await axios.get(getAPIUrl(`tokens/${token_id}`));
-    const url = `http://198.58.105.159:9094/api/rwalk/tokens/history/${token_id}/0x895a6F444BE4ba9d124F61DF736605792B35D66b/0/1000`;
+    const url = `http://69.10.55.2:9294/api/rwalk/tokens/history/${token_id}/0x895a6F444BE4ba9d124F61DF736605792B35D66b/0/1000`;
     const res = await axios.get(url);
     if (data) {
       data.tokenHistory = res?.data?.TokenHistory;
@@ -84,7 +84,7 @@ class ApiService {
 
   public async tradingHistory(page: number) {
     let perPage = 20;
-    let url = `http://198.58.105.159:9094/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/0/1000000`;
+    let url = `http://69.10.55.2:9294/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/0/1000000`;
     let res = await axios.get(url);
     let totalCount = res.data.Trading.length ?? 0;
     let start = totalCount - perPage * page;
@@ -92,7 +92,7 @@ class ApiService {
       perPage += start;
       start = 0;
     }
-    url = `http://198.58.105.159:9094/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/${start}/${perPage}`;
+    url = `http://69.10.55.2:9294/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/${start}/${perPage}`;
     res = await axios.get(url);
     let data = res?.data?.Trading;
     data.sort((a: { TimeStamp: number }, b: { TimeStamp: number }) => {
