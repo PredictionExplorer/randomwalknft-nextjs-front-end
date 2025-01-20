@@ -68,7 +68,9 @@ const Gallery = () => {
       }
     };
 
-    getTokens();
+    if (contract) {
+      getTokens();
+    }
   }, [contract, router]);
 
   return (
