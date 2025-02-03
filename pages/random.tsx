@@ -16,7 +16,7 @@ const Random = (props) => {
       const fileName = tokenIds[0].toString().padStart(6, "0");
       setTokenId(tokenIds[0]);
       setBlackImage(
-        `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black.png`
+        `http://69.10.55.2/images/randomwalk/${fileName}_black.png`
       );
     };
     getToken();
@@ -60,7 +60,8 @@ const Random = (props) => {
               </StyledLink>
             </Typography>
           )}
-        </div>)}
+        </div>
+      )}
     </>
   );
 };

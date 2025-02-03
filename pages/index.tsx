@@ -10,9 +10,8 @@ function NewHome() {
   const setRandomVideo = async () => {
     const tokenIds = await ApiService.random_token();
     const fileName = tokenIds[0].toString().padStart(6, "0");
-    console.log(tokenIds[0]);
     setBlackVideo(
-      `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_triple.mp4`
+      `http://69.10.55.2/images/randomwalk/${fileName}_black_triple.mp4`
     );
   };
 

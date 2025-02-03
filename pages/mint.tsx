@@ -226,7 +226,7 @@ const Mint = () => {
                       <StyledCard key={i} style={{ margin: 2 }}>
                         <CardActionArea href={`/detail/${id}`}>
                           <NFTImage
-                            image={`https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_thumb.jpg`}
+                            image={`http://69.10.55.2/images/randomwalk/${fileName}_black_thumb.jpg`}
                           />
                           <NFTInfoWrapper>
                             <Typography variant="body1">

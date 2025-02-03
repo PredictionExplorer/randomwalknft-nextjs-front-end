@@ -13,7 +13,7 @@ const NFTTrait2 = ({ id, clickHandler }) => {
     const getToken = async () => {
       const fileName = id.toString().padStart(6, "0");
       setBlackImage(
-        `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_thumb.jpg`
+        `http://69.10.55.2/images/randomwalk/${fileName}_black_thumb.jpg`
       );
     };
     getToken();

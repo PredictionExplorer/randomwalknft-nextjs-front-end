@@ -6,7 +6,7 @@ import { formatId } from "../utils";
 
 const NFTOffer = ({ offer }) => {
   const fileName = offer.TokenId.toString().padStart(6, "0");
-  const image_thumb = `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_thumb.jpg`;
+  const image_thumb = `http://69.10.55.2/images/randomwalk/${fileName}_black_thumb.jpg`;
 
   return (
     <StyledCard>

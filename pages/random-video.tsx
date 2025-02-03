@@ -15,7 +15,7 @@ const RandomVideo = (props) => {
     const fileName = tokenIds[0].toString().padStart(6, "0");
     setTokenId(tokenIds[0]);
     setBlackVideo(
-      `https://randomwalknft.s3.us-east-2.amazonaws.com/${fileName}_black_single.mp4`
+      `http://69.10.55.2/images/randomwalk/${fileName}_black_single.mp4`
     );
   };
 
