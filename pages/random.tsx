@@ -4,7 +4,7 @@ import Head from "next/head";
 
 import { StyledLink } from "../components/styled";
 import api from "../services/api";
-import { formatId } from "../utils";
+import { formatId, getAssetsUrl } from "../utils";
 
 const Random = (props) => {
   const [tokenId, setTokenId] = useState(null);
@@ -15,9 +15,7 @@ const Random = (props) => {
       const tokenIds = await api.random_token();
       const fileName = tokenIds[0].toString().padStart(6, "0");
       setTokenId(tokenIds[0]);
-      setBlackImage(
-        `http://69.10.55.2/images/randomwalk/${fileName}_black.png`
-      );
+      setBlackImage(getAssetsUrl(`${fileName}_black.png`));
     };
     getToken();
   }, []);

@@ -2,11 +2,11 @@ import React from "react";
 import { Typography, CardActionArea } from "@mui/material";
 
 import { NFTImage, NFTInfoWrapper, NFTPrice, StyledCard } from "./styled";
-import { formatId } from "../utils";
+import { formatId, getAssetsUrl } from "../utils";
 
 const NFTOffer = ({ offer }) => {
   const fileName = offer.TokenId.toString().padStart(6, "0");
-  const image_thumb = `http://69.10.55.2/images/randomwalk/${fileName}_black_thumb.jpg`;
+  const image_thumb = getAssetsUrl(`${fileName}_black_thumb.jpg`);
 
   return (
     <StyledCard>

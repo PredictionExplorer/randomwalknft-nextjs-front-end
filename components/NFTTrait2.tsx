@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Typography, CardActionArea, Grid, Button, Box } from "@mui/material";
 import { StyledCard, NFTImage, NFTInfoWrapper } from "./styled";
+import { getAssetsUrl } from "../utils";
 
 const NFTTrait2 = ({ id, clickHandler }) => {
   const [black_image_url, setBlackImage] = useState(null);
@@ -12,9 +13,7 @@ const NFTTrait2 = ({ id, clickHandler }) => {
   useEffect(() => {
     const getToken = async () => {
       const fileName = id.toString().padStart(6, "0");
-      setBlackImage(
-        `http://69.10.55.2/images/randomwalk/${fileName}_black_thumb.jpg`
-      );
+      setBlackImage(getAssetsUrl(`${fileName}_black_thumb.jpg`));
     };
     getToken();
   }, [id]);

@@ -23,7 +23,7 @@ import useNFTContract from "../hooks/useNFTContract";
 import useMarketContract from "../hooks/useMarketContract";
 
 import api from "../services/api";
-import { formatId, parseBalance } from "../utils";
+import { formatId, getAssetsUrl, parseBalance } from "../utils";
 
 const Mint = () => {
   const [saleSeconds, setSaleSeconds] = useState(null);
@@ -226,7 +226,7 @@ const Mint = () => {
                       <StyledCard key={i} style={{ margin: 2 }}>
                         <CardActionArea href={`/detail/${id}`}>
                           <NFTImage
-                            image={`http://69.10.55.2/images/randomwalk/${fileName}_black_thumb.jpg`}
+                            image={getAssetsUrl(`${fileName}_black_thumb.jpg`)}
                           />
                           <NFTInfoWrapper>
                             <Typography variant="body1">

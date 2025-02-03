@@ -3,7 +3,7 @@ import { Typography, Link } from "@mui/material";
 import Head from "next/head";
 
 import ApiService from "../services/api";
-import { formatId } from "../utils";
+import { formatId, getAssetsUrl } from "../utils";
 
 const RandomVideo = (props) => {
   const [tokenId, setTokenId] = useState(null);
@@ -14,9 +14,7 @@ const RandomVideo = (props) => {
     const tokenIds = await ApiService.random_token();
     const fileName = tokenIds[0].toString().padStart(6, "0");
     setTokenId(tokenIds[0]);
-    setBlackVideo(
-      `http://69.10.55.2/images/randomwalk/${fileName}_black_single.mp4`
-    );
+    setBlackVideo(getAssetsUrl(`${fileName}_black_single.mp4`));
   };
 
   useEffect(() => {

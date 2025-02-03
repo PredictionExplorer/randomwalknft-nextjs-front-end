@@ -40,3 +40,9 @@ export const parseBalance = (
 export const formatId = (id: number | string) => {
   return `#${id.toString().padStart(6, '0')}`
 }
+
+export const getAssetsUrl = (url: string) => {
+  const proxyUrl = "/api/proxy?url=";
+  const imageServerUrl = "http://69.10.55.2/images/randomwalk/";
+  return `${proxyUrl}${encodeURIComponent(imageServerUrl + url)}`;
+};

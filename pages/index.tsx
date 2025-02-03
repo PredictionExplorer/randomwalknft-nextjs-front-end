@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Box, Typography, Link, Hidden } from "@mui/material";
 import { MainWrapper, CenterBox, MintButton } from "../components/styled";
 import ApiService from "../services/api";
+import { getAssetsUrl } from "../utils";
 
 function NewHome() {
   const [blackVideo, setBlackVideo] = useState(null);
@@ -10,9 +11,7 @@ function NewHome() {
   const setRandomVideo = async () => {
     const tokenIds = await ApiService.random_token();
     const fileName = tokenIds[0].toString().padStart(6, "0");
-    setBlackVideo(
-      `http://69.10.55.2/images/randomwalk/${fileName}_black_triple.mp4`
-    );
+    setBlackVideo(getAssetsUrl(`${fileName}_black_triple.mp4`));
   };
 
   useEffect(() => {
