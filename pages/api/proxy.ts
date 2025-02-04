@@ -37,33 +37,23 @@ export default async function handler(
     // Configure Axios request
     const axiosConfig: AxiosRequestConfig = {
       method,
-      url: targetUrl,
-      headers: { ...req.headers } as Record<string, string>,
-      data: isGet ? undefined : req.body,
-      responseType: 'stream', // Use stream to dynamically handle response type
+      url: targetUrl, // Use the validated full URL
+      headers: {
+        ...req.headers,
+      } as Record<string, string>,
+      data: isGet ? undefined : req.body, // Include body only for non-GET requests
+      responseType: 'arraybuffer', // Support binary content (images, PDFs, etc.)
     };
 
+    // Make the request to the external HTTP server
     const response = await axios(axiosConfig);
 
-    // Determine Content-Type
-    const contentType = response.headers['content-type'] || 'application/octet-stream';
+    // Set headers for response
+    res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+    res.setHeader('Content-Length', response.headers['content-length'] || '0');
 
-    res.setHeader('Content-Type', contentType);
-
-    if (contentType.includes('application/json')) {
-      // If JSON, parse the response and send JSON
-      let responseData = '';
-      response.data.on('data', (chunk: Buffer) => {
-        responseData += chunk.toString();
-      });
-
-      response.data.on('end', () => {
-        res.status(response.status).json(JSON.parse(responseData));
-      });
-    } else {
-      // Otherwise, stream the binary response
-      response.data.pipe(res);
-    }
+    // Send the response back to the client
+    res.status(response.status).send(Buffer.from(response.data));
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
       message: 'Proxy request failed',
