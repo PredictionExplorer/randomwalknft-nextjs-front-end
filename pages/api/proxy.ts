@@ -1,18 +1,15 @@
-import axios, { AxiosRequestConfig, Method } from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import axios, { Method } from 'axios';
 import { URL } from 'url';
 
 export const config = {
   api: {
-    responseLimit: false, // Allow large responses
-    bodyParser: false, // Prevent Next.js from parsing request bodies (important for binary data)
+    responseLimit: false,
+    bodyParser: false, // Important for binary streaming
   },
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-): Promise<void> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { url } = req.query;
 
@@ -21,43 +18,38 @@ export default async function handler(
       return;
     }
 
-    // Ensure the URL is correctly formatted
     let targetUrl: string;
     try {
       const parsedUrl = new URL(url.startsWith('http') ? url : `http://${url}`);
-      targetUrl = parsedUrl.href; // Get the full URL with protocol
+      targetUrl = parsedUrl.href;
     } catch {
       res.status(400).json({ error: 'Invalid URL format' });
       return;
     }
 
-    const method: Method = req.method as Method;
-    const isGet = method === 'GET';
+    // Forward range headers (important for video streaming)
 
-    // Configure Axios request
-    const axiosConfig: AxiosRequestConfig = {
-      method,
-      url: targetUrl, // Use the validated full URL
+    // Stream response using Axios
+    const response = await axios({
+      method: req.method as Method,
+      url: targetUrl,
       headers: {
         ...req.headers,
       } as Record<string, string>,
-      data: isGet ? undefined : req.body, // Include body only for non-GET requests
-      responseType: 'arraybuffer', // Support binary content (images, PDFs, etc.)
-    };
+      responseType: 'stream', // Stream the response instead of buffering
+    });
 
-    // Make the request to the external HTTP server
-    const response = await axios(axiosConfig);
+    // Set necessary headers for video playback
+    res.writeHead(response.status, response.headers);
 
-    // Set headers for response
-    res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
-    res.setHeader('Content-Length', response.headers['content-length'] || '0');
-
-    // Send the response back to the client
-    res.status(response.status).send(Buffer.from(response.data));
+    // Pipe the response directly to the client
+    response.data.pipe(res);
   } catch (error: any) {
+    console.error('Proxy request failed:', error.message);
+
     res.status(error.response?.status || 500).json({
       message: 'Proxy request failed',
-      error: error.response?.data || error.message,
+      status: error.response?.status || 500,
     });
   }
 }
