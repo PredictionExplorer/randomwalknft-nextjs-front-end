@@ -46,7 +46,9 @@ const Redeem = () => {
       );
     };
 
-    getData();
+    if (contract) {
+      getData();
+    }
   }, [contract]);
 
   if (withdrawalSeconds === null) return null;

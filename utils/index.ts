@@ -43,6 +43,12 @@ export const formatId = (id: number | string) => {
 
 export const getAssetsUrl = (url: string) => {
   const proxyUrl = "/api/proxy?url=";
-  const imageServerUrl = "http://69.10.55.2/images/randomwalk/";
+  const imageServerUrl = "http://161.129.67.58/images/randomwalk/";
   return `${proxyUrl}${encodeURIComponent(imageServerUrl + url)}`;
+};
+
+export const getOriginUrl = (url: string) => {
+  const decodedUrl = decodeURIComponent(url);
+  const originUrl = decodedUrl.replace(/\/api\/proxy\?url=/, '');
+  return originUrl;
 };

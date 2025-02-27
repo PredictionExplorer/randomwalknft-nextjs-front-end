@@ -26,7 +26,7 @@ import NFTVideo from "./NFTVideo";
 import useNFTContract from "../hooks/useNFTContract";
 import useMarketContract from "../hooks/useMarketContract";
 import { useActiveWeb3React } from "../hooks/web3";
-import { formatId } from "../utils";
+import { formatId, getOriginUrl } from "../utils";
 import {
   StyledCard,
   SectionWrapper,
@@ -338,8 +338,8 @@ const NFTTrait = ({
                     <CopyToClipboard
                       text={
                         theme === "black"
-                          ? nft_asset_info?.black_single_video
-                          : nft_asset_info?.white_single_video
+                          ? getOriginUrl(nft_asset_info?.black_single_video)
+                          : getOriginUrl(nft_asset_info?.white_single_video)
                       }
                     >
                       <MenuItem
@@ -352,8 +352,8 @@ const NFTTrait = ({
                     <CopyToClipboard
                       text={
                         theme === "black"
-                          ? nft_asset_info?.black_triple_video
-                          : nft_asset_info?.white_triple_video
+                          ? getOriginUrl(nft_asset_info?.black_triple_video)
+                          : getOriginUrl(nft_asset_info?.white_triple_video)
                       }
                     >
                       <MenuItem onClick={handleMenuClose}>
@@ -363,8 +363,8 @@ const NFTTrait = ({
                     <CopyToClipboard
                       text={
                         theme === "black"
-                          ? nft_asset_info?.black_image
-                          : nft_asset_info?.white_image
+                          ? getOriginUrl(nft_asset_info?.black_image)
+                          : getOriginUrl(nft_asset_info?.white_image)
                       }
                     >
                       <MenuItem onClick={handleMenuClose}>Image</MenuItem>
