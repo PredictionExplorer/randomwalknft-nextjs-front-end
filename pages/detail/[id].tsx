@@ -19,6 +19,7 @@ import { useActiveWeb3React } from "../../hooks/web3";
 
 import api, { baseUrl } from "../../services/api";
 import axios from "axios";
+import { getAssetsUrl } from "../../utils";
 
 const Detail = ({ nft }) => {
   const router = useRouter();
@@ -28,11 +29,12 @@ const Detail = ({ nft }) => {
   const [buyOffers, setBuyOffers] = useState([]);
   const [sellOffers, setSellOffers] = useState([]);
   const [userSellOffers, setUserSellOffers] = useState([]);
-  const blackVideo = nft?.black_triple_video_url;
+  const fileName = nft?.id.toString().padStart(6, "0");
+  const blackVideo = getAssetsUrl(`${fileName}_black_triple.mp4`);
   const ref = useRef(null);
 
   useEffect(() => {
-    if (blackVideo) {
+    if (nft) {
       ref.current.load();
     }
   }, [blackVideo]);
@@ -176,7 +178,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   return {
-    props: { nft: data, title: "Detail", description: `NFT#${data?.id} Details - ` },
+    props: {
+      nft: data,
+      title: "Detail",
+      description: `NFT#${data?.id} Details - `,
+    },
   };
 }
 
