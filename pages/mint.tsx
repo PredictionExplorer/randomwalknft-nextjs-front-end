@@ -48,11 +48,11 @@ const Mint = () => {
         const mintPrice = await nftContract.getMintPrice();
         const newPrice = parseFloat(ethers.utils.formatEther(mintPrice)) * 1.01;
 
-        const receipt = await nftContract
+        await nftContract
           .mint({ value: ethers.utils.parseEther(newPrice.toFixed(4)) })
           .then((tx) => tx.wait());
 
-        const token_id = receipt.events[0].args.tokenId.toNumber();
+        const token_id = (await nftContract.totalSupply()).toNumber() - 1;
 
         const task_id = await api.create(token_id);
         let delay = 2000;
@@ -97,8 +97,10 @@ const Mint = () => {
       setTokenIds(tokenIds);
     };
 
-    getData();
-  }, [nftContract, marketContract]);
+    if (nftContract) {
+      getData();
+    }
+  }, [nftContract]);
 
   return (
     <>
