@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import axios, { Method } from 'axios';
+import axios, { Method, AxiosRequestConfig } from 'axios';
 import { URL } from 'url';
 
 export const config = {
   api: {
     responseLimit: false,
-    bodyParser: false, // Important for binary streaming
+    bodyParser: false,
   },
 };
 
@@ -27,26 +27,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    // Forward range headers (important for video streaming)
-
-    // Stream response using Axios
-    const response = await axios({
+    const axiosConfig: AxiosRequestConfig = {
       method: req.method as Method,
       url: targetUrl,
       headers: {
         ...req.headers,
-      } as Record<string, string>,
-      responseType: 'stream', // Stream the response instead of buffering
-    });
+        host: new URL(targetUrl).host,
+      } as unknown as Record<string, string>,
+      responseType: 'stream',
+    };
 
-    // Set necessary headers for video playback
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      axiosConfig.data = req; // forward the body stream
+    }
+
+    const response = await axios(axiosConfig);
+
     res.writeHead(response.status, response.headers);
-
-    // Pipe the response directly to the client
     response.data.pipe(res);
   } catch (error: any) {
     console.error('Proxy request failed:', error.message);
-
     res.status(error.response?.status || 500).json({
       message: 'Proxy request failed',
       status: error.response?.status || 500,
