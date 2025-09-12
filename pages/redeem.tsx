@@ -8,6 +8,9 @@ import Head from "next/head";
 import { CenterBox, MainWrapper, StyledLink } from "../components/styled";
 import Counter from "../components/Counter";
 import useNFTContract from "../hooks/useNFTContract";
+import useContractNoSigner from "../hooks/useContractNoSigner";
+import NFT_ABI from "../contracts/NFT.json";
+import { NFT_ADDRESS } from "../config/app";
 
 const Redeem = () => {
   const [withdrawalSeconds, setWithdrawalSeconds] = useState(null);
@@ -15,6 +18,7 @@ const Redeem = () => {
   const [withdrawalAmount, setWithdrawalAmount] = useState(null);
 
   const contract = useNFTContract();
+  const contract2 = useContractNoSigner(NFT_ADDRESS, NFT_ABI);
 
   const handleWithdraw = async () => {
     try {
@@ -34,22 +38,22 @@ const Redeem = () => {
 
   useEffect(() => {
     const getData = async () => {
-      const seconds = (await contract.timeUntilWithdrawal()).toNumber();
+      const seconds = (await contract2.timeUntilWithdrawal()).toNumber();
       setWithdrawalSeconds(seconds);
 
-      const lastMinter = await contract.lastMinter();
+      const lastMinter = await contract2.lastMinter();
       setLastMinter(lastMinter);
 
-      const amount = await contract.withdrawalAmount();
+      const amount = await contract2.withdrawalAmount();
       setWithdrawalAmount(
         parseFloat(ethers.utils.formatEther(amount)).toFixed(1)
       );
     };
 
-    if (contract) {
+    if (contract2) {
       getData();
     }
-  }, [contract]);
+  }, [contract2]);
 
   if (withdrawalSeconds === null) return null;
 
