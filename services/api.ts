@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const baseUrl = "https://randomwalknft-api.com/";
-export const baseUrl = "http://69.10.55.2/";
+export const baseUrl = "https://nfts.cosmicsignature.com/";
 const proxyUrl = "/api/proxy?url=";
 const getAPIUrl = (url: string) => {
   return `${proxyUrl}${encodeURIComponent(baseUrl + url)}`;
