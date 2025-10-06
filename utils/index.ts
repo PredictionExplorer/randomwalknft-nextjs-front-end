@@ -42,9 +42,8 @@ export const formatId = (id: number | string) => {
 }
 
 export const getAssetsUrl = (url: string) => {
-  const proxyUrl = "/api/proxy?url=";
   const imageServerUrl = "http://69.10.55.2/images/randomwalk/";
-  return `${proxyUrl}${encodeURIComponent(imageServerUrl + url)}`;
+  return imageServerUrl + url;
 };
 
 export const getOriginUrl = (url: string) => {
