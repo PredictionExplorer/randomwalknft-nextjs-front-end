@@ -42,7 +42,7 @@ export const formatId = (id: number | string) => {
 }
 
 export const getAssetsUrl = (url: string) => {
-  const imageServerUrl = "http://69.10.55.2/images/randomwalk/";
+  const imageServerUrl = "https://nfts.cosmicsignature.com/images/randomwalk/";
   return imageServerUrl + url;
 };
 
