@@ -50,7 +50,7 @@
     "react-countdown": "^2.3.2",
     "react-device-detect": "^2.1.2",
     "react-dom": "^18",
-    "react-modal-video": "^1.2.8",
+    "react-modal-video": "^2.0.2",
     "react-slideshow-image": "^3.6.0",
     "swr": "^1.0.1"
   },

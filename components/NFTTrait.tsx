@@ -279,184 +279,165 @@ const NFTTrait = ({
 
   return (
     <Container>
-      <SectionWrapper>
-        <Grid container spacing={4} justifyContent="center">
-          <Grid item xs={12} sm={8} md={6}>
-            <StyledCard>
-              <CardActionArea onClick={() => setImageOpen(true)}>
-                <NFTImage
-                  image={
-                    theme === "black"
-                      ? nft_asset_info?.black_image_thumb
-                      : nft_asset_info?.white_image_thumb
-                  }
-                />
-                <NFTInfoWrapper>
-                  <Typography
-                    variant="body1"
-                    gutterBottom
-                    sx={{
-                      color: theme === "black" ? "#FFFFFF" : "#000000",
-                    }}
-                  >
-                    {formatId(id)}
-                  </Typography>
-                  {sellPrice && (
-                    <NFTPrice variant="body1">{sellPrice.toFixed(4)}Ξ</NFTPrice>
-                  )}
-                </NFTInfoWrapper>
-              </CardActionArea>
-            </StyledCard>
-            <Box mt={2}>
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    style={{ width: "100%" }}
-                    onClick={handleMenuOpen}
-                  >
-                    Copy link
-                    {anchorEl ? <ExpandLess /> : <ExpandMore />}
-                  </Button>
-
-                  <Menu
-                    elevation={0}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "center",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "center",
-                    }}
-                    anchorEl={anchorEl}
-                    keepMounted
-                    open={Boolean(anchorEl)}
-                    onClose={handleMenuClose}
-                  >
-                    <CopyToClipboard
-                      text={
-                        theme === "black"
-                          ? getOriginUrl(nft_asset_info?.black_single_video)
-                          : getOriginUrl(nft_asset_info?.white_single_video)
-                      }
+      {nft_asset_info && (
+        <SectionWrapper>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid item xs={12} sm={8} md={6}>
+              <StyledCard>
+                <CardActionArea onClick={() => setImageOpen(true)}>
+                  <NFTImage
+                    image={
+                      theme === "black"
+                        ? nft_asset_info?.black_image_thumb
+                        : nft_asset_info?.white_image_thumb
+                    }
+                  />
+                  <NFTInfoWrapper>
+                    <Typography
+                      variant="body1"
+                      gutterBottom
+                      sx={{
+                        color: theme === "black" ? "#FFFFFF" : "#000000",
+                      }}
                     >
-                      <MenuItem
-                        style={{ minWidth: 166 }}
-                        onClick={handleMenuClose}
-                      >
-                        Single Video
-                      </MenuItem>
-                    </CopyToClipboard>
-                    <CopyToClipboard
-                      text={
-                        theme === "black"
-                          ? getOriginUrl(nft_asset_info?.black_triple_video)
-                          : getOriginUrl(nft_asset_info?.white_triple_video)
-                      }
-                    >
-                      <MenuItem onClick={handleMenuClose}>
-                        Triple Video
-                      </MenuItem>
-                    </CopyToClipboard>
-                    <CopyToClipboard
-                      text={
-                        theme === "black"
-                          ? getOriginUrl(nft_asset_info?.black_image)
-                          : getOriginUrl(nft_asset_info?.white_image)
-                      }
-                    >
-                      <MenuItem onClick={handleMenuClose}>Image</MenuItem>
-                    </CopyToClipboard>
-                    <CopyToClipboard text={window.location.href}>
-                      <MenuItem onClick={handleMenuClose}>Detail Page</MenuItem>
-                    </CopyToClipboard>
-                  </Menu>
-                </Grid>
-                <Grid item xs={4}>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    style={{ width: "100%" }}
-                    onClick={handlePrev}
-                  >
-                    Prev
-                  </Button>
-                </Grid>
-                <Grid item xs={4}>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    style={{ width: "100%" }}
-                    onClick={handleNext}
-                  >
-                    Next
-                  </Button>
-                </Grid>
-              </Grid>
-            </Box>
-            {account === (seller || realOwner) && accountTokenIds.length > 0 && (
-              <Box mt={1}>
+                      {formatId(id)}
+                    </Typography>
+                    {sellPrice && (
+                      <NFTPrice variant="body1">
+                        {sellPrice.toFixed(4)}Ξ
+                      </NFTPrice>
+                    )}
+                  </NFTInfoWrapper>
+                </CardActionArea>
+              </StyledCard>
+              <Box mt={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <Button
                       variant="outlined"
                       color="primary"
                       style={{ width: "100%" }}
-                      onClick={handlePrevInWallet}
+                      onClick={handleMenuOpen}
                     >
-                      Prev In Wallet
+                      Copy link
+                      {anchorEl ? <ExpandLess /> : <ExpandMore />}
+                    </Button>
+
+                    <Menu
+                      elevation={0}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "center",
+                      }}
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "center",
+                      }}
+                      anchorEl={anchorEl}
+                      keepMounted
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                    >
+                      <CopyToClipboard
+                        text={
+                          theme === "black"
+                            ? getOriginUrl(nft_asset_info?.black_single_video)
+                            : getOriginUrl(nft_asset_info?.white_single_video)
+                        }
+                      >
+                        <MenuItem
+                          style={{ minWidth: 166 }}
+                          onClick={handleMenuClose}
+                        >
+                          Single Video
+                        </MenuItem>
+                      </CopyToClipboard>
+                      <CopyToClipboard
+                        text={
+                          theme === "black"
+                            ? getOriginUrl(nft_asset_info?.black_triple_video)
+                            : getOriginUrl(nft_asset_info?.white_triple_video)
+                        }
+                      >
+                        <MenuItem onClick={handleMenuClose}>
+                          Triple Video
+                        </MenuItem>
+                      </CopyToClipboard>
+                      <CopyToClipboard
+                        text={
+                          theme === "black"
+                            ? getOriginUrl(nft_asset_info?.black_image)
+                            : getOriginUrl(nft_asset_info?.white_image)
+                        }
+                      >
+                        <MenuItem onClick={handleMenuClose}>Image</MenuItem>
+                      </CopyToClipboard>
+                      <CopyToClipboard text={window.location.href}>
+                        <MenuItem onClick={handleMenuClose}>
+                          Detail Page
+                        </MenuItem>
+                      </CopyToClipboard>
+                    </Menu>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      style={{ width: "100%" }}
+                      onClick={handlePrev}
+                    >
+                      Prev
                     </Button>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <Button
                       variant="outlined"
                       color="primary"
                       style={{ width: "100%" }}
-                      onClick={handleNextInWallet}
+                      onClick={handleNext}
                     >
-                      Next In Wallet
+                      Next
                     </Button>
                   </Grid>
                 </Grid>
               </Box>
-            )}
-            {imageOpen && (
-              <Lightbox
-                image={
-                  theme === "black"
-                    ? nft_asset_info?.black_image
-                    : nft_asset_info?.white_image
-                }
-                onClose={() => setImageOpen(false)}
-              />
-            )}
-          </Grid>
-          <Grid item xs={12} sm={8} md={6}>
-            <NFTVideo
-              image_thumb={
-                theme === "black"
-                  ? nft_asset_info?.black_image_thumb
-                  : nft_asset_info?.white_image_thumb
-              }
-              onClick={() =>
-                handlePlay(
-                  theme === "black"
-                    ? nft_asset_info?.black_single_video
-                    : nft_asset_info?.white_single_video
-                )
-              }
-            />
-            <Box mt={2}>
-              <Typography variant="body1" align="center">
-                Single Video
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-        <Box mt={3}>
-          <Grid container spacing={4} justifyContent="center">
+              {account === (seller || realOwner) && accountTokenIds.length > 0 && (
+                <Box mt={1}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        style={{ width: "100%" }}
+                        onClick={handlePrevInWallet}
+                      >
+                        Prev In Wallet
+                      </Button>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        style={{ width: "100%" }}
+                        onClick={handleNextInWallet}
+                      >
+                        Next In Wallet
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+              {imageOpen && (
+                <Lightbox
+                  image={
+                    theme === "black"
+                      ? nft_asset_info?.black_image
+                      : nft_asset_info?.white_image
+                  }
+                  onClose={() => setImageOpen(false)}
+                />
+              )}
+            </Grid>
             <Grid item xs={12} sm={8} md={6}>
               <NFTVideo
                 image_thumb={
@@ -467,159 +448,144 @@ const NFTTrait = ({
                 onClick={() =>
                   handlePlay(
                     theme === "black"
-                      ? nft_asset_info?.black_triple_video
-                      : nft_asset_info?.white_triple_video
+                      ? nft_asset_info?.black_single_video
+                      : nft_asset_info?.white_single_video
                   )
                 }
               />
               <Box mt={2}>
                 <Typography variant="body1" align="center">
-                  Triple Video
+                  Single Video
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={8} md={6}>
-              {nft.tokenHistory[0]?.Record?.TimeStamp && (
-                <Box mb={3}>
-                  <Typography align="left" variant="body1" color="secondary">
-                    Minted Date
-                  </Typography>
-                  <Typography align="left" variant="body2" color="textPrimary">
-                    {convertTimestampToDateTime(
-                      nft.tokenHistory[0]?.Record?.TimeStamp
-                    )}
-                  </Typography>
-                </Box>
-              )}
-              <Box mb={3}>
-                <Typography align="left" variant="body1" color="secondary">
-                  Beauty Score
-                </Typography>
-                <Typography align="left" variant="body2" color="textPrimary">
-                  {rating.toFixed(2)}
-                </Typography>
-              </Box>
-              {highestOffer && (
-                <Box mb={3}>
-                  <Typography align="left" variant="body1" color="secondary">
-                    Highest Offer
-                  </Typography>
-                  <Typography align="left" variant="body2" color="textPrimary">
-                    {highestOffer.toFixed(4)}Ξ
+          </Grid>
+          <Box mt={3}>
+            <Grid container spacing={4} justifyContent="center">
+              <Grid item xs={12} sm={8} md={6}>
+                <NFTVideo
+                  image_thumb={
+                    theme === "black"
+                      ? nft_asset_info?.black_image_thumb
+                      : nft_asset_info?.white_image_thumb
+                  }
+                  onClick={() =>
+                    handlePlay(
+                      theme === "black"
+                        ? nft_asset_info?.black_triple_video
+                        : nft_asset_info?.white_triple_video
+                    )
+                  }
+                />
+                <Box mt={2}>
+                  <Typography variant="body1" align="center">
+                    Triple Video
                   </Typography>
                 </Box>
-              )}
-              <Box mb={3}>
-                <Typography align="left" variant="body1" color="secondary">
-                  Owner
-                </Typography>
-                <Typography align="left" variant="body2" color="textPrimary">
-                  <Link
-                    style={{ color: "#fff" }}
-                    href={`/gallery?address=${seller || realOwner}`}
-                  >
-                    {seller || realOwner}
-                  </Link>
-                </Typography>
-              </Box>
-              <Box mb={3}>
-                <Typography align="left" variant="body1" color="secondary">
-                  Seed
-                </Typography>
-                <Typography align="left" variant="body2" color="textPrimary">
-                  {seed}
-                </Typography>
-              </Box>
-              {name && (
+              </Grid>
+              <Grid item xs={12} sm={8} md={6}>
+                {nft.tokenHistory[0]?.Record?.TimeStamp && (
+                  <Box mb={3}>
+                    <Typography align="left" variant="body1" color="secondary">
+                      Minted Date
+                    </Typography>
+                    <Typography
+                      align="left"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      {convertTimestampToDateTime(
+                        nft.tokenHistory[0]?.Record?.TimeStamp
+                      )}
+                    </Typography>
+                  </Box>
+                )}
                 <Box mb={3}>
                   <Typography align="left" variant="body1" color="secondary">
-                    Name
+                    Beauty Score
                   </Typography>
                   <Typography align="left" variant="body2" color="textPrimary">
-                    {name}
+                    {rating.toFixed(2)}
                   </Typography>
                 </Box>
-              )}
-              <Box>
-                {account === realOwner ? (
-                  <>
-                    <Box mb={3}>
-                      <Typography gutterBottom variant="h6" align="left">
-                        TRANSFER
-                      </Typography>
-                      <Box display="flex">
-                        <TextField
-                          variant="filled"
-                          color="secondary"
-                          placeholder="Enter address here"
-                          fullWidth
-                          size="small"
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                        />
-                        <Button
-                          color="secondary"
-                          variant="contained"
-                          onClick={handleTransfer}
-                        >
-                          Send
-                        </Button>
-                      </Box>
-                    </Box>
-                    <Box mb={3}>
-                      <Typography gutterBottom variant="h6" align="left">
-                        PUT ON SALE
-                      </Typography>
-                      <Box display="flex">
-                        <TextField
-                          type="number"
-                          variant="filled"
-                          color="secondary"
-                          placeholder="Enter ETH price here"
-                          value={price}
-                          size="small"
-                          style={{ flex: 1 }}
-                          onChange={(e) => setPrice(e.target.value)}
-                        />
-                        <Button
-                          color="secondary"
-                          variant="contained"
-                          onClick={handleMakeSell}
-                        >
-                          Sell
-                        </Button>
-                      </Box>
-                    </Box>
-                    <Box mb={3}>
-                      <Typography gutterBottom variant="h6" align="left">
-                        RENAME
-                      </Typography>
-                      <Box display="flex">
-                        <TextField
-                          variant="filled"
-                          color="secondary"
-                          placeholder="Enter token name here"
-                          value={tokenName}
-                          size="small"
-                          fullWidth
-                          onChange={(e) => setTokenName(e.target.value)}
-                        />
-                        <Button
-                          color="secondary"
-                          variant="contained"
-                          onClick={handleSetTokenName}
-                        >
-                          Update
-                        </Button>
-                      </Box>
-                    </Box>
-                  </>
-                ) : (
-                  <>
-                    {!user_sell_offers.length && (
+                {highestOffer && (
+                  <Box mb={3}>
+                    <Typography align="left" variant="body1" color="secondary">
+                      Highest Offer
+                    </Typography>
+                    <Typography
+                      align="left"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      {highestOffer.toFixed(4)}Ξ
+                    </Typography>
+                  </Box>
+                )}
+                <Box mb={3}>
+                  <Typography align="left" variant="body1" color="secondary">
+                    Owner
+                  </Typography>
+                  <Typography align="left" variant="body2" color="textPrimary">
+                    <Link
+                      style={{ color: "#fff" }}
+                      href={`/gallery?address=${seller || realOwner}`}
+                    >
+                      {seller || realOwner}
+                    </Link>
+                  </Typography>
+                </Box>
+                <Box mb={3}>
+                  <Typography align="left" variant="body1" color="secondary">
+                    Seed
+                  </Typography>
+                  <Typography align="left" variant="body2" color="textPrimary">
+                    {seed}
+                  </Typography>
+                </Box>
+                {name && (
+                  <Box mb={3}>
+                    <Typography align="left" variant="body1" color="secondary">
+                      Name
+                    </Typography>
+                    <Typography
+                      align="left"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      {name}
+                    </Typography>
+                  </Box>
+                )}
+                <Box>
+                  {account === realOwner ? (
+                    <>
                       <Box mb={3}>
                         <Typography gutterBottom variant="h6" align="left">
-                          BID
+                          TRANSFER
+                        </Typography>
+                        <Box display="flex">
+                          <TextField
+                            variant="filled"
+                            color="secondary"
+                            placeholder="Enter address here"
+                            fullWidth
+                            size="small"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                          />
+                          <Button
+                            color="secondary"
+                            variant="contained"
+                            onClick={handleTransfer}
+                          >
+                            Send
+                          </Button>
+                        </Box>
+                      </Box>
+                      <Box mb={3}>
+                        <Typography gutterBottom variant="h6" align="left">
+                          PUT ON SALE
                         </Typography>
                         <Box display="flex">
                           <TextField
@@ -635,55 +601,107 @@ const NFTTrait = ({
                           <Button
                             color="secondary"
                             variant="contained"
-                            onClick={handleMakeBuy}
+                            onClick={handleMakeSell}
                           >
-                            Make Offer
+                            Sell
                           </Button>
                         </Box>
                       </Box>
-                    )}
-                    {user_sell_offers.length ? (
                       <Box mb={3}>
-                        <Button
-                          color="secondary"
-                          variant="contained"
-                          onClick={handleCancelSell}
-                          size="large"
-                          style={{ height: "100%" }}
-                        >
-                          Cancel Sell Offer
-                        </Button>
+                        <Typography gutterBottom variant="h6" align="left">
+                          RENAME
+                        </Typography>
+                        <Box display="flex">
+                          <TextField
+                            variant="filled"
+                            color="secondary"
+                            placeholder="Enter token name here"
+                            value={tokenName}
+                            size="small"
+                            fullWidth
+                            onChange={(e) => setTokenName(e.target.value)}
+                          />
+                          <Button
+                            color="secondary"
+                            variant="contained"
+                            onClick={handleSetTokenName}
+                          >
+                            Update
+                          </Button>
+                        </Box>
                       </Box>
-                    ) : (
-                      realOwner &&
-                      realOwner.toLowerCase() ===
-                        MARKET_ADDRESS.toLowerCase() && (
+                    </>
+                  ) : (
+                    <>
+                      {!user_sell_offers.length && (
+                        <Box mb={3}>
+                          <Typography gutterBottom variant="h6" align="left">
+                            BID
+                          </Typography>
+                          <Box display="flex">
+                            <TextField
+                              type="number"
+                              variant="filled"
+                              color="secondary"
+                              placeholder="Enter ETH price here"
+                              value={price}
+                              size="small"
+                              style={{ flex: 1 }}
+                              onChange={(e) => setPrice(e.target.value)}
+                            />
+                            <Button
+                              color="secondary"
+                              variant="contained"
+                              onClick={handleMakeBuy}
+                            >
+                              Make Offer
+                            </Button>
+                          </Box>
+                        </Box>
+                      )}
+                      {user_sell_offers.length ? (
                         <Box mb={3}>
                           <Button
                             color="secondary"
                             variant="contained"
-                            onClick={handleAcceptSell}
+                            onClick={handleCancelSell}
                             size="large"
                             style={{ height: "100%" }}
                           >
-                            Buy Now for {sellPrice && sellPrice.toFixed(4)}Ξ
+                            Cancel Sell Offer
                           </Button>
                         </Box>
-                      )
-                    )}
-                  </>
-                )}
-              </Box>
+                      ) : (
+                        realOwner &&
+                        realOwner.toLowerCase() ===
+                          MARKET_ADDRESS.toLowerCase() && (
+                          <Box mb={3}>
+                            <Button
+                              color="secondary"
+                              variant="contained"
+                              onClick={handleAcceptSell}
+                              size="large"
+                              style={{ height: "100%" }}
+                            >
+                              Buy Now for {sellPrice && sellPrice.toFixed(4)}Ξ
+                            </Button>
+                          </Box>
+                        )
+                      )}
+                    </>
+                  )}
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-        <ModalVideo
-          channel="custom"
-          url={videoPath}
-          isOpen={open}
-          onClose={() => setOpen(false)}
-        />
-      </SectionWrapper>
+          </Box>
+          <ModalVideo
+            channel="custom"
+            url={videoPath}
+            isOpen={open}
+            onClose={() => setOpen(false)}
+          />
+        </SectionWrapper>
+      )}
     </Container>
   );
 };
