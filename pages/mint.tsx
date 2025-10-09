@@ -46,7 +46,7 @@ const Mint = () => {
         }
 
         const mintPrice = await nftContract.getMintPrice();
-        const newPrice = parseFloat(ethers.utils.formatEther(mintPrice)) * 1.01;
+        const newPrice = parseFloat(ethers.utils.formatEther(mintPrice));
 
         await nftContract
           .mint({ value: ethers.utils.parseEther(newPrice.toFixed(4)) })
