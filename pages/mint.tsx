@@ -83,9 +83,7 @@ const Mint = () => {
   useEffect(() => {
     const getData = async () => {
       const mintPrice = await nftContract.getMintPrice();
-      setMintPrice(
-        (parseFloat(parseBalance(mintPrice)) * 1.01 + 0.008).toFixed(4)
-      );
+      setMintPrice(parseFloat(parseBalance(mintPrice)).toFixed(4));
 
       const withdrawalAmount = await nftContract.withdrawalAmount();
       setWithdrawalAmount(parseBalance(withdrawalAmount));
@@ -227,7 +225,13 @@ const Mint = () => {
                     return (
                       <StyledCard key={i} style={{ margin: 2 }}>
                         <CardActionArea href={`/detail/${id}`}>
-                          <Box sx={{ position: 'relative', width: '100%', paddingTop: '64%' }}>
+                          <Box
+                            sx={{
+                              position: "relative",
+                              width: "100%",
+                              paddingTop: "64%",
+                            }}
+                          >
                             <Image
                               src={getAssetsUrl(`${fileName}_black_thumb.jpg`)}
                               alt={`NFT ${formatId(id)}`}
