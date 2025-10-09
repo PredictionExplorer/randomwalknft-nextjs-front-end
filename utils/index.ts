@@ -42,8 +42,9 @@ export const formatId = (id: number | string) => {
 }
 
 export const getAssetsUrl = (url: string) => {
+  const proxyUrl = "/api/proxy?url=";
   const imageServerUrl = "https://nfts.cosmicsignature.com/images/randomwalk/";
-  return imageServerUrl + url;
+  return `${proxyUrl}${encodeURIComponent(imageServerUrl + url)}`;
 };
 
 export const getOriginUrl = (url: string) => {
