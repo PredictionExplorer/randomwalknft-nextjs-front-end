@@ -2,6 +2,7 @@ import axios from "axios";
 
 // const baseUrl = "https://randomwalknft-api.com/";
 export const baseUrl = "https://nfts.cosmicsignature.com/";
+export const rwalkBaseUrl = "http://69.10.55.2:9291/api/rwalk/";
 const proxyUrl = "/api/proxy?url=";
 const getAPIUrl = (url: string) => {
   return `${proxyUrl}${encodeURIComponent(baseUrl + url)}`;
@@ -18,7 +19,11 @@ class ApiService {
   }
 
   public async get_info(token_id: number | string) {
-    const { data } = await axios.get(getAPIUrl(`token_info/${token_id}`));
+    const { data } = await axios.get(
+      `${proxyUrl}${encodeURIComponent(
+        `${rwalkBaseUrl}tokens/info/0x895a6F444BE4ba9d124F61DF736605792B35D66b/${token_id}`
+      )}`
+    );
     return data;
   }
 
@@ -74,7 +79,7 @@ class ApiService {
 
   public async tradingHistory(page: number) {
     let perPage = 20;
-    let url = `http://69.10.55.2:9291/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/0/1000000`;
+    let url = `${rwalkBaseUrl}trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/0/1000000`;
     let res = await axios.get(url);
     let totalCount = res.data.Trading.length ?? 0;
     let start = totalCount - perPage * page;
@@ -82,7 +87,7 @@ class ApiService {
       perPage += start;
       start = 0;
     }
-    url = `http://69.10.55.2:9291/api/rwalk/trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/${start}/${perPage}`;
+    url = `${rwalkBaseUrl}trading/sales/0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08/${start}/${perPage}`;
     res = await axios.get(url);
     let data = res?.data?.Trading;
     data.sort((a: { TimeStamp: number }, b: { TimeStamp: number }) => {
