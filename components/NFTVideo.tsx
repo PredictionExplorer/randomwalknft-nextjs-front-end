@@ -1,11 +1,21 @@
 import React from 'react'
 import Image from 'next/image'
+import { Box } from '@mui/material'
 
-import { VideoCard, NFTImage } from './styled'
+import { VideoCard } from './styled'
 
 const NFTVideo = ({ image_thumb, onClick }) => (
   <VideoCard>
-    <NFTImage image={image_thumb} style={{ opacity: 0.55 }} />
+    <Box sx={{ position: 'relative', width: '100%', paddingTop: '64%', opacity: 0.55 }}>
+      <Image
+        src={image_thumb}
+        alt="NFT Video Thumbnail"
+        layout="fill"
+        objectFit="cover"
+        sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
+        loading="lazy"
+      />
+    </Box>
     <div
       style={{
         position: 'absolute',

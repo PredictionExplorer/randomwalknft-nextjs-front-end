@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { ethers } from "ethers";
 import { Typography, Box, Grid, CardActionArea, Hidden } from "@mui/material";
+import Image from "next/image";
 import Countdown from "react-countdown";
 import { Fade } from "react-slideshow-image";
 import "react-slideshow-image/dist/styles.css";
@@ -12,7 +13,6 @@ import {
   MainWrapper,
   CenterBox,
   MintActiveButton,
-  NFTImage,
   NFTInfoWrapper,
   StyledLink,
   StyledCard,
@@ -227,9 +227,16 @@ const Mint = () => {
                     return (
                       <StyledCard key={i} style={{ margin: 2 }}>
                         <CardActionArea href={`/detail/${id}`}>
-                          <NFTImage
-                            image={getAssetsUrl(`${fileName}_black_thumb.jpg`)}
-                          />
+                          <Box sx={{ position: 'relative', width: '100%', paddingTop: '64%' }}>
+                            <Image
+                              src={getAssetsUrl(`${fileName}_black_thumb.jpg`)}
+                              alt={`NFT ${formatId(id)}`}
+                              layout="fill"
+                              objectFit="cover"
+                              sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
+                              priority
+                            />
+                          </Box>
                           <NFTInfoWrapper>
                             <Typography variant="body1">
                               {formatId(id)}
