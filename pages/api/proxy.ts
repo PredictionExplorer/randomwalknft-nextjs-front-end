@@ -43,7 +43,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const response = await axios(axiosConfig);
 
-    res.writeHead(response.status, response.headers);
+    // Override cache headers to prevent aggressive caching
+    const headers = {
+      ...response.headers,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    };
+
+    res.writeHead(response.status, headers);
     response.data.pipe(res);
   } catch (error: any) {
     console.error('Proxy request failed:', error.message);
