@@ -35,6 +35,7 @@ export function SiteHeader() {
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
+              (item.href.startsWith("/#") && pathname === "/") ||
               ("children" in item && item.children ? item.children.some((child) => pathname === child.href) : false);
 
             if ("children" in item && item.children) {
@@ -99,9 +100,9 @@ export function SiteHeader() {
                       "block text-lg font-medium tracking-[0.14em]",
                       pathname === item.href ? "text-secondary" : "text-foreground"
                     )}
-                    >
-                      {item.title}
-                    </Link>
+                  >
+                    {item.title}
+                  </Link>
                   {"children" in item && item.children ? (
                     <div className="space-y-1 pl-4">
                       {item.children.map((child: (typeof item.children)[number]) => (

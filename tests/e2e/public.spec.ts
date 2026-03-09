@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 test("home page renders primary CTA", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: /mint now/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /mint the next work/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /random walk nft/i })).toBeVisible();
 });
 
@@ -38,15 +38,32 @@ test("gallery renders a single page of NFTs and supports page navigation", async
 
 test("gallery beauty filter persists in the URL", async ({ page }) => {
   await page.goto("/gallery");
-  await page.getByRole("link", { name: /sort by beauty/i }).click();
+  await page.getByRole("link", { name: /beauty score/i }).click();
   await expect(page).toHaveURL(/sortBy=beauty/);
   await expect(page.getByText(/Page 1 of/i)).toBeVisible();
+});
+
+test("gallery token search applies a query filter", async ({ page }) => {
+  await page.goto("/gallery");
+  await page.getByLabel(/search token id/i).fill("1");
+  await page.getByRole("button", { name: /apply/i }).click();
+  await expect(page).toHaveURL(/query=1/);
+  await expect(page.getByText(/Token #000001/i)).toBeVisible();
 });
 
 test("marketplace supports the buy-offer filter", async ({ page }) => {
   await page.goto("/marketplace");
   await page.getByRole("link", { name: /buy offers/i }).click();
   await expect(page).toHaveURL(/filter=buy/);
+});
+
+test("marketplace price filters persist in the URL", async ({ page }) => {
+  await page.goto("/marketplace");
+  await page.getByLabel(/min eth/i).fill("0.1");
+  await page.getByLabel(/max eth/i).fill("1");
+  await page.getByRole("button", { name: /apply marketplace filters/i }).click();
+  await expect(page).toHaveURL(/min=0.1/);
+  await expect(page).toHaveURL(/max=1/);
 });
 
 test("random image page links to an NFT detail page", async ({ page }) => {

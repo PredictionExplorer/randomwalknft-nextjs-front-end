@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { NftDetailExperience } from "@/components/feature/nft-detail-experience";
 import { getOffersForToken, getTokenDetail } from "@/lib/api/public";
 import { SITE_DESCRIPTION } from "@/lib/config";
+import type { AssetTheme, AssetVariant } from "@/lib/types";
 import { formatId } from "@/lib/utils";
 
 type Params = Promise<{ id: string }>;
@@ -59,6 +60,12 @@ export default async function DetailPage({
   }
 
   const message = typeof resolvedSearchParams.message === "string" ? resolvedSearchParams.message : undefined;
+  const initialTheme: AssetTheme =
+    resolvedSearchParams.theme === "white" ? "white" : "black";
+  const initialMedia: AssetVariant =
+    resolvedSearchParams.media === "singleVideo" || resolvedSearchParams.media === "tripleVideo"
+      ? resolvedSearchParams.media
+      : "image";
 
   return (
     <NftDetailExperience
@@ -66,6 +73,8 @@ export default async function DetailPage({
       buyOffers={offers.buyOffers}
       sellOffers={offers.sellOffers}
       message={message}
+      initialTheme={initialTheme}
+      initialMedia={initialMedia}
     />
   );
 }

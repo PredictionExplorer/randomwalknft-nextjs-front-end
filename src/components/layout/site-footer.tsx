@@ -8,11 +8,26 @@ const socialLinks = [
 export function SiteFooter() {
   return (
     <footer className="mt-20 border-t border-border/60 bg-background/40">
-      <PageShell className="flex flex-col gap-4 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <p>Random Walk NFT</p>
-        <div className="flex items-center gap-4">
+      <PageShell className="grid gap-8 py-10 text-sm text-muted-foreground lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+        <div className="space-y-3">
+          <p className="text-lg font-semibold text-foreground">Random Walk NFT</p>
+          <p className="max-w-xl leading-7">
+            A collector-first CC0 generative collection with verified contracts, multi-format outputs, and an on-chain incentive model built around participation.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.24em] text-secondary">Navigate</p>
+          <div className="space-y-2">
+            <a href="/gallery" className="block transition hover:text-secondary">Collection</a>
+            <a href="/marketplace" className="block transition hover:text-secondary">Marketplace</a>
+            <a href="/mint" className="block transition hover:text-secondary">Mint</a>
+            <a href="/faq" className="block transition hover:text-secondary">FAQ</a>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.24em] text-secondary">Community</p>
           {socialLinks.map((item) => (
-            <a key={item.href} href={item.href} target="_blank" className="transition hover:text-secondary">
+            <a key={item.href} href={item.href} target="_blank" className="block transition hover:text-secondary">
               {item.label}
             </a>
           ))}

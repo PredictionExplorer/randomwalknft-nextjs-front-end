@@ -12,16 +12,23 @@ const toneClasses: Record<NonNullable<HeadingPart["tone"]>, string> = {
 };
 
 export function PageHeading({
+  eyebrow,
   title,
   description,
   align = "left"
 }: {
+  eyebrow?: string;
   title: HeadingPart[];
   description?: string;
   align?: "left" | "center";
 }) {
   return (
     <div className={cn("space-y-4", align === "center" && "text-center")}>
+      {eyebrow ? (
+        <p className={cn("text-xs uppercase tracking-[0.32em] text-secondary/80", align === "center" && "mx-auto")}>
+          {eyebrow}
+        </p>
+      ) : null}
       <h1 className="flex flex-wrap gap-x-3 gap-y-1 text-3xl font-semibold tracking-[0.12em] sm:text-4xl">
         {title.map((part) => (
           <span key={`${part.text}-${part.tone ?? "default"}`} className={toneClasses[part.tone ?? "default"]}>

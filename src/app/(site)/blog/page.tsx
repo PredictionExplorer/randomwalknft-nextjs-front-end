@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Pager } from "@/components/common/pager";
@@ -33,7 +34,14 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
 
   return (
     <PageShell className="space-y-10 py-16">
+      <Breadcrumbs
+        items={[
+          { href: "/", label: "Home" },
+          { label: "Blog" }
+        ]}
+      />
       <PageHeading
+        eyebrow="Editorial and updates"
         title={[
           { text: "OUR" },
           { text: "BLOG", tone: "primary" }

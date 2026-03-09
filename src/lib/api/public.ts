@@ -23,8 +23,10 @@ import {
   tradingRecordSchema,
   voteCountSchema
 } from "@/lib/api/schemas";
-import type { BlogPost, Nft, Offer, TradingRecord } from "@/lib/types";
+import { nftAbi } from "@/generated/wagmi";
+import type { BlogPost, HomepageStats, Nft, Offer, TradingRecord } from "@/lib/types";
 import { createAssetUrls, slugify } from "@/lib/utils";
+import { publicClient } from "@/lib/web3/public-client";
 
 function normalizeOffer(
   input: z.infer<typeof offerSchema>,
@@ -102,6 +104,29 @@ export const getTokenInfo = cache(async (tokenId: number) => {
 
 export const getRandomTokenIds = cache(async () => {
   return fetchApi<number[]>("random_token", { revalidate: REVALIDATE_SHORT });
+});
+
+export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
+  const [featuredTokenIds, activeListings, activeBids, recentSales, totalSupply] = await Promise.all([
+    getRandomTokenIds(),
+    getOffers("sell"),
+    getOffers("buy"),
+    getTradingHistory(1),
+    publicClient.readContract({
+      address: NFT_ADDRESS,
+      abi: nftAbi,
+      functionName: "totalSupply"
+    }) as Promise<bigint>
+  ]);
+
+  return {
+    mintedCount: Number(totalSupply),
+    activeListings: activeListings.length,
+    activeBids: activeBids.length,
+    recentSales: recentSales.tradingHistory.slice(0, 4),
+    latestSalePrice: recentSales.tradingHistory[0]?.price,
+    featuredTokenIds
+  };
 });
 
 export const getRandomPair = cache(async () => {

@@ -7,6 +7,7 @@ import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { arbitrum } from "wagmi/chains";
 import { toast } from "sonner";
 
+import { trackEvent } from "@/lib/analytics";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,9 +41,19 @@ export function ConnectWalletButton() {
 
     try {
       setPendingWalletUid(walletUid);
+      trackEvent("wallet_connect_attempt", {
+        wallet: wallet.label
+      });
       await connectAsync({ connector: wallet.connector });
+      trackEvent("wallet_connect_success", {
+        wallet: wallet.label
+      });
       setSheetOpen(false);
     } catch (error) {
+      trackEvent("wallet_connect_error", {
+        wallet: wallet.label,
+        message: getErrorMessage(error)
+      });
       toast.error(getErrorMessage(error));
     } finally {
       setPendingWalletUid(null);
@@ -122,7 +133,14 @@ export function ConnectWalletButton() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {wrongNetwork ? (
-          <DropdownMenuItem onClick={() => switchChainAsync({ chainId: arbitrum.id })}>
+          <DropdownMenuItem
+            onClick={() => {
+              trackEvent("wallet_switch_network", {
+                chainId: arbitrum.id
+              });
+              void switchChainAsync({ chainId: arbitrum.id });
+            }}
+          >
             Switch to Arbitrum
           </DropdownMenuItem>
         ) : null}

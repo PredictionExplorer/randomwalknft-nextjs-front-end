@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageShell } from "@/components/common/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -34,6 +35,13 @@ export default async function BlogDetailPage({ params }: { params: Params }) {
 
   return (
     <PageShell className="space-y-8 py-16">
+      <Breadcrumbs
+        items={[
+          { href: "/", label: "Home" },
+          { href: "/blog", label: "Blog" },
+          { label: blog.title }
+        ]}
+      />
       <div className="space-y-4">
         <Badge variant="secondary">{formatDateFromUnix(blog.createdAt)}</Badge>
         <h1 className="max-w-4xl text-4xl font-semibold tracking-[0.08em] text-foreground">{blog.title}</h1>

@@ -2,13 +2,16 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { Route } from "next";
 
+import { NftCard } from "@/components/nft/nft-card";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getRandomTokenIds } from "@/lib/api/public";
-import { SITE_DESCRIPTION } from "@/lib/config";
-import { createAssetUrls, formatId } from "@/lib/utils";
+import { getHomepageStats } from "@/lib/api/public";
+import { homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
+import { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION } from "@/lib/config";
+import { createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Home",
@@ -16,12 +19,15 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [featuredId] = await getRandomTokenIds();
+  const stats = await getHomepageStats();
+  const [featuredId] = stats.featuredTokenIds;
   const assets = createAssetUrls(featuredId ?? 1);
+  const featuredCards = stats.featuredTokenIds.slice(0, 3);
 
   return (
     <div className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(80vh,54rem)] overflow-hidden opacity-80">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_0%,rgba(244,191,255,0.18),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(198,118,215,0.18),transparent_24%),linear-gradient(180deg,rgba(5,5,5,0.4),rgba(5,5,5,0.96))]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(80vh,54rem)] overflow-hidden opacity-70">
         <video
           autoPlay
           loop
@@ -33,44 +39,197 @@ export default async function HomePage() {
         </video>
       </div>
 
-      <PageShell className="flex min-h-[calc(100vh-11rem)] flex-col justify-center py-16 sm:py-24">
-        <div className="max-w-3xl space-y-8">
+      <PageShell className="space-y-20 py-16 sm:py-24">
+        <section className="grid items-end gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
+          <div className="max-w-4xl space-y-8">
+            <Badge variant="secondary">On-chain generative media collection</Badge>
+            <PageHeading
+              eyebrow="Collector-first CC0 collection"
+              title={[
+                { text: "RANDOM", tone: "primary" },
+                { text: "WALK" },
+                { text: "NFT", tone: "secondary" }
+              ]}
+              description="A public-domain generative collection where every mint becomes a seed, every seed becomes a family of media, and every collector decision shapes the collection’s on-chain story."
+            />
+
+            <div className="max-w-2xl space-y-4 text-base leading-8 text-muted-foreground">
+              <p>
+                Random Walk NFT combines collectible still images, motion variants, and an incentive model that sends mint value back toward collectors rather than creators.
+              </p>
+              <p>
+                Mint directly on Arbitrum, browse beauty-ranked works, or collect from a zero-fee native marketplace built specifically for the collection.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/mint"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-secondary bg-secondary px-6 text-sm font-medium text-[#140a1f] transition hover:bg-secondary/90"
+                style={{ color: "#140a1f" }}
+              >
+                Mint the next work
+              </Link>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/gallery">Browse collection</Link>
+              </Button>
+              <Button asChild variant="ghost" size="lg">
+                <Link href="/marketplace">Explore marketplace</Link>
+              </Button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {[
+                { label: "Minted", value: formatCompactNumber(stats.mintedCount) },
+                { label: "Active listings", value: formatCompactNumber(stats.activeListings) },
+                { label: "Buy offers", value: formatCompactNumber(stats.activeBids) },
+                { label: "Latest sale", value: stats.latestSalePrice ? formatEth(stats.latestSalePrice) : "Pending" }
+              ].map((item) => (
+                <Card key={item.label} className="bg-background/60">
+                  <CardContent className="space-y-2 p-5">
+                    <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">{item.label}</p>
+                    <p className="text-2xl font-semibold text-foreground">{item.value}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <Card className="overflow-hidden bg-background/55">
+            <CardContent className="space-y-6 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.26em] text-muted-foreground">Featured now</p>
+                  <Link href={`/detail/${featuredId ?? 1}` as Route} className="mt-2 inline-block text-2xl font-semibold text-secondary transition hover:text-primary">
+                    {formatId(featuredId ?? 1)}
+                  </Link>
+                </div>
+                <Badge>Live media</Badge>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {featuredCards.map((id) => (
+                  <NftCard
+                    key={id}
+                    id={id}
+                    image={createAssetUrls(id).blackThumb}
+                    href={`/detail/${id}`}
+                    compact
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section id="how-it-works" className="space-y-8 scroll-mt-32">
           <PageHeading
+            eyebrow="How it works"
             title={[
-              { text: "RANDOM", tone: "primary" },
-              { text: "WALK" },
-              { text: "NFT", tone: "secondary" }
+              { text: "COLLECT" },
+              { text: "THE", tone: "primary" },
+              { text: "RANDOM WALK", tone: "secondary" }
             ]}
-            description="On-chain CC0 NFTs built from the random walk mathematical process. Minting ETH flows back to minters through a novel on-chain incentive design."
+            description="Three parts define the collection experience: minting a seed, curating a collection, and participating in the incentive structure."
           />
+          <div className="grid gap-6 lg:grid-cols-3">
+            {homepageHowItWorks.map((item) => (
+              <Card key={item.step} className="bg-card/70">
+                <CardContent className="space-y-4 p-6">
+                  <p className="text-xs uppercase tracking-[0.28em] text-secondary">{item.step}</p>
+                  <h2 className="text-2xl font-semibold">{item.title}</h2>
+                  <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
 
-          <div className="max-w-2xl space-y-3 text-base leading-7 text-muted-foreground">
-            <p>Explore image and video outputs generated from each NFT seed.</p>
-            <p>Trade on the built-in 0.00% fee marketplace or mint the next work directly on Arbitrum.</p>
+        <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="space-y-8">
+            <PageHeading
+              eyebrow="Recent activity"
+              title={[
+                { text: "LIVE" },
+                { text: "COLLECTOR", tone: "primary" },
+                { text: "SIGNALS", tone: "secondary" }
+              ]}
+              description="A quick view of the latest marketplace activity so collectors can feel momentum, price discovery, and token movement."
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              {stats.recentSales.map((sale) => (
+                <Card key={sale.id} className="bg-card/70">
+                  <CardContent className="space-y-4 p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Recent sale</p>
+                        <Link href={`/detail/${sale.tokenId}` as Route} className="mt-2 inline-block text-xl font-semibold text-secondary">
+                          {formatId(sale.tokenId)}
+                        </Link>
+                      </div>
+                      <Badge variant="default">{formatEth(sale.price)}</Badge>
+                    </div>
+                    <p className="text-sm leading-7 text-muted-foreground">
+                      Seller {sale.seller.slice(0, 8)}… → Buyer {sale.buyer.slice(0, 8)}…
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <Link
-              href="/mint"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-secondary bg-secondary px-6 text-sm font-medium text-[#140a1f] transition hover:bg-secondary/90"
-              style={{ color: "#140a1f" }}
-            >
-              Mint now
-            </Link>
-            <Button asChild variant="outline" size="lg">
-              <Link href={`/detail/${featuredId ?? 1}` as Route}>View {formatId(featuredId ?? 1)}</Link>
-            </Button>
-          </div>
-        </div>
+          <Card className="bg-card/70">
+            <CardContent className="space-y-4 p-6">
+              <p className="text-xs uppercase tracking-[0.26em] text-muted-foreground">Collector trust</p>
+              <div className="space-y-3 text-sm leading-7 text-muted-foreground">
+                <p>
+                  NFT contract:
+                  {" "}
+                  <a href={`https://arbiscan.io/address/${NFT_ADDRESS}#code`} target="_blank" className="text-secondary">
+                    {NFT_ADDRESS}
+                  </a>
+                </p>
+                <p>
+                  Marketplace contract:
+                  {" "}
+                  <a href={`https://arbiscan.io/address/${MARKET_ADDRESS}#code`} target="_blank" className="text-secondary">
+                    {MARKET_ADDRESS}
+                  </a>
+                </p>
+              </div>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/faq">Read the collector FAQ</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
 
-        <Card className="mt-12 max-w-2xl bg-background/45">
-          <CardContent className="flex flex-wrap items-center gap-4 p-5">
-            <span className="text-xs uppercase tracking-[0.32em] text-muted-foreground">Featured now</span>
-            <Link href={`/detail/${featuredId ?? 1}` as Route} className="text-secondary transition hover:text-primary">
-              {formatId(featuredId ?? 1)}
-            </Link>
-          </CardContent>
-        </Card>
+        <section className="space-y-8">
+          <PageHeading
+            eyebrow="Why collectors trust it"
+            title={[
+              { text: "PROFESSIONAL" },
+              { text: "BY", tone: "primary" },
+              { text: "DESIGN", tone: "secondary" }
+            ]}
+            description="The collection feels stronger when its mechanics are legible. Trust signals and product clarity should be visible at every step."
+          />
+          <div className="grid gap-6 lg:grid-cols-3">
+            {homepageTrustCards.map((item) => (
+              <Card key={item.title} className="bg-card/70">
+                <CardContent className="space-y-4 p-6">
+                  <p className="text-xs uppercase tracking-[0.24em] text-secondary">{item.eyebrow}</p>
+                  <h2 className="text-2xl font-semibold">{item.title}</h2>
+                  <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
+                  {item.href && item.linkLabel ? (
+                    <Button asChild variant="ghost" size="sm">
+                      <a href={item.href} target="_blank">{item.linkLabel}</a>
+                    </Button>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
       </PageShell>
     </div>
   );

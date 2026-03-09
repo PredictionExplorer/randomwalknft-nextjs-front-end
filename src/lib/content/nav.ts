@@ -1,32 +1,21 @@
 export const navItems = [
-  { title: "Home", href: "/" },
+  { title: "Collection", href: "/gallery" },
+  { title: "Marketplace", href: "/marketplace" },
   { title: "Mint", href: "/mint" },
+  { title: "How it Works", href: "/#how-it-works" },
+  { title: "FAQ", href: "/faq" },
+  { title: "Blog", href: "/blog" },
   {
-    title: "NFT",
-    href: "/gallery",
-    children: [
-      { title: "Gallery", href: "/gallery" },
-      { title: "Marketplace", href: "/marketplace" },
-      { title: "Trading History", href: "/trading" }
-    ]
-  },
-  { title: "Redeem", href: "/redeem" },
-  {
-    title: "Random",
+    title: "Discover",
     href: "/random",
     children: [
+      { title: "Trading History", href: "/trading" },
+      { title: "Redeem", href: "/redeem" },
       { title: "Random Image", href: "/random" },
-      { title: "Random Video", href: "/random-video" }
-    ]
-  },
-  { title: "Beauty Contest", href: "/compare" },
-  {
-    title: "About",
-    href: "/faq",
-    children: [
+      { title: "Random Video", href: "/random-video" },
+      { title: "Beauty Contest", href: "/compare" },
       { title: "Generation Code", href: "/code" },
-      { title: "FAQ", href: "/faq" },
-      { title: "Blog", href: "/blog" }
+      { title: "FAQ", href: "/faq" }
     ]
   }
 ] as const;

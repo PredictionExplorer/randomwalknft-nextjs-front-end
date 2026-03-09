@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Pager } from "@/components/common/pager";
+import { CollectionToolbar } from "@/components/collection/collection-toolbar";
 import { NftGrid } from "@/components/nft/nft-grid";
-import { Button } from "@/components/ui/button";
 import { nftAbi } from "@/generated/wagmi";
 import { getRatingOrder } from "@/lib/api/public";
 import { NFT_ADDRESS, PAGE_SIZE } from "@/lib/config";
 import { getDescendingTokenPage, paginateItems } from "@/lib/pagination";
+import { buildCollectionSearchParams, parseCollectionQueryState } from "@/lib/query-state";
 import { publicClient } from "@/lib/web3/public-client";
 
 export const metadata: Metadata = {
@@ -19,10 +21,8 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function GalleryPage({ searchParams }: { searchParams: SearchParams }) {
   const resolvedSearchParams = await searchParams;
-  const address = typeof resolvedSearchParams.address === "string" ? resolvedSearchParams.address : undefined;
-  const sortBy = resolvedSearchParams.sortBy === "beauty" ? "beauty" : "tokenId";
-  const requestedPage =
-    typeof resolvedSearchParams.page === "string" ? Number(resolvedSearchParams.page) : 1;
+  const state = parseCollectionQueryState(resolvedSearchParams);
+  const { address, sortBy, query, page: requestedPage, view } = state;
 
   let tokenIds: number[] = [];
   let pageData = {
@@ -59,21 +59,38 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
     tokenIds.sort((left, right) => right - left);
   }
 
+  if (query !== undefined) {
+    if (pageData.items.length) {
+      pageData = {
+        items: pageData.items.includes(query) ? [query] : [],
+        totalItems: pageData.items.includes(query) ? 1 : 0,
+        totalPages: 1,
+        page: 1
+      };
+    } else {
+      tokenIds = tokenIds.filter((id) => id === query);
+    }
+  }
+
   if (tokenIds.length) {
     pageData = paginateItems(tokenIds, requestedPage, PAGE_SIZE);
   }
 
-  const pagerParams = new URLSearchParams();
-  if (address) {
-    pagerParams.set("address", address);
-  }
-  if (sortBy !== "tokenId") {
-    pagerParams.set("sortBy", sortBy);
-  }
+  const pagerParams = buildCollectionSearchParams({
+    ...state,
+    page: 1
+  });
 
   return (
     <PageShell className="space-y-8 py-16">
+      <Breadcrumbs
+        items={[
+          { href: "/", label: "Home" },
+          { label: "Collection" }
+        ]}
+      />
       <PageHeading
+        eyebrow="Collection browser"
         title={[
           { text: "RANDOM" },
           { text: "WALK", tone: "primary" },
@@ -83,14 +100,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
         description={address ? `Owned by ${address}` : "Browse the full Random Walk NFT collection."}
       />
 
-      <div className="flex flex-wrap gap-3">
-        <Button asChild variant={sortBy === "tokenId" ? "default" : "outline"} size="sm">
-          <a href={address ? `/gallery?address=${address}` : "/gallery"}>Sort by Token ID</a>
-        </Button>
-        <Button asChild variant={sortBy === "beauty" ? "default" : "outline"} size="sm">
-          <a href={address ? `/gallery?address=${address}&sortBy=beauty` : "/gallery?sortBy=beauty"}>Sort by Beauty</a>
-        </Button>
-      </div>
+      <CollectionToolbar state={state} />
 
       <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
         <span>{pageData.totalItems.toLocaleString()} NFTs</span>
@@ -99,7 +109,32 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
         </span>
       </div>
 
-      <NftGrid ids={pageData.items} emptyMessage="No NFTs found for this wallet." />
+      {(state.query !== undefined || state.sortBy !== "tokenId" || state.view !== "gallery" || state.address) ? (
+        <div className="flex flex-wrap gap-2">
+          {state.address ? (
+            <span className="rounded-full border border-border/80 px-3 py-1 text-xs text-muted-foreground">
+              Wallet view
+            </span>
+          ) : null}
+          {state.query !== undefined ? (
+            <span className="rounded-full border border-border/80 px-3 py-1 text-xs text-muted-foreground">
+              Token #{state.query.toString().padStart(6, "0")}
+            </span>
+          ) : null}
+          {state.sortBy === "beauty" ? (
+            <span className="rounded-full border border-border/80 px-3 py-1 text-xs text-muted-foreground">
+              Sorted by beauty
+            </span>
+          ) : null}
+          {state.view === "compact" ? (
+            <span className="rounded-full border border-border/80 px-3 py-1 text-xs text-muted-foreground">
+              Compact layout
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      <NftGrid ids={pageData.items} view={view} emptyMessage="No NFTs found for this wallet." />
       <Pager pathname="/gallery" page={pageData.page} totalPages={pageData.totalPages} searchParams={pagerParams} />
     </PageShell>
   );

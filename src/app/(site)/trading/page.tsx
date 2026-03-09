@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Pager } from "@/components/common/pager";
@@ -29,7 +30,15 @@ export default async function TradingPage({ searchParams }: { searchParams: Sear
 
   return (
     <PageShell className="space-y-8 py-16">
+      <Breadcrumbs
+        items={[
+          { href: "/", label: "Home" },
+          { href: "/marketplace", label: "Marketplace" },
+          { label: "Trading History" }
+        ]}
+      />
       <PageHeading
+        eyebrow="Collector tape"
         title={[
           { text: "RANDOM" },
           { text: "WALK", tone: "primary" },

@@ -3,16 +3,21 @@
 import { useWaitForTransactionReceipt } from "wagmi";
 import { toast } from "sonner";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { Countdown } from "@/components/common/countdown";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { useReadNftLastMinter, useReadNftTimeUntilWithdrawal, useReadNftWithdrawalAmount, useWriteNftWithdraw } from "@/generated/wagmi";
+import { trackEvent } from "@/lib/analytics";
 import { formatDateTimeFromUnix, formatEth } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
+import { useAccount } from "wagmi";
 
 export function RedeemExperience() {
+  const { chain, isConnected } = useAccount();
   const { data: withdrawalSeconds } = useReadNftTimeUntilWithdrawal();
   const { data: lastMinter } = useReadNftLastMinter();
   const { data: withdrawalAmount } = useReadNftWithdrawalAmount();
@@ -28,7 +33,14 @@ export function RedeemExperience() {
 
   return (
     <PageShell className="space-y-10 py-16">
+      <Breadcrumbs
+        items={[
+          { href: "/", label: "Home" },
+          { label: "Redeem" }
+        ]}
+      />
       <PageHeading
+        eyebrow="Collector redemption"
         title={
           seconds > 0
             ? [
@@ -41,6 +53,14 @@ export function RedeemExperience() {
               ]
         }
       />
+
+      {!isConnected || chain?.id !== 42161 ? (
+        <WalletStatusCard
+          disconnectedTitle="Connect to redeem"
+          disconnectedBody="Redemption is only available to the current qualifying collector. Connect your wallet to check eligibility and prepare the withdrawal."
+          wrongNetworkBody="Switch to Arbitrum before attempting redemption."
+        />
+      ) : null}
 
       {seconds > 0 ? <Countdown seconds={seconds} /> : null}
 
@@ -81,8 +101,15 @@ export function RedeemExperience() {
           <Button
             onClick={async () => {
               try {
+                trackEvent("transaction_submitted", {
+                  flow: "redeem"
+                });
                 await writeContractAsync({});
               } catch (error) {
+                trackEvent("transaction_failed", {
+                  flow: "redeem",
+                  message: getErrorMessage(error)
+                });
                 toast.error(getErrorMessage(error));
               }
             }}
@@ -92,6 +119,30 @@ export function RedeemExperience() {
           </Button>
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {[
+          {
+            title: "Why it exists",
+            body: "The redemption model makes collectors part of the economic story rather than passive buyers."
+          },
+          {
+            title: "What is required",
+            body: "A 30-day pause in minting plus being the most recent minter at the moment redemption opens."
+          },
+          {
+            title: "What happens next",
+            body: "Half the mint pool is released and the remaining half stays in the contract, preserving long-term incentive continuity."
+          }
+        ].map((item) => (
+          <Card key={item.title}>
+            <CardContent className="space-y-3 p-5">
+              <p className="text-lg font-semibold">{item.title}</p>
+              <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </PageShell>
   );
 }

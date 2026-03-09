@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import { AdminBlogTable } from "@/components/blog/admin-blog-table";
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageShell } from "@/components/common/page-shell";
 import { Button } from "@/components/ui/button";
 import { getBlogs } from "@/lib/api/public";
@@ -16,6 +17,13 @@ export default async function AdminPage() {
 
   return (
     <PageShell className="space-y-8 py-16">
+      <Breadcrumbs
+        items={[
+          { href: "/", label: "Home" },
+          { href: "/blog", label: "Blog" },
+          { label: "Admin" }
+        ]}
+      />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-semibold tracking-[0.12em]">BLOGS</h1>
         <div className="flex gap-3">

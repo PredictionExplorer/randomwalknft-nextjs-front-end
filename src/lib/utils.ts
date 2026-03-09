@@ -21,6 +21,13 @@ export function formatEth(value: number, fractionDigits = 4) {
   return `${value.toFixed(fractionDigits)} ETH`;
 }
 
+export function formatCompactNumber(value: number) {
+  return new Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: value < 1000 ? 0 : 1
+  }).format(value);
+}
+
 export function formatDateFromUnix(timestamp: number) {
   return format(new Date(timestamp * 1000), "MMMM d, yyyy");
 }
