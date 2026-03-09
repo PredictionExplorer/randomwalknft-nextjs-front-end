@@ -68,7 +68,7 @@ export default async function HomePage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/mint"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-secondary bg-secondary px-6 text-sm font-medium text-secondary-foreground transition hover:bg-secondary/90"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-secondary bg-secondary px-6 text-sm font-medium text-[#140a1f] transition hover:bg-secondary/90"
               >
                 Mint the next work
               </Link>

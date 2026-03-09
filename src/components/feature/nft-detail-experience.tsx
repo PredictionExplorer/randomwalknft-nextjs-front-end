@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { Route } from "next";
+import { Film, Image as ImageIcon, Play } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { isAddress, parseEther } from "viem";
@@ -310,25 +311,41 @@ export function NftDetailExperience({
           </Card>
 
           <Card className="bg-card/65">
-            <CardContent className="grid gap-3 p-5 sm:grid-cols-5">
-              <Button variant={theme === "black" ? "default" : "outline"} onClick={() => setTheme("black")}>
-                Dark
-              </Button>
-              <Button variant={theme === "white" ? "default" : "outline"} onClick={() => setTheme("white")}>
-                Light
-              </Button>
-              {(["image", "singleVideo", "tripleVideo"] as const).map((media) => (
-                <Button
-                  key={media}
-                  variant={activeMedia === media ? "default" : "outline"}
-                  onClick={() => {
-                    setActiveMedia(media);
-                    setModal(media);
-                  }}
-                >
-                  {mediaLabels[media]}
+            <CardContent className="space-y-4 p-5">
+              <div className="flex gap-2">
+                <Button className="flex-1" variant={theme === "black" ? "default" : "outline"} onClick={() => setTheme("black")}>
+                  Dark
                 </Button>
-              ))}
+                <Button className="flex-1" variant={theme === "white" ? "default" : "outline"} onClick={() => setTheme("white")}>
+                  Light
+                </Button>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-3">
+                <Button
+                  variant={activeMedia === "image" ? "default" : "outline"}
+                  className="gap-2.5"
+                  onClick={() => { setActiveMedia("image"); setModal("image"); }}
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  Image
+                </Button>
+                <Button
+                  variant={activeMedia === "singleVideo" ? "secondary" : "outline"}
+                  className="gap-2.5 border-primary/40"
+                  onClick={() => { setActiveMedia("singleVideo"); setModal("singleVideo"); }}
+                >
+                  <Play className="h-4 w-4" />
+                  Single video
+                </Button>
+                <Button
+                  variant={activeMedia === "tripleVideo" ? "secondary" : "outline"}
+                  className="gap-2.5 border-primary/40"
+                  onClick={() => { setActiveMedia("tripleVideo"); setModal("tripleVideo"); }}
+                >
+                  <Film className="h-4 w-4" />
+                  Triple video
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -666,7 +683,14 @@ export function NftDetailExperience({
         </TabsContent>
       </Tabs>
 
-      <Dialog open={Boolean(modal)} onOpenChange={(open) => setModal(open ? activeMedia : null)}>
+      <Dialog open={Boolean(modal)} onOpenChange={(open) => {
+        if (!open) {
+          setModal(null);
+          window.scrollTo({ top: 0 });
+        } else {
+          setModal(activeMedia);
+        }
+      }}>
         <DialogContent className="overflow-hidden p-0">
           <DialogTitle className="sr-only">
             {modal ? `${mediaLabels[modal]} preview for ${formatId(nft.id)}` : `Preview for ${formatId(nft.id)}`}
