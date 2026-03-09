@@ -98,14 +98,14 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
         ]}
       />
       <PageHeading
-        eyebrow="Collection browser"
+        eyebrow="Full collection"
         title={[
           { text: "RANDOM" },
           { text: "WALK", tone: "primary" },
           { text: "NFT", tone: "secondary" },
           { text: "GALLERY" }
         ]}
-        description={address ? `Owned by ${address}` : "Browse the full Random Walk NFT collection."}
+        description={address ? `Showing NFTs owned by ${address.slice(0, 8)}...${address.slice(-4)}` : "Browse every Random Walk NFT — sort by newest or community beauty score."}
       />
 
       <CollectionToolbar state={state} />

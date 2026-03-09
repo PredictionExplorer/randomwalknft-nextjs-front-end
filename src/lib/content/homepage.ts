@@ -3,43 +3,43 @@ import type { TrustSectionContent } from "@/lib/types";
 export const homepageTrustCards: TrustSectionContent[] = [
   {
     eyebrow: "Verified contracts",
-    title: "Transparent and verifiable",
+    title: "Fully transparent on-chain",
     body:
-      "Both the NFT and marketplace contracts are verified on Arbiscan, so collectors can inspect the exact logic behind minting, trading, and withdrawals.",
+      "Both the NFT and marketplace contracts are verified on Arbiscan. Anyone can inspect the exact logic behind minting, trading, and withdrawals before committing a single transaction.",
     href: "https://arbiscan.io",
     linkLabel: "View on Arbiscan"
   },
   {
-    eyebrow: "Collector-aligned design",
-    title: "Minting value flows back to minters",
+    eyebrow: "Collector-aligned economics",
+    title: "Mint value flows back to you",
     body:
-      "The incentive model is part of the product story, not hidden economics. If minting pauses for 30 days, the most recent minter can withdraw half the accumulated mint pool."
+      "This is not a creator cash-grab. If no one mints for 30 days, the most recent minter can withdraw half of the accumulated mint pool — keeping the economics aligned with collectors."
   },
   {
-    eyebrow: "CC0",
-    title: "A public-domain generative collection",
+    eyebrow: "CC0 public domain",
+    title: "Own it, remix it, share it",
     body:
-      "Random Walk NFT is built around collectible media that remains open and remixable. The code, media output, and provenance all reinforce the collection’s long-term cultural value."
+      "All artwork is released under CC0 — completely public domain. You own the on-chain token and provenance, while the art itself stays free for anyone to use, remix, or build upon."
   }
 ];
 
 export const homepageHowItWorks = [
   {
     step: "01",
-    title: "Mint a new path",
+    title: "Mint your NFT",
     body:
-      "Every mint creates a new on-chain seed, which becomes the source for one still image and multiple motion outputs."
+      "Each mint creates a unique on-chain seed. That seed is used to generate a one-of-a-kind still image and multiple motion variants — all tied to your token."
   },
   {
     step: "02",
     title: "Collect and trade",
     body:
-      "Browse the gallery, buy on the zero-fee marketplace, or build a wallet-focused collection strategy around beauty score and rarity."
+      "Browse the collection ranked by community beauty scores. Buy and sell on the built-in zero-fee marketplace — no platform cuts, ever."
   },
   {
     step: "03",
-    title: "Benefit from the incentive model",
+    title: "Earn from the mint pool",
     body:
-      "When minting activity pauses for 30 days, the last minter can redeem half of the mint pool, keeping the system oriented toward collectors."
+      "When minting pauses for 30 days, the last minter can claim half the ETH in the mint pool. The other half stays in the contract for future collectors."
   }
 ] as const;

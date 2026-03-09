@@ -15,7 +15,7 @@ export function SiteFooter() {
         <div className="space-y-3">
           <p className="text-lg font-semibold text-foreground">Random Walk NFT</p>
           <p className="max-w-xl leading-7">
-            A collector-first CC0 generative collection with verified contracts, multi-format outputs, and an on-chain incentive model built around participation.
+            Generative art on Arbitrum. Verified contracts, zero-fee marketplace, and an incentive model that returns ETH to collectors.
           </p>
         </div>
         <div className="space-y-2">

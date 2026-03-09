@@ -23,7 +23,7 @@ describe("HeroVideo", () => {
   it("fetches a new random token when the video ends", async () => {
     server.use(
       http.get("/api/random-token", () =>
-        HttpResponse.json([99, 100, 101])
+        HttpResponse.json({ tokenId: 99, totalSupply: 200 })
       )
     );
 

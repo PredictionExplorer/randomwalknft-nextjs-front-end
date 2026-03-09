@@ -45,30 +45,30 @@ export default async function HomePage() {
       <PageShell className="space-y-20 pt-2 pb-20 sm:pt-3 sm:pb-24">
         <section className="grid min-h-[calc(100vh-6rem)] items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
           <div className="max-w-4xl space-y-8">
-            <Badge variant="secondary">On-chain generative media collection</Badge>
+            <Badge variant="secondary">Generative art on Arbitrum</Badge>
             <PageHeading
-              eyebrow="Collector-first CC0 collection"
+              eyebrow="CC0 public-domain collection"
               title={[
                 { text: "RANDOM", tone: "primary" },
                 { text: "WALK" },
                 { text: "NFT", tone: "secondary" }
               ]}
-              description="A public-domain generative collection where every mint becomes a seed, every seed becomes a family of media, and every collector decision shapes the collection’s on-chain story."
+              description="Every mint creates a unique seed. Every seed becomes a still image and motion artwork. And the ETH you spend flows back to collectors — not creators."
             />
 
             <div className="max-w-2xl space-y-4 text-base leading-8 text-muted-foreground">
               <p>
-                Random Walk NFT combines collectible still images, motion variants, and an incentive model that sends mint value back toward collectors rather than creators.
+                Random Walk NFT is a generative collection where each token produces unique still images and video variants from a single on-chain seed — all released under CC0 public domain.
               </p>
               <p>
-                Mint directly on Arbitrum, browse beauty-ranked works, or collect from a zero-fee native marketplace built specifically for the collection.
+                Mint on Arbitrum for under $0.10 in gas, browse works ranked by community beauty scores, and trade on a zero-fee marketplace with no platform cuts.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/mint"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-secondary bg-secondary px-6 text-sm font-medium text-[#140a1f] transition hover:bg-secondary/90"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-primary bg-primary px-7 text-sm font-bold tracking-wide text-white shadow-[0_0_24px_rgba(198,118,215,0.5)] transition hover:bg-primary/85 hover:shadow-[0_0_32px_rgba(198,118,215,0.65)]"
               >
                 Mint the next work
               </Link>
@@ -131,7 +131,7 @@ export default async function HomePage() {
               { text: "THE", tone: "primary" },
               { text: "RANDOM WALK", tone: "secondary" }
             ]}
-            description="Three parts define the collection experience: minting a seed, curating a collection, and participating in the incentive structure."
+            description="Three steps — from minting a seed to earning from the collection."
           />
           <div className="grid gap-6 lg:grid-cols-3">
             {homepageHowItWorks.map((item) => (
@@ -151,11 +151,11 @@ export default async function HomePage() {
             <PageHeading
               eyebrow="Recent activity"
               title={[
-                { text: "LIVE" },
-                { text: "COLLECTOR", tone: "primary" },
-                { text: "SIGNALS", tone: "secondary" }
+                { text: "RECENT" },
+                { text: "MARKETPLACE", tone: "primary" },
+                { text: "ACTIVITY", tone: "secondary" }
               ]}
-              description="A quick view of the latest marketplace activity so collectors can feel momentum, price discovery, and token movement."
+              description="The latest sales across the collection — see what collectors are buying and at what price."
             />
             <div className="grid gap-4 md:grid-cols-2">
               {stats.recentSales.map((sale) => (
@@ -209,11 +209,11 @@ export default async function HomePage() {
           <PageHeading
             eyebrow="Why collectors trust it"
             title={[
-              { text: "PROFESSIONAL" },
-              { text: "BY", tone: "primary" },
-              { text: "DESIGN", tone: "secondary" }
+              { text: "BUILT" },
+              { text: "ON", tone: "primary" },
+              { text: "TRUST", tone: "secondary" }
             ]}
-            description="The collection feels stronger when its mechanics are legible. Trust signals and product clarity should be visible at every step."
+            description="Verified contracts, transparent economics, and public-domain art — designed so you can collect with confidence."
           />
           <div className="grid gap-6 lg:grid-cols-3">
             {homepageTrustCards.map((item) => (

@@ -1,7 +1,7 @@
 export const SITE_URL = "https://www.randomwalknft.com";
 export const SITE_NAME = "Random Walk NFT";
 export const SITE_DESCRIPTION =
-  "Programmatically generated Random Walk image and video NFTs. ETH spent on minting goes back to the minters.";
+  "A generative art collection on Arbitrum where every mint creates unique images and videos — and ETH flows back to collectors, not creators.";
 
 export const NFT_ADDRESS = "0x895a6F444BE4ba9d124F61DF736605792B35D66b";
 export const MARKET_ADDRESS = "0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08";

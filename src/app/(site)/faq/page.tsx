@@ -22,9 +22,9 @@ export default function FaqPage() {
         ]}
       />
       <PageHeading
-        eyebrow="Collector essentials"
+        eyebrow="Frequently asked questions"
         title={[{ text: "FAQ", tone: "secondary" }]}
-        description="Answers about minting, CC0 rights, Arbitrum, redemption, and how the collection’s economics are designed."
+        description="Everything you need to know about minting, collecting, trading, and the economics behind Random Walk NFT."
       />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -39,10 +39,10 @@ export default function FaqPage() {
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Have a question?</CardTitle>
+            <CardTitle>Still have questions?</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-            <p>Reach out on social if you need something that is not covered here.</p>
+            <p>Join the community — we are happy to help.</p>
             <p>
               <ExternalLink href="https://twitter.com/RandomWalkNFT" className="text-secondary underline underline-offset-4">
                 Twitter

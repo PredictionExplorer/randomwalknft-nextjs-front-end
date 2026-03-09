@@ -14,12 +14,12 @@ import { ExternalLink } from "@/components/common/external-link";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { NftCard } from "@/components/nft/nft-card";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { useReadNftGetMintPrice, useReadNftTimeUntilSale, useReadNftWithdrawalAmount, useWriteNftMint } from "@/generated/wagmi";
 import { NFT_ADDRESS, MARKET_ADDRESS } from "@/lib/config";
 import { getErrorMessage } from "@/lib/web3/errors";
+import { showWalletError } from "@/lib/web3/wallet-toast";
 import { publicClient } from "@/lib/web3/public-client";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { arbiscanContractUrl, createAssetUrls } from "@/lib/utils";
@@ -80,7 +80,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         flow: "mint",
         message: getErrorMessage(error)
       });
-      toast.error(getErrorMessage(error));
+      showWalletError(error);
     }
   };
 
@@ -93,7 +93,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         ]}
       />
       <PageHeading
-        eyebrow="Collector mint"
+        eyebrow="Mint a new NFT"
         title={
           isSaleOpen
             ? [
@@ -110,9 +110,9 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
 
       {!isReady ? (
         <WalletStatusCard
-          disconnectedTitle="Connect to mint"
-          disconnectedBody="Minting starts with an Arbitrum wallet. Connect first so the site can prepare the transaction and guide you through confirmation."
-          wrongNetworkBody="Your wallet is connected on the wrong network. Switch to Arbitrum to mint the next Random Walk NFT."
+          disconnectedTitle="Wallet required"
+          disconnectedBody="Connect an Arbitrum wallet to mint. The site will prepare the transaction for you to confirm."
+          wrongNetworkBody="Your wallet is on the wrong network. Switch to Arbitrum to continue."
         />
       ) : null}
 
@@ -152,23 +152,28 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
             </Card>
           </div>
 
-          <Button onClick={handleMint} disabled={isPending || !isSaleOpen} size="lg">
+          <button
+            type="button"
+            onClick={handleMint}
+            disabled={isPending || !isSaleOpen}
+            className="inline-flex h-12 items-center justify-center rounded-full border border-primary bg-primary px-7 text-sm font-bold tracking-wide text-white shadow-[0_0_24px_rgba(198,118,215,0.5)] transition hover:bg-primary/85 hover:shadow-[0_0_32px_rgba(198,118,215,0.65)] disabled:pointer-events-none disabled:opacity-50"
+          >
             {isPending ? "Minting..." : "Mint now"}
-          </Button>
+          </button>
 
           <div id="how-it-works" className="grid gap-4 md:grid-cols-3">
             {[
               {
-                title: "Mint the seed",
-                body: "The transaction creates the on-chain seed that defines the artwork and motion outputs."
+                title: "1. Mint your token",
+                body: "Your transaction creates a unique on-chain seed that will be used to generate your artwork."
               },
               {
-                title: "Generate the media",
-                body: "The seed is rendered into a still image plus motion studies that become part of the collector experience."
+                title: "2. Art is generated",
+                body: "Within minutes, the seed produces a high-resolution image and multiple video variants — all unique to your token."
               },
               {
-                title: "Stay in the incentive loop",
-                body: "If mint activity pauses for 30 days, the latest minter can redeem half of the mint pool."
+                title: "3. Earn from the pool",
+                body: "If no one mints for 30 days, the last minter can claim half the ETH in the mint pool."
               }
             ].map((item) => (
               <Card key={item.title}>
@@ -191,21 +196,21 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
       <Card className="bg-card/70">
         <CardContent className="grid gap-5 p-6 md:grid-cols-3">
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.24em] text-secondary">Why collectors mint</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-secondary">Why mint?</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Minting secures the next seed, starts the media-generation process, and puts collectors directly inside the collection’s economic loop.
+              Each mint adds a new unique work to the collection, contributes to the shared pool, and gives you a chance to earn if minting pauses.
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.24em] text-secondary">What you receive</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-secondary">What you get</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Each NFT is a CC0 on-chain token paired with a still image and motion variants derived from the same seed.
+              A CC0 on-chain token with a unique still image and multiple video variants, all generated from one seed.
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.24em] text-secondary">Proof and trust</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-secondary">Verified and transparent</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              The NFT and marketplace contracts are verified on Arbiscan, keeping collector due diligence straightforward.
+              Both the NFT and marketplace contracts are verified on Arbiscan — inspect every rule before you transact.
             </p>
           </div>
         </CardContent>

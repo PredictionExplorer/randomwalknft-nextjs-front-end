@@ -22,6 +22,7 @@ import {
   shortenAddress
 } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
+import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
@@ -177,7 +178,7 @@ export function NftDetailExperience({
         tokenId: nft.id,
         message: getErrorMessage(error)
       });
-      toast.error(getErrorMessage(error));
+      showWalletError(error);
     } finally {
       setIsMutating(false);
     }
@@ -265,9 +266,9 @@ export function NftDetailExperience({
       />
 
       <PageHeading
-        eyebrow="Collector detail"
+        eyebrow="NFT detail"
         title={[{ text: nft.name || formatId(nft.id), tone: "secondary" }]}
-        description="A multi-format generative work with a live order book, ownership context, and a clear path to collect, bid, list, or rename."
+        description="View artwork, check the order book, and buy, bid, list, or transfer this token."
       />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
@@ -384,9 +385,9 @@ export function NftDetailExperience({
         <div className="space-y-6">
           {!isConnected || wrongNetwork ? (
             <WalletStatusCard
-              disconnectedTitle="Connect to collect"
-              disconnectedBody="Connect your wallet to buy, bid, rename, transfer, or list this NFT directly from the detail page."
-              wrongNetworkBody="You are connected on the wrong network. Switch to Arbitrum before using collector actions."
+              disconnectedTitle="Wallet required"
+              disconnectedBody="Connect your wallet to buy, bid, list, rename, or transfer this NFT."
+              wrongNetworkBody="Switch to Arbitrum to interact with this token."
             />
           ) : null}
 
@@ -395,19 +396,26 @@ export function NftDetailExperience({
               <CardTitle>Collector snapshot</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 text-sm text-muted-foreground">
-              <div>
+              <div className="min-w-0">
                 <span className="block text-xs uppercase tracking-[0.24em]">Owner</span>
-                <a href={`/gallery?address=${owner}`} className="text-secondary">
-                  {owner}
+                <a href={`/gallery?address=${owner}`} className="text-secondary transition hover:text-primary" title={owner}>
+                  {shortenAddress(owner, 6)}
                 </a>
               </div>
               <div>
                 <span className="block text-xs uppercase tracking-[0.24em]">Beauty score</span>
                 <span>{nft.rating.toFixed(2)}</span>
               </div>
-              <div>
+              <div className="min-w-0 sm:col-span-2">
                 <span className="block text-xs uppercase tracking-[0.24em]">Seed</span>
-                <span>{nft.seed}</span>
+                <button
+                  type="button"
+                  className="max-w-full cursor-copy truncate text-left font-mono text-xs text-muted-foreground transition hover:text-secondary"
+                  title="Click to copy full seed"
+                  onClick={() => navigator.clipboard.writeText(nft.seed).then(() => toast.success("Seed copied."))}
+                >
+                  {nft.seed}
+                </button>
               </div>
               <div>
                 <span className="block text-xs uppercase tracking-[0.24em]">Minted</span>

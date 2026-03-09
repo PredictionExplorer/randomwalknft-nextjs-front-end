@@ -6,9 +6,12 @@ import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { NftGrid } from "@/components/nft/nft-grid";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useReadNftWalletOfOwner } from "@/generated/wagmi";
+import { useMounted } from "@/lib/use-mounted";
 
 export function MyNftsView() {
+  const mounted = useMounted();
   const { address, isConnected } = useAccount();
   const { data } = useReadNftWalletOfOwner({
     args: address ? [address] : undefined,
@@ -30,12 +33,14 @@ export function MyNftsView() {
         ]}
       />
 
-      {!isConnected ? (
+      {!mounted ? (
+        <Skeleton className="h-48 w-full" />
+      ) : !isConnected ? (
         <Card>
-          <CardContent className="p-6 text-muted-foreground">Connect your wallet to load your NFTs.</CardContent>
+          <CardContent className="p-6 text-muted-foreground">Connect your wallet to view your NFTs.</CardContent>
         </Card>
       ) : (
-        <NftGrid ids={ids} emptyMessage="No NFTs found for this wallet." />
+        <NftGrid ids={ids} emptyMessage="No NFTs found." emptyDescription="You don't own any Random Walk NFTs yet. Mint one or buy from the marketplace." />
       )}
     </PageShell>
   );

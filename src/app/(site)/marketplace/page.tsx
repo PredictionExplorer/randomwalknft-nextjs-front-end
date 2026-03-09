@@ -53,14 +53,14 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
         ]}
       />
       <PageHeading
-        eyebrow="Native collector market"
+        eyebrow="Zero-fee marketplace"
         title={[
           { text: "RANDOM" },
           { text: "WALK", tone: "primary" },
           { text: "NFTS" },
           { text: "MARKETPLACE", tone: "secondary" }
         ]}
-        description="Zero-fee listings and bids, sorted for serious collectors who want faster price discovery."
+        description="Buy and sell Random Walk NFTs with zero platform fees. Filter by price, token ID, or offer type."
       />
 
       <MarketplaceToolbar state={state} totalOffers={offers.length} />
@@ -68,7 +68,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="space-y-2 p-5">
-            <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Visible entries</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Total listings</p>
             <p className="text-2xl font-semibold">{offers.length}</p>
           </CardContent>
         </Card>
@@ -102,7 +102,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
 
       {!offers.length ? (
         <div className="rounded-[1.5rem] border border-dashed border-border px-6 py-12 text-center text-muted-foreground">
-          No marketplace entries are available for this filter right now.
+          No results match your current filters. Try adjusting the price range or switching between buy offers and sell listings.
         </div>
       ) : null}
     </PageShell>

@@ -38,7 +38,7 @@ export default async function TradingPage({ searchParams }: { searchParams: Sear
         ]}
       />
       <PageHeading
-        eyebrow="Collector tape"
+        eyebrow="Sales history"
         title={[
           { text: "RANDOM" },
           { text: "WALK", tone: "primary" },

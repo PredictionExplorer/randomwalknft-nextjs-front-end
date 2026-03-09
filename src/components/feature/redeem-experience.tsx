@@ -14,6 +14,7 @@ import { useReadNftLastMinter, useReadNftTimeUntilWithdrawal, useReadNftWithdraw
 import { trackEvent } from "@/lib/analytics";
 import { formatDateTimeFromUnix, formatEth } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
+import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 
 export function RedeemExperience() {
@@ -40,7 +41,7 @@ export function RedeemExperience() {
         ]}
       />
       <PageHeading
-        eyebrow="Collector redemption"
+        eyebrow="Mint pool withdrawal"
         title={
           seconds > 0
             ? [
@@ -56,9 +57,9 @@ export function RedeemExperience() {
 
       {!isReady ? (
         <WalletStatusCard
-          disconnectedTitle="Connect to redeem"
-          disconnectedBody="Redemption is only available to the current qualifying collector. Connect your wallet to check eligibility and prepare the withdrawal."
-          wrongNetworkBody="Switch to Arbitrum before attempting redemption."
+          disconnectedTitle="Wallet required"
+          disconnectedBody="Connect your wallet to check if you are eligible for the withdrawal. Only the most recent minter qualifies."
+          wrongNetworkBody="Switch to Arbitrum to check eligibility and withdraw."
         />
       ) : null}
 
@@ -96,7 +97,7 @@ export function RedeemExperience() {
       <Card>
         <CardContent className="space-y-5 p-6">
           <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-            If nobody mints for 30 days after the last mint, the last minter can withdraw half of all ETH spent on minting up to that point. That keeps value cycling back to minters rather than the creator.
+            If 30 days pass without a new mint, the most recent minter becomes eligible to withdraw half the ETH in the mint pool. The other half remains in the contract for future collectors.
           </p>
           <Button
             onClick={async () => {
@@ -110,7 +111,7 @@ export function RedeemExperience() {
                   flow: "redeem",
                   message: getErrorMessage(error)
                 });
-                toast.error(getErrorMessage(error));
+                showWalletError(error);
               }
             }}
             disabled={isPending}
@@ -123,16 +124,16 @@ export function RedeemExperience() {
       <div className="grid gap-4 md:grid-cols-3">
         {[
           {
-            title: "Why it exists",
-            body: "The redemption model makes collectors part of the economic story rather than passive buyers."
-          },
-          {
-            title: "What is required",
-            body: "A 30-day pause in minting plus being the most recent minter at the moment redemption opens."
-          },
-          {
-            title: "What happens next",
-            body: "Half the mint pool is released and the remaining half stays in the contract, preserving long-term incentive continuity."
+                title: "Why this exists",
+                body: "The withdrawal mechanism ensures ETH flows back to active participants, not the project creator."
+              },
+              {
+                title: "Who qualifies",
+                body: "Only the most recent minter at the time the 30-day window expires. No one else can claim the withdrawal."
+              },
+              {
+                title: "What happens after",
+                body: "Half the mint pool is withdrawn. The remaining half stays in the contract, maintaining the incentive for the next cycle."
           }
         ].map((item) => (
           <Card key={item.title}>

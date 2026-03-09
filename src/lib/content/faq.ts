@@ -1,56 +1,72 @@
 export const faqItems = [
   {
-    summary: "How do I mint Random Walk NFTs?",
+    summary: "What is Random Walk NFT?",
     detail:
-      "Install a browser wallet such as MetaMask, fund it with ETH on Arbitrum, connect it on the site, and mint the next available token. The mint action triggers the on-chain seed that powers the final image and motion outputs."
+      "Random Walk NFT is a generative art collection on Arbitrum. Each token is created from a unique on-chain seed that produces a still image and multiple video variants using a mathematical random walk algorithm. The collection is CC0 (public domain) and features a built-in incentive model that returns ETH to collectors."
   },
   {
-    summary: "Why Arbitrum?",
+    summary: "How do I mint?",
     detail:
-      "Random Walk NFT uses Arbitrum for lower fees and faster collector interactions. That keeps minting, bidding, and secondary trading practical without changing the collection’s on-chain provenance."
+      "Install a wallet like MetaMask or Rabby, add some ETH on Arbitrum, connect your wallet on this site, and click Mint. The transaction creates your unique seed, and the artwork is generated automatically within a few minutes."
   },
   {
-    summary: "How many Random Walk NFTs will there be?",
+    summary: "What do I receive when I mint?",
     detail:
-      "The mint price increases by roughly 0.1% after each mint, so supply growth slows dramatically over time. A few thousand minted NFTs is more plausible than a very large collection."
+      "You receive an on-chain NFT token tied to a unique seed. From that seed, the system generates a high-resolution still image and two video variants (single and triple motion). All media is viewable and downloadable from your token's detail page."
   },
   {
-    summary: "How does the mint incentive model work?",
+    summary: "How much does it cost to mint?",
     detail:
-      "If minting pauses for 30 days, the most recent minter can withdraw half of the ETH spent on minting up to that point. The remaining half stays in the contract, so collector activity continues to shape the economics over time."
+      "The mint price increases by roughly 0.1% after each mint, starting from a low base. The current price is always displayed on the Mint page. You will also need a small amount of ETH for Arbitrum gas fees, which are typically under $0.10."
   },
   {
-    summary: "Are the contracts verified?",
+    summary: "Why is this on Arbitrum instead of Ethereum?",
     detail:
-      "Yes. Both the NFT contract and the marketplace contract are verified on Arbiscan, so collectors can inspect the underlying code directly."
+      "Arbitrum is an Ethereum Layer 2 that offers the same security guarantees as Ethereum mainnet but with significantly lower gas fees and faster transactions. This makes minting, trading, and bidding practical and affordable."
   },
   {
-    summary: "What is the marketplace fee?",
-    detail: "The built-in marketplace charges 0% fees."
+    summary: "How does the mint pool incentive work?",
+    detail:
+      "ETH from every mint goes into a shared pool inside the smart contract. If 30 days pass without a new mint, the most recent minter becomes eligible to withdraw half the pool. The remaining half stays in the contract, preserving the incentive for future collectors."
   },
   {
-    summary: "What exactly do collectors own?",
+    summary: "Is there a marketplace fee?",
     detail:
-      "Collectors own an on-chain Random Walk NFT tied to a seed, plus a family of generated media outputs derived from that seed. The collection is CC0, so the artwork is public domain while ownership and provenance stay on-chain."
+      "No. The built-in marketplace charges zero fees. When you buy or sell, the full amount goes directly between buyer and seller with no platform cut."
   },
   {
-    summary: "How are the images and videos generated?",
+    summary: "How do I sell my NFT?",
     detail:
-      "Each mint starts with a deterministic seed from the contract. That seed feeds a Python-based random walk that generates both still imagery and motion variants from the same mathematical origin."
+      "Go to your token's detail page, enter a price in ETH, and click List. Your NFT will appear on the marketplace immediately. You can cancel the listing at any time. Buyers can also make offers on any token, even if it is not listed."
+  },
+  {
+    summary: "What is the beauty score?",
+    detail:
+      "The beauty score is a community-driven ranking. On the Beauty Contest page, visitors vote between two randomly selected artworks. Over time, these votes produce a score for each token, so the collection can be browsed by what the community finds most visually compelling."
+  },
+  {
+    summary: "Are the smart contracts verified?",
+    detail:
+      "Yes. Both the NFT contract and the marketplace contract are verified and publicly readable on Arbiscan. You can review every function, rule, and economic mechanism before interacting with the collection."
+  },
+  {
+    summary: "What does CC0 mean for my NFT?",
+    detail:
+      "CC0 means the artwork is released into the public domain — anyone can use, remix, or redistribute it freely. However, the on-chain token itself (ownership, provenance, and naming rights) belongs exclusively to the wallet that holds it."
   },
   {
     summary: "What is a random walk?",
     detail:
-      "A random walk is a path built by taking steps in random directions. When that process is repeated enough times and visualized, it produces the abstract structures that define the collection."
+      "A random walk is a mathematical process where each step moves in a random direction. When repeated thousands of times and visualized, these paths create the intricate abstract patterns that define the collection. Color evolves in parallel, so composition and palette are generated together from the same seed."
   },
   {
-    summary: "How are the colors generated?",
+    summary: "How do I view my NFTs?",
     detail:
-      "Color is driven by the same generative system. While the walk moves through space, a parallel walk happens in color space, so each piece evolves composition and palette together."
+      "Connect your wallet and visit the My NFTs page from the account menu. You can also browse the Collection page and filter by your wallet address to see all tokens you own."
   },
   {
     summary: "Does the creator have special privileges?",
     detail:
-      "No. Once deployed, the creator follows the same rules as everyone else. Minting, trading, and redemption privileges are not reserved for a team wallet."
+      "No. The smart contracts have no admin keys or special access. Once deployed, the creator follows the same rules as every other participant — minting, trading, and redemption work identically for everyone."
   }
 ] as const;

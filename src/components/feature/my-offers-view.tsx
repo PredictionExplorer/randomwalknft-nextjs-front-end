@@ -11,9 +11,11 @@ import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useWriteMarketCancelBuyOffer, useWriteMarketCancelSellOffer } from "@/generated/wagmi";
-import { getErrorMessage } from "@/lib/web3/errors";
+import { useMounted } from "@/lib/use-mounted";
+import { showWalletError } from "@/lib/web3/wallet-toast";
 import { formatEth, formatId } from "@/lib/utils";
 
 const offerItemSchema = z.object({
@@ -41,6 +43,7 @@ async function fetchOffers(account: string): Promise<OfferResponse> {
 }
 
 export function MyOffersView() {
+  const mounted = useMounted();
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();
   const offersQuery = useQuery({
@@ -66,16 +69,18 @@ export function MyOffersView() {
       toast.success("Offer cancelled.");
       await offersQuery.refetch();
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      showWalletError(error);
     }
   };
 
   return (
     <PageShell className="space-y-8 py-16">
       <PageHeading title={[{ text: "MY OFFERS", tone: "primary" }]} />
-      {!isConnected ? (
+      {!mounted ? (
+        <Skeleton className="h-48 w-full" />
+      ) : !isConnected ? (
         <Card>
-          <CardContent className="p-6 text-muted-foreground">Connect your wallet to load your offers.</CardContent>
+          <CardContent className="p-6 text-muted-foreground">Connect your wallet to view your offers.</CardContent>
         </Card>
       ) : (
         <Card>
