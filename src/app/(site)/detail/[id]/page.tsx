@@ -23,11 +23,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     const nft = await getTokenDetail(tokenId);
     return {
       title: `NFT ${formatId(nft.id)}`,
-      description: `${SITE_DESCRIPTION} Details for ${formatId(nft.id)}.`,
+      description: `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed. View, trade, and explore its history.`,
+      alternates: { canonical: `/detail/${nft.id}` },
       openGraph: {
+        title: `NFT ${formatId(nft.id)} | ${SITE_NAME}`,
+        description: `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed.`,
         images: [nft.assets.blackThumb]
       },
       twitter: {
+        title: `NFT ${formatId(nft.id)} | ${SITE_NAME}`,
         images: [nft.assets.blackThumb]
       }
     };

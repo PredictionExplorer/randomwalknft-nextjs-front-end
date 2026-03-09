@@ -18,7 +18,8 @@ import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, f
 
 export const metadata: Metadata = {
   title: "Home",
-  description: SITE_DESCRIPTION
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" }
 };
 
 export default async function HomePage() {
@@ -35,6 +36,19 @@ export default async function HomePage() {
           name: SITE_NAME,
           url: SITE_URL,
           description: SITE_DESCRIPTION
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: SITE_NAME,
+          url: SITE_URL,
+          description: SITE_DESCRIPTION,
+          sameAs: [
+            "https://twitter.com/RandomWalkNFT",
+            "https://discord.gg/bGnPn96Qwt"
+          ]
         }}
       />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_0%,rgba(244,191,255,0.18),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(198,118,215,0.18),transparent_24%),linear-gradient(180deg,rgba(5,5,5,0.4),rgba(5,5,5,0.96))]" />
@@ -125,6 +139,7 @@ export default async function HomePage() {
 
         <section id="how-it-works" className="space-y-8 scroll-mt-32">
           <PageHeading
+            as="h2"
             eyebrow="How it works"
             title={[
               { text: "COLLECT" },
@@ -138,7 +153,7 @@ export default async function HomePage() {
               <Card key={item.step} className="bg-card/70">
                 <CardContent className="space-y-4 p-6">
                   <p className="text-xs uppercase tracking-[0.28em] text-secondary">{item.step}</p>
-                  <h2 className="text-2xl font-semibold">{item.title}</h2>
+                  <h3 className="text-2xl font-semibold">{item.title}</h3>
                   <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
                 </CardContent>
               </Card>
@@ -149,6 +164,7 @@ export default async function HomePage() {
         <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="space-y-8">
             <PageHeading
+              as="h2"
               eyebrow="Recent activity"
               title={[
                 { text: "RECENT" },
@@ -207,6 +223,7 @@ export default async function HomePage() {
 
         <section className="space-y-8">
           <PageHeading
+            as="h2"
             eyebrow="Why collectors trust it"
             title={[
               { text: "BUILT" },
@@ -220,7 +237,7 @@ export default async function HomePage() {
               <Card key={item.title} className="bg-card/70">
                 <CardContent className="space-y-4 p-6">
                   <p className="text-xs uppercase tracking-[0.24em] text-secondary">{item.eyebrow}</p>
-                  <h2 className="text-2xl font-semibold">{item.title}</h2>
+                  <h3 className="text-2xl font-semibold">{item.title}</h3>
                   <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
                   {item.href && item.linkLabel ? (
                     <Button asChild variant="ghost" size="sm">

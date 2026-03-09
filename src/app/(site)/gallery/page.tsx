@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+import { JsonLd } from "@/components/common/json-ld";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Pager } from "@/components/common/pager";
@@ -8,13 +9,22 @@ import { CollectionToolbar } from "@/components/collection/collection-toolbar";
 import { NftGrid } from "@/components/nft/nft-grid";
 import { nftAbi } from "@/generated/wagmi";
 import { getRatingOrder } from "@/lib/api/public";
-import { NFT_ADDRESS, PAGE_SIZE } from "@/lib/config";
+import { NFT_ADDRESS, PAGE_SIZE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
 import { getDescendingTokenPage, paginateItems } from "@/lib/pagination";
 import { buildCollectionSearchParams, parseCollectionQueryState } from "@/lib/query-state";
+import { createAssetUrls } from "@/lib/utils";
 import { publicClient } from "@/lib/web3/public-client";
 
 export const metadata: Metadata = {
-  title: "Gallery"
+  title: "Gallery",
+  description:
+    "Browse the full Random Walk NFT collection. Sort by newest or community beauty score and explore generative art on Arbitrum.",
+  alternates: { canonical: "/gallery" },
+  openGraph: {
+    title: "Gallery | Random Walk NFT",
+    description:
+      "Browse the full Random Walk NFT collection. Sort by newest or community beauty score and explore generative art on Arbitrum."
+  }
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -91,6 +101,27 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
 
   return (
     <PageShell className="space-y-8 py-16">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: `${SITE_NAME} Gallery`,
+          description: SITE_DESCRIPTION,
+          url: `${SITE_URL}/gallery`,
+          isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: pageData.totalItems,
+            itemListElement: pageData.items.slice(0, 12).map((id, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: `${SITE_URL}/detail/${id}`,
+              name: `Random Walk NFT #${String(id).padStart(6, "0")}`,
+              image: createAssetUrls(id).blackThumb
+            }))
+          }
+        }}
+      />
       <Breadcrumbs
         items={[
           { href: "/", label: "Home" },

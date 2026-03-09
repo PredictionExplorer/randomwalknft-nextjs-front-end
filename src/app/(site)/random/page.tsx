@@ -4,7 +4,15 @@ import { RandomImageExperience } from "@/components/feature/random-image-experie
 import { getRandomTokenIds } from "@/lib/api/public";
 
 export const metadata: Metadata = {
-  title: "Random Image"
+  title: "Random Image",
+  description:
+    "Discover Random Walk NFT artworks at random. Navigate through full-screen generative art images created from unique on-chain seeds on Arbitrum.",
+  alternates: { canonical: "/random" },
+  openGraph: {
+    title: "Random Image | Random Walk NFT",
+    description:
+      "Discover Random Walk NFT artworks at random. Navigate through full-screen generative art images created from unique on-chain seeds on Arbitrum."
+  }
 };
 
 export default async function RandomImagePage() {

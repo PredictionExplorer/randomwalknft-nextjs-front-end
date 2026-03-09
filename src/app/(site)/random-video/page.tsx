@@ -16,7 +16,15 @@ const RandomVideoExperience = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Random Video"
+  title: "Random Video",
+  description:
+    "Watch Random Walk NFT motion artworks at random. Each video is generated from a unique on-chain seed using a mathematical random walk algorithm.",
+  alternates: { canonical: "/random-video" },
+  openGraph: {
+    title: "Random Video | Random Walk NFT",
+    description:
+      "Watch Random Walk NFT motion artworks at random. Each video is generated from a unique on-chain seed using a mathematical random walk algorithm."
+  }
 };
 
 export default function RandomVideoPage() {

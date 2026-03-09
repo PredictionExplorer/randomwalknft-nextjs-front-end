@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+import { JsonLd } from "@/components/common/json-ld";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { MarketplaceToolbar } from "@/components/marketplace/marketplace-toolbar";
@@ -8,11 +9,20 @@ import { NftCard } from "@/components/nft/nft-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getOffers } from "@/lib/api/public";
+import { SITE_NAME, SITE_URL } from "@/lib/config";
 import { parseMarketplaceQueryState } from "@/lib/query-state";
 import { createAssetUrls, formatEth, formatId } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Marketplace"
+  title: "Marketplace",
+  description:
+    "Buy and sell Random Walk NFTs on a zero-fee marketplace. Browse sell listings and buy offers for generative art on Arbitrum.",
+  alternates: { canonical: "/marketplace" },
+  openGraph: {
+    title: "Marketplace | Random Walk NFT",
+    description:
+      "Buy and sell Random Walk NFTs on a zero-fee marketplace. Browse sell listings and buy offers for generative art on Arbitrum."
+  }
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -45,6 +55,21 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
 
   return (
     <PageShell className="space-y-8 py-16">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: `${SITE_NAME} Marketplace`,
+          url: `${SITE_URL}/marketplace`,
+          numberOfItems: offers.length,
+          itemListElement: offers.slice(0, 12).map((offer, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            url: `${SITE_URL}/detail/${offer.tokenId}`,
+            name: `${offer.kind === "buy" ? "Buy offer" : "Sell listing"} for NFT #${String(offer.tokenId).padStart(6, "0")}`
+          }))
+        }}
+      />
       <Breadcrumbs
         items={[
           { href: "/", label: "Home" },

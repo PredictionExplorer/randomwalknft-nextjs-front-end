@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ExternalLink } from "@/components/common/external-link";
+import { JsonLd } from "@/components/common/json-ld";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -9,12 +10,31 @@ import { homepageTrustCards } from "@/lib/content/homepage";
 import { faqItems } from "@/lib/content/faq";
 
 export const metadata: Metadata = {
-  title: "FAQ"
+  title: "FAQ",
+  description:
+    "Frequently asked questions about Random Walk NFT — minting, trading, the zero-fee marketplace, beauty scores, CC0 licensing, and the mint pool incentive on Arbitrum.",
+  alternates: { canonical: "/faq" },
+  openGraph: {
+    title: "FAQ | Random Walk NFT",
+    description:
+      "Frequently asked questions about Random Walk NFT — minting, trading, the zero-fee marketplace, beauty scores, CC0 licensing, and the mint pool incentive on Arbitrum."
+  }
 };
 
 export default function FaqPage() {
   return (
     <PageShell className="space-y-10 py-16">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqItems.map((item) => ({
+            "@type": "Question",
+            name: item.summary,
+            acceptedAnswer: { "@type": "Answer", text: item.detail }
+          }))
+        }}
+      />
       <Breadcrumbs
         items={[
           { href: "/", label: "Home" },
@@ -61,7 +81,7 @@ export default function FaqPage() {
           <Card key={item.title}>
             <CardContent className="space-y-3 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-secondary">{item.eyebrow}</p>
-              <h2 className="text-xl font-semibold">{item.title}</h2>
+              <h3 className="text-xl font-semibold">{item.title}</h3>
               <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
             </CardContent>
           </Card>

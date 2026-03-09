@@ -12,7 +12,15 @@ import { getTradingHistory } from "@/lib/api/public";
 import { formatDateTimeFromUnix, formatEth, formatId, shortenAddress } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Trading History"
+  title: "Trading History",
+  description:
+    "View the full trading history of Random Walk NFTs. See every sale, the price paid, seller, buyer, and date across the zero-fee marketplace.",
+  alternates: { canonical: "/trading" },
+  openGraph: {
+    title: "Trading History | Random Walk NFT",
+    description:
+      "View the full trading history of Random Walk NFTs. See every sale, the price paid, seller, buyer, and date across the zero-fee marketplace."
+  }
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;

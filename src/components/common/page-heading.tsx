@@ -15,12 +15,14 @@ export function PageHeading({
   eyebrow,
   title,
   description,
-  align = "left"
+  align = "left",
+  as: Tag = "h1"
 }: {
   eyebrow?: string;
   title: HeadingPart[];
   description?: string;
   align?: "left" | "center";
+  as?: "h1" | "h2" | "h3";
 }) {
   return (
     <div className={cn("space-y-4", align === "center" && "text-center")}>
@@ -29,13 +31,13 @@ export function PageHeading({
           {eyebrow}
         </p>
       ) : null}
-      <h1 className="flex flex-wrap gap-x-3 gap-y-1 text-3xl font-semibold tracking-[0.12em] sm:text-4xl">
+      <Tag className="flex flex-wrap gap-x-3 gap-y-1 text-3xl font-semibold tracking-[0.12em] sm:text-4xl">
         {title.map((part) => (
           <span key={`${part.text}-${part.tone ?? "default"}`} className={toneClasses[part.tone ?? "default"]}>
             {part.text}
           </span>
         ))}
-      </h1>
+      </Tag>
       {description ? (
         <p className={cn("max-w-3xl text-base leading-7 text-muted-foreground", align === "center" && "mx-auto")}>
           {description}

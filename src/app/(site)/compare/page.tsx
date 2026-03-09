@@ -20,7 +20,15 @@ const CompareExperience = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Beauty Contest"
+  title: "Beauty Contest",
+  description:
+    "Vote between two Random Walk NFTs to rank the collection by community beauty scores. Help decide which generative artworks are the most visually compelling.",
+  alternates: { canonical: "/compare" },
+  openGraph: {
+    title: "Beauty Contest | Random Walk NFT",
+    description:
+      "Vote between two Random Walk NFTs to rank the collection by community beauty scores. Help decide which generative artworks are the most visually compelling."
+  }
 };
 
 export default function ComparePage() {

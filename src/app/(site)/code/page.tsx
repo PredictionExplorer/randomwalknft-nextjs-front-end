@@ -9,7 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generatorFiles } from "@/lib/content/generation-code";
 
 export const metadata: Metadata = {
-  title: "Generation Code"
+  title: "Generation Code",
+  description:
+    "View the complete Python generator, pinned dependencies, and step-by-step instructions to reproduce any Random Walk NFT artwork locally.",
+  alternates: { canonical: "/code" },
+  openGraph: {
+    title: "Generation Code | Random Walk NFT",
+    description:
+      "View the complete Python generator, pinned dependencies, and step-by-step instructions to reproduce any Random Walk NFT artwork locally."
+  }
 };
 
 export default function CodePage() {
