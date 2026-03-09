@@ -2,11 +2,15 @@
 
 # dependencies
 /node_modules
+/.pnpm-store
 /.pnp
 .pnp.js
 
 # testing
 /coverage
+/playwright-report
+/test-results
+/.lighthouseci
 
 # next.js
 /.next/
@@ -36,3 +40,7 @@ yarn-error.log*
 
 # typescript
 tsconfig.buildinfo
+*.tsbuildinfo
+
+# local legacy copies used during migration
+/legacy
