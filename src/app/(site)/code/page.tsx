@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
+import { CodeArtifactCard } from "@/components/code/code-artifact-card";
 import { Card, CardContent } from "@/components/ui/card";
-import { generationCode } from "@/lib/content/generation-code";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { generatorFiles } from "@/lib/content/generation-code";
 
 export const metadata: Metadata = {
   title: "Generation Code"
@@ -13,32 +15,75 @@ export const metadata: Metadata = {
 export default function CodePage() {
   return (
     <PageShell className="space-y-10 py-16">
+      <Breadcrumbs
+        items={[
+          { href: "/", label: "Home" },
+          { label: "Generation Code" }
+        ]}
+      />
       <PageHeading
+        eyebrow="Full reproducibility"
         title={[
           { text: "GENERATION" },
           { text: "CODE", tone: "secondary" }
         ]}
-        description="A representative excerpt of the Python process that turns an on-chain seed into still images and videos."
+        description="The complete Python generator, the exact dependencies, and the local reproduction steps needed to regenerate Random Walk NFT media on your own machine."
       />
 
-      <Card>
-        <CardContent className="space-y-6 p-6">
-          <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-            The full source is also pinned on IPFS:
-            {" "}
-            <Link
-              href="https://cloudflare-ipfs.com/ipfs/QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W"
-              target="_blank"
-              className="text-secondary underline underline-offset-4"
-            >
-              ipfs://QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W
-            </Link>
-          </p>
-          <pre className="overflow-x-auto rounded-[1.25rem] border border-border/60 bg-[#09090c] p-5 text-sm leading-6 text-slate-200">
-            <code>{generationCode}</code>
-          </pre>
+      <Card className="bg-card/70">
+        <CardContent className="grid gap-5 p-6 md:grid-cols-3">
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.22em] text-secondary">1. Install system packages</p>
+            <p className="text-sm leading-7 text-muted-foreground">
+              The original generator expects OpenCV at the system level. On Ubuntu the documented path is `apt-get update && apt-get install -y python3-opencv`.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.22em] text-secondary">2. Install Python deps</p>
+            <p className="text-sm leading-7 text-muted-foreground">
+              Use the exact requirements file below to install Pillow, NumPy, OpenCV, and requests in a clean Python environment.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.22em] text-secondary">3. Generate from a token</p>
+            <p className="text-sm leading-7 text-muted-foreground">
+              Run `python3 randomWalkGen.py &lt;NFT number&gt;` and the generator will fetch the seed from Arbitrum, then render both black and white outputs locally.
+            </p>
+          </div>
         </CardContent>
       </Card>
+
+      <Tabs defaultValue="guide">
+        <TabsList>
+          <TabsTrigger value="guide">Guide</TabsTrigger>
+          <TabsTrigger value="requirements">Requirements</TabsTrigger>
+          <TabsTrigger value="source">Full source</TabsTrigger>
+        </TabsList>
+        <TabsContent value="guide">
+          <CodeArtifactCard
+            title="Reproduction steps"
+            description="The exact instructions bundled with the generator so collectors can reproduce the media on their own machine."
+            content={generatorFiles.readme}
+            fileName={generatorFiles.readmeFileName}
+          />
+        </TabsContent>
+        <TabsContent value="requirements">
+          <CodeArtifactCard
+            title="Python requirements"
+            description="Install these pinned Python dependencies before running the generator."
+            content={generatorFiles.requirements}
+            fileName={generatorFiles.requirementsFileName}
+          />
+        </TabsContent>
+        <TabsContent value="source">
+          <CodeArtifactCard
+            title="Complete Python generator"
+            description="This is the full generator code, including RPC seed lookup, image rendering, and single/triple video generation."
+            content={generatorFiles.source}
+            fileName={generatorFiles.sourceFileName}
+          />
+        </TabsContent>
+      </Tabs>
     </PageShell>
   );
 }

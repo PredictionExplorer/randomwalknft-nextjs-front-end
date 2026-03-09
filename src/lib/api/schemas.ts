@@ -66,27 +66,6 @@ export const tokenInfoSchema = z.object({
   })
 });
 
-export const blogSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  epic: z.string(),
-  content: z.string(),
-  banner_image: z.string(),
-  thumb_image: z.string(),
-  slug: z.string(),
-  status: z.boolean().nullish().transform((value) => value ?? false),
-  created_at: z.number()
-});
-
-export const loginResponseSchema = z.object({
-  result: z.string(),
-  token: z.string().optional()
-});
-
-export const authCheckResponseSchema = z.object({
-  result: z.string()
-});
-
 export const actionResponseSchema = z.object({
   result: z.string()
 });

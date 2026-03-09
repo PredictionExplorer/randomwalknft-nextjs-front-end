@@ -10,9 +10,6 @@ export const API_BASE_URL = "https://nfts.cosmicsignature.com";
 export const RWALK_BASE_URL = "http://69.10.55.2:9291/api/rwalk";
 export const ASSET_BASE_URL = "https://nfts.cosmicsignature.com/images/randomwalk";
 
-export const SESSION_COOKIE = "randomwalknft_session";
-export const ADMIN_SESSION_HOURS = 1;
-
 export const SUPPORTED_ASSET_EXTENSIONS = [
   ".png",
   ".jpg",
@@ -26,4 +23,3 @@ export const REVALIDATE_MEDIUM = 300;
 export const REVALIDATE_LONG = 1800;
 
 export const PAGE_SIZE = 24;
-export const BLOG_PAGE_SIZE = 8;

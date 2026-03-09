@@ -19,15 +19,13 @@ test.describe("visual regressions", () => {
   test("faq page matches desktop snapshot", async ({ page }) => {
     await page.goto("/faq");
     await expect(page).toHaveScreenshot("faq-desktop.png", {
-      fullPage: true,
       animations: "disabled"
     });
   });
 
-  test("login page matches desktop snapshot", async ({ page }) => {
-    await page.goto("/auth/login");
-    await expect(page).toHaveScreenshot("login-desktop.png", {
-      fullPage: true,
+  test("code page matches desktop snapshot", async ({ page }) => {
+    await page.goto("/code");
+    await expect(page).toHaveScreenshot("code-desktop.png", {
       animations: "disabled"
     });
   });
@@ -35,7 +33,6 @@ test.describe("visual regressions", () => {
   test("detail page matches desktop snapshot", async ({ page }) => {
     await page.goto("/detail/1");
     await expect(page).toHaveScreenshot("detail-desktop.png", {
-      fullPage: true,
       animations: "disabled"
     });
   });

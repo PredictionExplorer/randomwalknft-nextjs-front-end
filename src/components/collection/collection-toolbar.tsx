@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CollectionQueryState } from "@/lib/types";
-import { buildCollectionSearchParams, getCollectionViewLabel } from "@/lib/query-state";
 
 export function CollectionToolbar({ state }: { state: CollectionQueryState }) {
   const clearHref = state.address ? `/gallery?address=${state.address}` : "/gallery";
@@ -22,6 +21,7 @@ export function CollectionToolbar({ state }: { state: CollectionQueryState }) {
 
       <form action="/gallery" className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_auto]">
         {state.address ? <input type="hidden" name="address" value={state.address} /> : null}
+        <input type="hidden" name="page" value="1" />
         <div className="space-y-2">
           <label htmlFor="gallery-query" className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
             Search token ID
@@ -37,37 +37,32 @@ export function CollectionToolbar({ state }: { state: CollectionQueryState }) {
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
-            <span className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Sort</span>
-            <div className="flex flex-wrap gap-2">
-              <Button asChild variant={state.sortBy === "tokenId" ? "default" : "outline"} size="sm">
-                <a href={state.address ? `/gallery?address=${state.address}` : "/gallery"}>Newest first</a>
-              </Button>
-              <Button asChild variant={state.sortBy === "beauty" ? "default" : "outline"} size="sm">
-                <a href={state.address ? `/gallery?address=${state.address}&sortBy=beauty` : "/gallery?sortBy=beauty"}>
-                  Beauty score
-                </a>
-              </Button>
-            </div>
+            <label htmlFor="gallery-sort" className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+              Sort
+            </label>
+            <select
+              id="gallery-sort"
+              name="sortBy"
+              defaultValue={state.sortBy}
+              className="flex h-11 w-full rounded-2xl border border-input bg-card/70 px-4 py-2 text-sm text-foreground"
+            >
+              <option value="tokenId">Newest first</option>
+              <option value="beauty">Beauty score</option>
+            </select>
           </div>
           <div className="space-y-2">
-            <span className="text-xs uppercase tracking-[0.22em] text-muted-foreground">View</span>
-            <div className="flex flex-wrap gap-2">
-              {(["gallery", "compact"] as const).map((view) => {
-                const params = buildCollectionSearchParams({
-                  ...state,
-                  page: 1,
-                  view
-                });
-
-                return (
-                  <Button key={view} asChild variant={state.view === view ? "default" : "outline"} size="sm">
-                    <a href={`/gallery${params.toString() ? `?${params.toString()}` : ""}`}>
-                      {getCollectionViewLabel(view)}
-                    </a>
-                  </Button>
-                );
-              })}
-            </div>
+            <label htmlFor="gallery-view" className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+              View
+            </label>
+            <select
+              id="gallery-view"
+              name="view"
+              defaultValue={state.view}
+              className="flex h-11 w-full rounded-2xl border border-input bg-card/70 px-4 py-2 text-sm text-foreground"
+            >
+              <option value="gallery">Gallery</option>
+              <option value="compact">Compact</option>
+            </select>
           </div>
         </div>
         <div className="flex items-end gap-2">

@@ -63,23 +63,6 @@ export type TradingRecord = {
   txHash: string;
 };
 
-export type BlogPost = {
-  id: number;
-  title: string;
-  epic: string;
-  content: string;
-  bannerImage: string;
-  thumbImage: string;
-  slug: string;
-  status: boolean;
-  createdAt: number;
-};
-
-export type AuthSession = {
-  email: string;
-  token: string;
-};
-
 export type WalletActionState = {
   status: "idle" | "pending" | "success" | "error";
   message?: string | undefined;

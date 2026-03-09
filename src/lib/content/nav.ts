@@ -4,7 +4,6 @@ export const navItems = [
   { title: "Mint", href: "/mint" },
   { title: "How it Works", href: "/#how-it-works" },
   { title: "FAQ", href: "/faq" },
-  { title: "Blog", href: "/blog" },
   {
     title: "Discover",
     href: "/random",

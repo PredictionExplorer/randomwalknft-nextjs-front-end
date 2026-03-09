@@ -59,4 +59,34 @@ describe("query-state helpers", () => {
 
     expect(params.toString()).toBe("");
   });
+
+  it("preserves non-default marketplace params when building query strings", () => {
+    const params = buildMarketplaceSearchParams({
+      filter: "buy",
+      sort: "recent",
+      min: 0.2,
+      max: 2,
+      query: 7
+    });
+
+    expect(params.toString()).toBe("filter=buy&sort=recent&min=0.2&max=2&query=7");
+  });
+
+  it("falls back to safe marketplace defaults for invalid input", () => {
+    expect(
+      parseMarketplaceQueryState({
+        filter: "unexpected",
+        sort: "bogus",
+        min: "-1",
+        max: "NaN",
+        query: "-5"
+      })
+    ).toEqual({
+      filter: "sell",
+      sort: "price-asc",
+      min: undefined,
+      max: undefined,
+      query: undefined
+    });
+  });
 });

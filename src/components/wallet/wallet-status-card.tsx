@@ -1,13 +1,18 @@
 "use client";
 
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { AlertTriangle, CheckCircle2, PlugZap, Wallet } from "lucide-react";
 import { useAccount, useConnect } from "wagmi";
 import { arbitrum } from "wagmi/chains";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { WalletConnectionState } from "@/lib/types";
+import { trackEvent } from "@/lib/analytics";
+import { walletConnectEnabled, walletConnectSupportNote } from "@/lib/web3/rainbowkit";
 import { getWalletOptions } from "@/lib/web3/wallets";
+import { getErrorMessage } from "@/lib/web3/errors";
 
 type WalletStatusCardProps = {
   disconnectedTitle: string;
@@ -58,6 +63,7 @@ export function WalletStatusCard({
 }: WalletStatusCardProps) {
   const { isConnected, chain } = useAccount();
   const { connectAsync, connectors, isPending } = useConnect();
+  const { openConnectModal } = useConnectModal();
 
   const walletOptions = getWalletOptions(connectors.filter((connector) => connector.name !== "walletconnect"));
   const preferredWallet = walletOptions[0];
@@ -85,12 +91,24 @@ export function WalletStatusCard({
         {!isConnected && preferredWallet ? (
           <Button
             variant="secondary"
-            onClick={() => void connectAsync({ connector: preferredWallet.connector })}
+            onClick={() => {
+              if (walletConnectEnabled) {
+                trackEvent("wallet_connect_attempt", { mode: "rainbowkit-status" });
+                openConnectModal?.();
+                return;
+              }
+
+              void connectAsync({ connector: preferredWallet.connector }).catch((error) => {
+                toast.error(getErrorMessage(error));
+              });
+            }}
             disabled={isPending}
           >
             <PlugZap className="h-4 w-4" />
             Connect wallet
           </Button>
+        ) : !isConnected ? (
+          <p className="max-w-xs text-xs leading-6 text-muted-foreground">{walletConnectSupportNote}</p>
         ) : null}
       </CardContent>
     </Card>

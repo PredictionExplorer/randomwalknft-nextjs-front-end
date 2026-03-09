@@ -10,6 +10,7 @@ export function MarketplaceToolbar({
   totalOffers: number;
 }) {
   const clearHref = "/marketplace";
+  const currentFilter = state.filter;
 
   return (
     <div className="space-y-4 rounded-[1.75rem] border border-border/70 bg-card/60 p-5">
@@ -30,21 +31,29 @@ export function MarketplaceToolbar({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button asChild variant={state.filter === "sell" ? "default" : "outline"} size="sm">
-          <a href="/marketplace" style={state.filter === "sell" ? { color: "#140a1f" } : undefined}>
-            Sell listings
-          </a>
-        </Button>
-        <Button asChild variant={state.filter === "buy" ? "default" : "outline"} size="sm">
-          <a href="/marketplace?filter=buy" style={state.filter === "buy" ? { color: "#140a1f" } : undefined}>
-            Buy offers
-          </a>
-        </Button>
-      </div>
-
       <form action="/marketplace" className="grid gap-4 lg:grid-cols-4">
-        {state.filter !== "sell" ? <input type="hidden" name="filter" value={state.filter} /> : null}
+        <div className="flex flex-wrap gap-2 lg:col-span-4">
+          <Button
+            type="submit"
+            name="filter"
+            value="sell"
+            variant={state.filter === "sell" ? "default" : "outline"}
+            size="sm"
+            style={state.filter === "sell" ? { color: "#140a1f" } : undefined}
+          >
+            Sell listings
+          </Button>
+          <Button
+            type="submit"
+            name="filter"
+            value="buy"
+            variant={state.filter === "buy" ? "default" : "outline"}
+            size="sm"
+            style={state.filter === "buy" ? { color: "#140a1f" } : undefined}
+          >
+            Buy offers
+          </Button>
+        </div>
         <div className="space-y-2">
           <label htmlFor="marketplace-query" className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
             Token ID
@@ -86,7 +95,9 @@ export function MarketplaceToolbar({
           </select>
         </div>
         <div className="lg:col-span-4">
-          <Button type="submit">Apply marketplace filters</Button>
+          <Button type="submit" name="filter" value={currentFilter}>
+            Apply marketplace filters
+          </Button>
         </div>
       </form>
 

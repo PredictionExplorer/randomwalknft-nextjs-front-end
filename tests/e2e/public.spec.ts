@@ -7,10 +7,19 @@ test("home page renders primary CTA", async ({ page }) => {
   await expect(page.getByRole("link", { name: /random walk nft/i })).toBeVisible();
 });
 
-test("admin redirects unauthenticated users to login", async ({ page }) => {
-  await page.goto("/admin");
-  await expect(page).toHaveURL(/\/auth\/login/);
-  await expect(page.getByRole("heading", { name: /log in/i })).toBeVisible();
+test("home hero sits near the top fold without a dead spacer", async ({ page }) => {
+  await page.goto("/");
+  const heroHeading = page.getByRole("heading", { name: /random walk nft/i });
+  await expect(heroHeading).toBeVisible();
+
+  const top = await heroHeading.evaluate((node) => node.getBoundingClientRect().top);
+  expect(top).toBeLessThan(260);
+});
+
+test("home page explains how the collection works", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText(/Mint a new path/i)).toBeVisible();
+  await expect(page.getByText(/Collector trust/i)).toBeVisible();
 });
 
 test("detail page for token 1 loads core metadata", async ({ page }) => {
@@ -38,7 +47,8 @@ test("gallery renders a single page of NFTs and supports page navigation", async
 
 test("gallery beauty filter persists in the URL", async ({ page }) => {
   await page.goto("/gallery");
-  await page.getByRole("link", { name: /beauty score/i }).click();
+  await page.getByLabel(/sort/i).selectOption("beauty");
+  await page.getByRole("button", { name: /apply/i }).click();
   await expect(page).toHaveURL(/sortBy=beauty/);
   await expect(page.getByText(/Page 1 of/i)).toBeVisible();
 });
@@ -53,7 +63,7 @@ test("gallery token search applies a query filter", async ({ page }) => {
 
 test("marketplace supports the buy-offer filter", async ({ page }) => {
   await page.goto("/marketplace");
-  await page.getByRole("link", { name: /buy offers/i }).click();
+  await page.getByRole("button", { name: /buy offers/i }).click();
   await expect(page).toHaveURL(/filter=buy/);
 });
 
@@ -66,9 +76,31 @@ test("marketplace price filters persist in the URL", async ({ page }) => {
   await expect(page).toHaveURL(/max=1/);
 });
 
+test("marketplace preserves other filters when switching offer type", async ({ page }) => {
+  await page.goto("/marketplace?min=0.2&max=2&sort=recent&query=7");
+  await page.getByRole("button", { name: /buy offers/i }).click();
+
+  await expect(page).toHaveURL(/filter=buy/);
+  await expect(page).toHaveURL(/min=0.2/);
+  await expect(page).toHaveURL(/max=2/);
+  await expect(page).toHaveURL(/sort=recent/);
+  await expect(page).toHaveURL(/query=7/);
+});
+
 test("random image page links to an NFT detail page", async ({ page }) => {
   await page.goto("/random");
   await expect(page.locator('a[href^="/detail/"]')).toBeVisible();
+});
+
+test("generation code page includes the full reproduction guide", async ({ page }) => {
+  await page.goto("/code");
+  await expect(page.getByText(/python3 randomWalkGen\.py 3456/i)).toBeVisible();
+
+  await page.getByRole("tab", { name: /requirements/i }).click();
+  await expect(page.getByText(/opencv-python==4\.5\.3\.56/i)).toBeVisible();
+
+  await page.getByRole("tab", { name: /full source/i }).click();
+  await expect(page.getByText(/def get_seed/i)).toBeVisible();
 });
 
 test("invalid NFT detail route returns not found", async ({ page }) => {

@@ -27,20 +27,20 @@ export default async function HomePage() {
   return (
     <div className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_0%,rgba(244,191,255,0.18),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(198,118,215,0.18),transparent_24%),linear-gradient(180deg,rgba(5,5,5,0.4),rgba(5,5,5,0.96))]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(80vh,54rem)] overflow-hidden opacity-70">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(84vh,56rem)] overflow-hidden opacity-70">
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="absolute left-1/2 top-24 h-auto min-w-full -translate-x-1/2 object-cover opacity-55"
+          className="absolute left-1/2 top-0 h-auto min-w-full -translate-x-1/2 object-cover opacity-55"
         >
           <source src={assets.blackTripleVideo} type="video/mp4" />
         </video>
       </div>
 
-      <PageShell className="space-y-20 py-16 sm:py-24">
-        <section className="grid items-end gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
+      <PageShell className="space-y-20 pt-2 pb-20 sm:pt-3 sm:pb-24">
+        <section className="grid min-h-[calc(100vh-6rem)] items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
           <div className="max-w-4xl space-y-8">
             <Badge variant="secondary">On-chain generative media collection</Badge>
             <PageHeading

@@ -36,14 +36,6 @@ export function formatDateTimeFromUnix(timestamp: number) {
   return format(new Date(timestamp * 1000), "MMM d, yyyy 'at' h:mm a");
 }
 
-export function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w ]+/g, " ")
-    .replace(/\s+/g, "-");
-}
-
 export function getAssetUrl(fileName: string) {
   return `${ASSET_BASE_URL}/${fileName}`;
 }

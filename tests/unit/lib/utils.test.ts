@@ -1,14 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createAssetUrls, formatId, getAssetBySelection, slugify } from "@/lib/utils";
+import { createAssetUrls, formatCompactNumber, formatId, getAssetBySelection } from "@/lib/utils";
 
 describe("utils", () => {
   it("formats token ids with left padding", () => {
     expect(formatId(7)).toBe("#000007");
-  });
-
-  it("slugifies titles for blog routes", () => {
-    expect(slugify("Hello World! 2026")).toBe("hello-world-2026");
   });
 
   it("creates proxied asset urls", () => {
@@ -21,5 +17,10 @@ describe("utils", () => {
     const urls = createAssetUrls(12);
     expect(getAssetBySelection(urls, "black", "singleVideo")).toContain("black_single.mp4");
     expect(getAssetBySelection(urls, "white", "image")).toContain("white.png");
+  });
+
+  it("formats compact numbers for live stats", () => {
+    expect(formatCompactNumber(12)).toBe("12");
+    expect(formatCompactNumber(1200)).toMatch(/1\.2K|1.2K/);
   });
 });

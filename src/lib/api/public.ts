@@ -13,9 +13,6 @@ import {
 import { fetchApi, fetchRwalk, postApi } from "@/lib/api/client";
 import {
   actionResponseSchema,
-  authCheckResponseSchema,
-  blogSchema,
-  loginResponseSchema,
   offerSchema,
   tokenDetailSchema,
   tokenHistorySchema,
@@ -24,8 +21,8 @@ import {
   voteCountSchema
 } from "@/lib/api/schemas";
 import { nftAbi } from "@/generated/wagmi";
-import type { BlogPost, HomepageStats, Nft, Offer, TradingRecord } from "@/lib/types";
-import { createAssetUrls, slugify } from "@/lib/utils";
+import type { HomepageStats, Nft, Offer, TradingRecord } from "@/lib/types";
+import { createAssetUrls } from "@/lib/utils";
 import { publicClient } from "@/lib/web3/public-client";
 
 function normalizeOffer(
@@ -43,20 +40,6 @@ function normalizeOffer(
     createdAt: input.DateTime,
     createdAtTimestamp: input.TimeStamp,
     kind
-  };
-}
-
-function normalizeBlog(input: z.infer<typeof blogSchema>): BlogPost {
-  return {
-    id: input.id,
-    title: input.title,
-    epic: input.epic,
-    content: input.content,
-    bannerImage: input.banner_image,
-    thumbImage: input.thumb_image,
-    slug: input.slug,
-    status: input.status,
-    createdAt: input.created_at
   };
 }
 
@@ -205,78 +188,6 @@ export const getTradingHistory = cache(async (page: number) => {
   };
 });
 
-export const getBlogs = cache(async () => {
-  const response = await fetchApi("get_all_blogs", { revalidate: REVALIDATE_MEDIUM }, blogSchema.array());
-  return response.map(normalizeBlog).sort((left, right) => right.createdAt - left.createdAt);
-});
-
-export const getBlogBySlug = cache(async (slug: string) => {
-  const response = await fetchApi(
-    `get_blog_by_title/${slug}`,
-    { revalidate: REVALIDATE_MEDIUM },
-    blogSchema
-  );
-  return normalizeBlog(response);
-});
-
-export const getBlogById = cache(async (blogId: number) => {
-  const response = await fetchApi(`get_blog/${blogId}`, { revalidate: REVALIDATE_SHORT }, blogSchema);
-  return normalizeBlog(response);
-});
-
-export async function loginAdmin(email: string, password: string) {
-  return postApi(
-    "login",
-    JSON.stringify({ email, password }),
-    {},
-    loginResponseSchema
-  );
-}
-
-export async function registerAdmin(username: string, email: string, password: string) {
-  return postApi(
-    "register",
-    JSON.stringify({ username, email, password }),
-    {},
-    actionResponseSchema
-  );
-}
-
-export async function checkAdminToken(email: string, token: string) {
-  return postApi(
-    "check_token",
-    JSON.stringify({ email, token }),
-    {},
-    authCheckResponseSchema
-  );
-}
-
-export async function createBlog(formData: FormData) {
-  return postApi("create_blog", formData, {}, actionResponseSchema);
-}
-
-export async function updateBlog(formData: FormData) {
-  return postApi("edit_blog", formData, {}, actionResponseSchema);
-}
-
-export async function deleteBlog(blogId: number) {
-  return postApi(
-    "delete_blog",
-    JSON.stringify({ blog_id: blogId }),
-    {},
-    actionResponseSchema
-  );
-}
-
-export async function toggleBlog(blogId: number, status: boolean) {
-  return postApi(
-    "toggle_blog",
-    JSON.stringify({ blog_id: blogId, status }),
-    {},
-    actionResponseSchema
-  );
-}
-
 export async function submitBeautyVote(firstId: number, secondId: number, winner: number) {
   return postApi(
     "add_game",
@@ -288,15 +199,4 @@ export async function submitBeautyVote(firstId: number, secondId: number, winner
     {},
     actionResponseSchema
   );
-}
-
-export async function ensureUniqueBlogSlug(title: string, currentId?: number) {
-  const slug = slugify(title);
-
-  try {
-    const existing = await getBlogBySlug(slug);
-    return existing.id === currentId;
-  } catch {
-    return true;
-  }
 }

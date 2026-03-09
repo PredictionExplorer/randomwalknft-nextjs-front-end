@@ -22,8 +22,8 @@ export function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <PageShell className="flex items-center gap-6 py-4">
+    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/84 backdrop-blur-xl">
+      <PageShell className="flex items-center gap-6 py-3">
         <Link href="/" className="flex items-center gap-3">
           <Image src="/images/logo2.png" alt="Random Walk mark" width={54} height={54} priority />
           <span className="hidden text-sm font-semibold tracking-[0.24em] text-muted-foreground sm:inline">

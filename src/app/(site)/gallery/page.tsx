@@ -25,6 +25,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
   const { address, sortBy, query, page: requestedPage, view } = state;
 
   let tokenIds: number[] = [];
+  let totalSupply = 0;
   let pageData = {
     items: [] as number[],
     totalItems: 0,
@@ -40,15 +41,15 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
     })) as bigint[];
     tokenIds = walletTokens.map((tokenId) => Number(tokenId));
   } else {
-    const totalSupply = (await publicClient.readContract({
+    totalSupply = Number((await publicClient.readContract({
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "totalSupply"
-    })) as bigint;
-    if (sortBy === "tokenId") {
-      pageData = getDescendingTokenPage(Number(totalSupply), requestedPage, PAGE_SIZE);
+    })) as bigint);
+    if (sortBy === "tokenId" && query === undefined) {
+      pageData = getDescendingTokenPage(totalSupply, requestedPage, PAGE_SIZE);
     } else {
-      tokenIds = Array.from({ length: Number(totalSupply) }, (_, index) => index).reverse();
+      tokenIds = Array.from({ length: totalSupply }, (_, index) => index).reverse();
     }
   }
 
@@ -60,7 +61,14 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
   }
 
   if (query !== undefined) {
-    if (pageData.items.length) {
+    if (!address && sortBy === "tokenId") {
+      pageData = {
+        items: query < totalSupply ? [query] : [],
+        totalItems: query < totalSupply ? 1 : 0,
+        totalPages: 1,
+        page: 1
+      };
+    } else if (pageData.items.length) {
       pageData = {
         items: pageData.items.includes(query) ? [query] : [],
         totalItems: pageData.items.includes(query) ? 1 : 0,
