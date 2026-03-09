@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 
 import { ExternalLink } from "@/components/common/external-link";
+import { HeroVideo } from "@/components/feature/hero-video";
 import { JsonLd } from "@/components/common/json-ld";
 import { NftCard } from "@/components/nft/nft-card";
 import { PageHeading } from "@/components/common/page-heading";
@@ -23,7 +24,6 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const stats = await getHomepageStats();
   const [featuredId] = stats.featuredTokenIds;
-  const assets = createAssetUrls(featuredId ?? 1);
   const featuredCards = stats.featuredTokenIds.slice(0, 3);
 
   return (
@@ -39,15 +39,7 @@ export default async function HomePage() {
       />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_0%,rgba(244,191,255,0.18),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(198,118,215,0.18),transparent_24%),linear-gradient(180deg,rgba(5,5,5,0.4),rgba(5,5,5,0.96))]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(84vh,56rem)] overflow-hidden opacity-70">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute left-1/2 top-0 h-auto min-w-full -translate-x-1/2 object-cover opacity-55"
-        >
-          <source src={assets.blackTripleVideo} type="video/mp4" />
-        </video>
+        <HeroVideo initialTokenId={featuredId ?? 1} />
       </div>
 
       <PageShell className="space-y-20 pt-2 pb-20 sm:pt-3 sm:pb-24">
