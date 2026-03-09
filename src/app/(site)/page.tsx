@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { Route } from "next";
 
+import { ExternalLink } from "@/components/common/external-link";
+import { JsonLd } from "@/components/common/json-ld";
 import { NftCard } from "@/components/nft/nft-card";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
@@ -10,8 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getHomepageStats } from "@/lib/api/public";
 import { homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
-import { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION } from "@/lib/config";
-import { createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
+import { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
+import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Home",
@@ -26,6 +28,15 @@ export default async function HomePage() {
 
   return (
     <div className="relative overflow-hidden">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: SITE_NAME,
+          url: SITE_URL,
+          description: SITE_DESCRIPTION
+        }}
+      />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_0%,rgba(244,191,255,0.18),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(198,118,215,0.18),transparent_24%),linear-gradient(180deg,rgba(5,5,5,0.4),rgba(5,5,5,0.96))]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(84vh,56rem)] overflow-hidden opacity-70">
         <video
@@ -65,8 +76,7 @@ export default async function HomePage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/mint"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-secondary bg-secondary px-6 text-sm font-medium text-[#140a1f] transition hover:bg-secondary/90"
-                style={{ color: "#140a1f" }}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-secondary bg-secondary px-6 text-sm font-medium text-secondary-foreground transition hover:bg-secondary/90"
               >
                 Mint the next work
               </Link>
@@ -184,16 +194,16 @@ export default async function HomePage() {
                 <p>
                   NFT contract:
                   {" "}
-                  <a href={`https://arbiscan.io/address/${NFT_ADDRESS}#code`} target="_blank" className="text-secondary">
+                  <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="text-secondary">
                     {NFT_ADDRESS}
-                  </a>
+                  </ExternalLink>
                 </p>
                 <p>
                   Marketplace contract:
                   {" "}
-                  <a href={`https://arbiscan.io/address/${MARKET_ADDRESS}#code`} target="_blank" className="text-secondary">
+                  <ExternalLink href={arbiscanContractUrl(MARKET_ADDRESS)} className="text-secondary">
                     {MARKET_ADDRESS}
-                  </a>
+                  </ExternalLink>
                 </p>
               </div>
               <Button asChild variant="outline" className="w-full">
@@ -222,7 +232,7 @@ export default async function HomePage() {
                   <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
                   {item.href && item.linkLabel ? (
                     <Button asChild variant="ghost" size="sm">
-                      <a href={item.href} target="_blank">{item.linkLabel}</a>
+                      <ExternalLink href={item.href}>{item.linkLabel}</ExternalLink>
                     </Button>
                   ) : null}
                 </CardContent>

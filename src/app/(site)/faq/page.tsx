@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+import { ExternalLink } from "@/components/common/external-link";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -43,13 +44,13 @@ export default function FaqPage() {
           <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
             <p>Reach out on social if you need something that is not covered here.</p>
             <p>
-              <a href="https://twitter.com/RandomWalkNFT" target="_blank" className="text-secondary underline underline-offset-4">
+              <ExternalLink href="https://twitter.com/RandomWalkNFT" className="text-secondary underline underline-offset-4">
                 Twitter
-              </a>
+              </ExternalLink>
               {" · "}
-              <a href="https://discord.gg/bGnPn96Qwt" target="_blank" className="text-secondary underline underline-offset-4">
+              <ExternalLink href="https://discord.gg/bGnPn96Qwt" className="text-secondary underline underline-offset-4">
                 Discord
-              </a>
+              </ExternalLink>
             </p>
           </CardContent>
         </Card>

@@ -32,4 +32,8 @@ describe("pagination helpers", () => {
     expect(getPaginationWindow(5, 10)).toEqual([1, "ellipsis", 4, 5, 6, "ellipsis", 10]);
     expect(getPaginationWindow(10, 10)).toEqual([1, "ellipsis", 9, 10]);
   });
+
+  it("returns all pages when totalPages is small", () => {
+    expect(getPaginationWindow(3, 5)).toEqual([1, 2, 3, 4, 5]);
+  });
 });

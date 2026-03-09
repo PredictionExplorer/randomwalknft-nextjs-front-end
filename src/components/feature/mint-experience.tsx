@@ -4,12 +4,13 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 import { parseEther } from "viem";
-import { useAccount, useWaitForTransactionReceipt } from "wagmi";
+import { useWaitForTransactionReceipt } from "wagmi";
 import { toast } from "sonner";
 
 import { trackEvent } from "@/lib/analytics";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { Countdown } from "@/components/common/countdown";
+import { ExternalLink } from "@/components/common/external-link";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { NftCard } from "@/components/nft/nft-card";
@@ -20,11 +21,12 @@ import { useReadNftGetMintPrice, useReadNftTimeUntilSale, useReadNftWithdrawalAm
 import { NFT_ADDRESS, MARKET_ADDRESS } from "@/lib/config";
 import { getErrorMessage } from "@/lib/web3/errors";
 import { publicClient } from "@/lib/web3/public-client";
-import { createAssetUrls } from "@/lib/utils";
+import { useWalletStatus } from "@/lib/web3/use-wallet-status";
+import { arbiscanContractUrl, createAssetUrls } from "@/lib/utils";
 
 export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
   const router = useRouter();
-  const { isConnected, chain } = useAccount();
+  const { isConnected, isReady, chain } = useWalletStatus();
   const { data: mintPrice } = useReadNftGetMintPrice();
   const { data: withdrawalAmount } = useReadNftWithdrawalAmount();
   const { data: saleSeconds } = useReadNftTimeUntilSale();
@@ -106,7 +108,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         }
       />
 
-      {!isConnected || chain?.id !== 42161 ? (
+      {!isReady ? (
         <WalletStatusCard
           disconnectedTitle="Connect to mint"
           disconnectedBody="Minting starts with an Arbitrum wallet. Connect first so the site can prepare the transaction and guide you through confirmation."
@@ -135,16 +137,16 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
                 <div>
                   NFT:
                   {" "}
-                  <a href={`https://arbiscan.io/address/${NFT_ADDRESS}#code`} target="_blank" className="text-secondary">
+                  <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="text-secondary">
                     {NFT_ADDRESS}
-                  </a>
+                  </ExternalLink>
                 </div>
                 <div>
                   Market:
                   {" "}
-                  <a href={`https://arbiscan.io/address/${MARKET_ADDRESS}#code`} target="_blank" className="text-secondary">
+                  <ExternalLink href={arbiscanContractUrl(MARKET_ADDRESS)} className="text-secondary">
                     {MARKET_ADDRESS}
-                  </a>
+                  </ExternalLink>
                 </div>
               </CardContent>
             </Card>

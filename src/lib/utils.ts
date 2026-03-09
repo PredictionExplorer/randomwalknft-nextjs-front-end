@@ -5,6 +5,18 @@ import { twMerge } from "tailwind-merge";
 import { ASSET_BASE_URL } from "@/lib/config";
 import type { AssetTheme, AssetVariant, NftAssetUrls } from "@/lib/types";
 
+export function arbiscanAddressUrl(address: string) {
+  return `https://arbiscan.io/address/${address}`;
+}
+
+export function arbiscanContractUrl(address: string) {
+  return `https://arbiscan.io/address/${address}#code`;
+}
+
+export function arbiscanTxUrl(hash: string) {
+  return `https://arbiscan.io/tx/${hash}`;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

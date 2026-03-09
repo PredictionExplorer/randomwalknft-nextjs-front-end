@@ -1,3 +1,6 @@
+import Link from "next/link";
+
+import { ExternalLink } from "@/components/common/external-link";
 import { PageShell } from "@/components/common/page-shell";
 
 const socialLinks = [
@@ -18,18 +21,18 @@ export function SiteFooter() {
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.24em] text-secondary">Navigate</p>
           <div className="space-y-2">
-            <a href="/gallery" className="block transition hover:text-secondary">Collection</a>
-            <a href="/marketplace" className="block transition hover:text-secondary">Marketplace</a>
-            <a href="/mint" className="block transition hover:text-secondary">Mint</a>
-            <a href="/faq" className="block transition hover:text-secondary">FAQ</a>
+            <Link href="/gallery" className="block transition hover:text-secondary">Collection</Link>
+            <Link href="/marketplace" className="block transition hover:text-secondary">Marketplace</Link>
+            <Link href="/mint" className="block transition hover:text-secondary">Mint</Link>
+            <Link href="/faq" className="block transition hover:text-secondary">FAQ</Link>
           </div>
         </div>
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.24em] text-secondary">Community</p>
           {socialLinks.map((item) => (
-            <a key={item.href} href={item.href} target="_blank" className="block transition hover:text-secondary">
+            <ExternalLink key={item.href} href={item.href} className="block transition hover:text-secondary">
               {item.label}
-            </a>
+            </ExternalLink>
           ))}
         </div>
       </PageShell>

@@ -19,7 +19,16 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
-      reportsDirectory: "./coverage/unit"
+      reportsDirectory: "./coverage/unit",
+      exclude: [
+        "tests/setup/**"
+      ],
+      thresholds: {
+        statements: 95,
+        branches: 93,
+        functions: 93,
+        lines: 95
+      }
     }
   }
 });

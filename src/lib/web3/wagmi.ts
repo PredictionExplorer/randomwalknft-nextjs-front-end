@@ -21,41 +21,37 @@ import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
 
 export const walletConnectProjectId =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID?.trim() ?? "";
-export const walletConnectEnabled = walletConnectProjectId.length > 0;
 
-const appInfo = {
-  appName: SITE_NAME,
-  appDescription: SITE_DESCRIPTION,
-  appUrl: SITE_URL
-};
-
-const walletList = [
-  {
-    groupName: "Popular",
-    wallets: [
-      metaMaskWallet,
-      coinbaseWallet,
-      rabbyWallet,
-      rainbowWallet,
-      injectedWallet,
-      safeWallet,
-      walletConnectWallet
-    ]
-  }
-];
+const walletConnectEnabled = walletConnectProjectId.length > 0;
 
 export const wagmiConfig = createConfig({
   chains: [arbitrum],
   connectors: walletConnectEnabled
-    ? connectorsForWallets(walletList, {
-        ...appInfo,
-        projectId: walletConnectProjectId
-      })
+    ? connectorsForWallets(
+        [
+          {
+            groupName: "Popular",
+            wallets: [
+              metaMaskWallet,
+              coinbaseWallet,
+              rabbyWallet,
+              rainbowWallet,
+              safeWallet,
+              walletConnectWallet,
+              injectedWallet
+            ]
+          }
+        ],
+        {
+          appName: SITE_NAME,
+          appDescription: SITE_DESCRIPTION,
+          appUrl: SITE_URL,
+          projectId: walletConnectProjectId
+        }
+      )
     : [injected({ shimDisconnect: true })],
   ssr: true,
-  storage: createStorage({
-    storage: cookieStorage
-  }),
+  storage: createStorage({ storage: cookieStorage }),
   transports: {
     [arbitrum.id]: http()
   }

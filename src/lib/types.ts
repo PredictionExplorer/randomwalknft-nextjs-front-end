@@ -85,13 +85,6 @@ export type MarketplaceQueryState = {
   query?: number | undefined;
 };
 
-export type WalletConnectionState = {
-  isConnected: boolean;
-  hasInstalledWallet: boolean;
-  isWrongNetwork: boolean;
-  label: string;
-  description: string;
-};
 
 export type HomepageStats = {
   mintedCount: number;

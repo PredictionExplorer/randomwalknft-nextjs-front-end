@@ -27,4 +27,40 @@ describe("MarketplaceToolbar", () => {
     expect(screen.getByText(/max 2 eth/i)).toBeInTheDocument();
     expect(screen.getByText(/most recent first/i)).toBeInTheDocument();
   });
+
+  it("renders filter pill badges when filters are applied", () => {
+    render(
+      <MarketplaceToolbar
+        state={{
+          filter: "sell",
+          sort: "price-desc",
+          min: 0.5,
+          max: 5,
+          query: 42
+        }}
+        totalOffers={100}
+      />
+    );
+    expect(screen.getByText(/token #000042/i)).toBeInTheDocument();
+    expect(screen.getByText(/min 0.5 eth/i)).toBeInTheDocument();
+    expect(screen.getByText(/max 5 eth/i)).toBeInTheDocument();
+    expect(screen.getByText(/highest price first/i)).toBeInTheDocument();
+  });
+
+  it("does not render filter pills when no filters are applied", () => {
+    render(
+      <MarketplaceToolbar
+        state={{
+          filter: "buy",
+          sort: "price-asc"
+        }}
+        totalOffers={50}
+      />
+    );
+    expect(screen.getByText(/50 entries/i)).toBeInTheDocument();
+    expect(screen.queryByText(/token #/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/min .* eth/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/max .* eth/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/highest price first|most recent first/i)).not.toBeInTheDocument();
+  });
 });

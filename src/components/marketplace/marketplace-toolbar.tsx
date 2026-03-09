@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { MarketplaceQueryState } from "@/lib/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { MarketplaceQueryState, MarketplaceSort } from "@/lib/types";
 
 export function MarketplaceToolbar({
   state,
@@ -11,6 +16,7 @@ export function MarketplaceToolbar({
 }) {
   const clearHref = "/marketplace";
   const currentFilter = state.filter;
+  const [sort, setSort] = useState<MarketplaceSort>(state.sort);
 
   return (
     <div className="space-y-4 rounded-[1.75rem] border border-border/70 bg-card/60 p-5">
@@ -32,6 +38,7 @@ export function MarketplaceToolbar({
       </div>
 
       <form action="/marketplace" className="grid gap-4 lg:grid-cols-4">
+        <input type="hidden" name="sort" value={sort} />
         <div className="flex flex-wrap gap-2 lg:col-span-4">
           <Button
             type="submit"
@@ -39,7 +46,6 @@ export function MarketplaceToolbar({
             value="sell"
             variant={state.filter === "sell" ? "default" : "outline"}
             size="sm"
-            style={state.filter === "sell" ? { color: "#140a1f" } : undefined}
           >
             Sell listings
           </Button>
@@ -49,7 +55,6 @@ export function MarketplaceToolbar({
             value="buy"
             variant={state.filter === "buy" ? "default" : "outline"}
             size="sm"
-            style={state.filter === "buy" ? { color: "#140a1f" } : undefined}
           >
             Buy offers
           </Button>
@@ -80,19 +85,17 @@ export function MarketplaceToolbar({
           <Input id="marketplace-max" name="max" type="number" min={0} step="0.001" defaultValue={state.max} />
         </div>
         <div className="space-y-2">
-          <label htmlFor="marketplace-sort" className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-            Sort
-          </label>
-          <select
-            id="marketplace-sort"
-            name="sort"
-            defaultValue={state.sort}
-            className="flex h-11 w-full rounded-2xl border border-input bg-card/70 px-4 py-2 text-sm text-foreground"
-          >
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
-            <option value="recent">Most recent</option>
-          </select>
+          <span className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Sort</span>
+          <Select value={sort} onValueChange={(value: MarketplaceSort) => setSort(value)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="price-asc">Price: low to high</SelectItem>
+              <SelectItem value="price-desc">Price: high to low</SelectItem>
+              <SelectItem value="recent">Most recent</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="lg:col-span-4">
           <Button type="submit" name="filter" value={currentFilter}>

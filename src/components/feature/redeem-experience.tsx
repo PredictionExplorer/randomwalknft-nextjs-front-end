@@ -14,10 +14,10 @@ import { useReadNftLastMinter, useReadNftTimeUntilWithdrawal, useReadNftWithdraw
 import { trackEvent } from "@/lib/analytics";
 import { formatDateTimeFromUnix, formatEth } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
-import { useAccount } from "wagmi";
+import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 
 export function RedeemExperience() {
-  const { chain, isConnected } = useAccount();
+  const { isReady } = useWalletStatus();
   const { data: withdrawalSeconds } = useReadNftTimeUntilWithdrawal();
   const { data: lastMinter } = useReadNftLastMinter();
   const { data: withdrawalAmount } = useReadNftWithdrawalAmount();
@@ -54,7 +54,7 @@ export function RedeemExperience() {
         }
       />
 
-      {!isConnected || chain?.id !== 42161 ? (
+      {!isReady ? (
         <WalletStatusCard
           disconnectedTitle="Connect to redeem"
           disconnectedBody="Redemption is only available to the current qualifying collector. Connect your wallet to check eligibility and prepare the withdrawal."

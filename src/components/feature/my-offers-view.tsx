@@ -5,6 +5,7 @@ import type { Route } from "next";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount, usePublicClient } from "wagmi";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
@@ -15,20 +16,19 @@ import { useWriteMarketCancelBuyOffer, useWriteMarketCancelSellOffer } from "@/g
 import { getErrorMessage } from "@/lib/web3/errors";
 import { formatEth, formatId } from "@/lib/utils";
 
-type OfferResponse = {
-  buyOffers: Array<{
-    offerId: number;
-    tokenId: number;
-    price: number;
-    kind: "buy";
-  }>;
-  sellOffers: Array<{
-    offerId: number;
-    tokenId: number;
-    price: number;
-    kind: "sell";
-  }>;
-};
+const offerItemSchema = z.object({
+  offerId: z.number(),
+  tokenId: z.number(),
+  price: z.number(),
+  kind: z.enum(["buy", "sell"])
+});
+
+const offerResponseSchema = z.object({
+  buyOffers: z.array(offerItemSchema),
+  sellOffers: z.array(offerItemSchema)
+});
+
+type OfferResponse = z.infer<typeof offerResponseSchema>;
 
 async function fetchOffers(account: string): Promise<OfferResponse> {
   const response = await fetch(`/api/offers?account=${account}`);
@@ -36,7 +36,8 @@ async function fetchOffers(account: string): Promise<OfferResponse> {
     throw new Error("Failed to load offers.");
   }
 
-  return response.json() as Promise<OfferResponse>;
+  const data: unknown = await response.json();
+  return offerResponseSchema.parse(data);
 }
 
 export function MyOffersView() {

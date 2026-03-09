@@ -107,3 +107,20 @@ test("invalid NFT detail route returns not found", async ({ page }) => {
   await page.goto("/detail/not-a-number");
   await expect(page.getByText(/this page could not be found/i)).toBeVisible();
 });
+
+test("marketplace page renders heading and toolbar", async ({ page }) => {
+  await page.goto("/marketplace");
+  await expect(page.getByRole("heading", { name: /random walk nfts marketplace/i })).toBeVisible();
+  await expect(page.getByText(/marketplace controls/i)).toBeVisible();
+});
+
+test("mint page renders heading", async ({ page }) => {
+  await page.goto("/mint");
+  await expect(page.getByRole("heading", { name: /random walk|sale opens/i })).toBeVisible();
+});
+
+test("marketplace page passes an axe smoke check", async ({ page }) => {
+  await page.goto("/marketplace");
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});

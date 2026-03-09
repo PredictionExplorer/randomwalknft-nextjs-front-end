@@ -3,18 +3,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { PageHeading } from "@/components/common/page-heading";
 import { NftCard } from "@/components/nft/nft-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PageShell } from "@/components/common/page-shell";
 import { createAssetUrls } from "@/lib/utils";
 
-type CompareResponse = {
-  tokenIds: number[];
-  totalCount: number;
-};
+const compareResponseSchema = z.object({
+  tokenIds: z.array(z.number()),
+  totalCount: z.number()
+});
+
+type CompareResponse = z.infer<typeof compareResponseSchema>;
 
 async function getComparePair(): Promise<CompareResponse> {
   const response = await fetch("/api/compare");
@@ -22,7 +26,8 @@ async function getComparePair(): Promise<CompareResponse> {
     throw new Error("Failed to fetch comparison pair.");
   }
 
-  return response.json() as Promise<CompareResponse>;
+  const data: unknown = await response.json();
+  return compareResponseSchema.parse(data);
 }
 
 async function submitVote(firstId: number, secondId: number, winner: number) {
@@ -68,6 +73,16 @@ export function CompareExperience() {
             { text: "IS MORE BEAUTIFUL?" }
           ]}
         />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-4">
+            <Skeleton className="aspect-square w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="aspect-square w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
       </PageShell>
     );
   }

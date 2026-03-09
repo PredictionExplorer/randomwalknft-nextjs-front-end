@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildCollectionSearchParams,
   buildMarketplaceSearchParams,
+  getCollectionViewLabel,
   parseCollectionQueryState,
   parseMarketplaceQueryState
 } from "@/lib/query-state";
@@ -88,5 +89,82 @@ describe("query-state helpers", () => {
       max: undefined,
       query: undefined
     });
+  });
+
+  it("returns undefined for whitespace-only min/max", () => {
+    expect(
+      parseMarketplaceQueryState({ filter: "sell", sort: "price-asc", min: "  " })
+    ).toMatchObject({ min: undefined });
+    expect(
+      parseMarketplaceQueryState({ filter: "sell", sort: "price-asc", max: "\t" })
+    ).toMatchObject({ max: undefined });
+  });
+
+  it("returns human-readable collection view labels", () => {
+    expect(getCollectionViewLabel("compact")).toBe("Compact");
+    expect(getCollectionViewLabel("gallery")).toBe("Gallery");
+  });
+
+  it("omits default collection params from search string", () => {
+    const params = buildCollectionSearchParams({
+      page: 1,
+      query: undefined,
+      sortBy: "tokenId",
+      view: "gallery"
+    });
+    expect(params.toString()).toBe("");
+  });
+
+  it("parses collection state with beauty sort and compact view", () => {
+    expect(
+      parseCollectionQueryState({ sortBy: "beauty", view: "compact", page: "3" })
+    ).toMatchObject({ sortBy: "beauty", view: "compact", page: 3 });
+  });
+
+  it("parses collection state with array values gracefully", () => {
+    expect(
+      parseCollectionQueryState({ address: ["a", "b"], query: ["1"], page: ["2"] })
+    ).toMatchObject({ address: undefined, query: undefined, page: 1 });
+  });
+
+  it("handles parsePositiveNumber with valid zero", () => {
+    expect(
+      parseMarketplaceQueryState({ filter: "sell", sort: "price-asc", min: "0" })
+    ).toMatchObject({ min: 0 });
+  });
+
+  it("treats empty query string as undefined, not zero", () => {
+    expect(
+      parseMarketplaceQueryState({ filter: "sell", sort: "price-asc", query: "" })
+    ).toMatchObject({ query: undefined });
+    expect(
+      parseCollectionQueryState({ query: "" })
+    ).toMatchObject({ query: undefined });
+  });
+
+  it("includes address in collection params only when set", () => {
+    const withAddress = buildCollectionSearchParams({
+      address: "0xabc",
+      page: 1,
+      query: undefined,
+      sortBy: "tokenId",
+      view: "gallery"
+    });
+    expect(withAddress.get("address")).toBe("0xabc");
+
+    const withoutAddress = buildCollectionSearchParams({
+      address: undefined,
+      page: 1,
+      query: undefined,
+      sortBy: "tokenId",
+      view: "gallery"
+    });
+    expect(withoutAddress.get("address")).toBeNull();
+  });
+
+  it("parses marketplace price-desc sort", () => {
+    expect(
+      parseMarketplaceQueryState({ filter: "sell", sort: "price-desc" })
+    ).toMatchObject({ sort: "price-desc" });
   });
 });

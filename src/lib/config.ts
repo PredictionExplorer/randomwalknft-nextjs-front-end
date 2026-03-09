@@ -6,9 +6,9 @@ export const SITE_DESCRIPTION =
 export const NFT_ADDRESS = "0x895a6F444BE4ba9d124F61DF736605792B35D66b";
 export const MARKET_ADDRESS = "0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08";
 
-export const API_BASE_URL = "https://nfts.cosmicsignature.com";
-export const RWALK_BASE_URL = "http://69.10.55.2:9291/api/rwalk";
-export const ASSET_BASE_URL = "https://nfts.cosmicsignature.com/images/randomwalk";
+export const API_BASE_URL = process.env.API_BASE_URL ?? "https://nfts.cosmicsignature.com";
+export const RWALK_BASE_URL = process.env.RWALK_BASE_URL ?? "http://69.10.55.2:9291/api/rwalk";
+export const ASSET_BASE_URL = process.env.ASSET_BASE_URL ?? "https://nfts.cosmicsignature.com/images/randomwalk";
 
 export const SUPPORTED_ASSET_EXTENSIONS = [
   ".png",

@@ -6,7 +6,7 @@ import type {
 } from "@/lib/types";
 
 function parsePositiveInteger(value: string | string[] | undefined) {
-  if (typeof value !== "string") {
+  if (typeof value !== "string" || value.trim() === "") {
     return undefined;
   }
 

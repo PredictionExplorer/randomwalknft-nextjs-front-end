@@ -5,7 +5,7 @@ import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { isAddress, parseEther } from "viem";
-import { useAccount, usePublicClient } from "wagmi";
+import { usePublicClient } from "wagmi";
 import { toast } from "sonner";
 
 import { trackEvent } from "@/lib/analytics";
@@ -21,6 +21,7 @@ import {
   shortenAddress
 } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
+import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
@@ -74,7 +75,7 @@ export function NftDetailExperience({
   const pathname = usePathname();
   const router = useRouter();
   const publicClient = usePublicClient();
-  const { address, chain, isConnected } = useAccount();
+  const { address, isConnected, isWrongNetwork } = useWalletStatus();
   const [theme, setTheme] = useState<AssetTheme>(initialTheme);
   const [activeMedia, setActiveMedia] = useState<AssetVariant>(initialMedia);
   const [modal, setModal] = useState<AssetVariant | null>(initialMedia);
@@ -107,7 +108,7 @@ export function NftDetailExperience({
 
   const owner = ownerOf ?? nft.owner;
   const isOwner = address?.toLowerCase() === owner.toLowerCase();
-  const wrongNetwork = Boolean(isConnected && chain?.id !== 42161);
+  const wrongNetwork = isWrongNetwork;
   const activeSellOffer = sellOffers[0];
   const highestOffer = buyOffers.reduce((max, offer) => Math.max(max, offer.price), 0);
   const walletTokenIds = (accountTokenIds ?? []).map((id) => Number(id));

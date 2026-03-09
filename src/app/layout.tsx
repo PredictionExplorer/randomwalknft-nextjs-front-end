@@ -76,10 +76,16 @@ export default async function RootLayout({
   return (
     <html lang="en" className={kelson.variable}>
       <body>
+        <a
+          href="#main-content"
+          className="fixed left-4 top-4 z-50 -translate-y-20 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition focus:translate-y-0"
+        >
+          Skip to content
+        </a>
         <AppProviders initialState={initialState}>
           <div className="flex min-h-screen flex-col">
             <SiteHeader />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" className="flex-1">{children}</main>
             <SiteFooter />
           </div>
         </AppProviders>

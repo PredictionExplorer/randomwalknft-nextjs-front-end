@@ -55,6 +55,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
     "@lhci/cli": "^0.15.1",
+    "@next/bundle-analyzer": "^16.1.6",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -72,6 +73,7 @@
     "fast-check": "^3.23.2",
     "jsdom": "^27.1.0",
     "msw": "^2.12.10",
+    "prettier": "^3.8.1",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
