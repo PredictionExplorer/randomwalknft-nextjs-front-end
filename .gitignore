@@ -1,46 +1,78 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnpm-store
 /.pnp
 .pnp.js
 
-# testing
+# next.js
+/.next/
+/out/
+/build
+
+# testing artifacts
 /coverage
 /playwright-report
 /test-results
 /.lighthouseci
+/blob-report
+/playwright/.cache
+*.trace.zip
 
-# next.js
-/.next/
-/out/
+# env files (may contain secrets)
+.env
+.env.*
+!.env.example
 
-# production
-/build
-
-# misc
+# OS files
 .DS_Store
+Thumbs.db
+Desktop.ini
 
-# debug
+# editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# secrets and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
 
+# walletconnect / web3 secrets
+walletconnect-project-id*
+
+# vercel
 .vercel
 
 # contract type generation
 /contracts/types
 
-# typescript
+# typescript build info
 tsconfig.buildinfo
 *.tsbuildinfo
 
+# bundle analyzer output
+.next-bundle-analyzer/
+analyze/
+
 # local legacy copies used during migration
 /legacy
+
+# turbopack
+.turbo/
+
+# msw service worker (auto-generated, should not be committed)
+public/mockServiceWorker.js
+
+# storybook (if added later)
+storybook-static/

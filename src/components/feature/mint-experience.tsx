@@ -156,7 +156,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
             type="button"
             onClick={handleMint}
             disabled={isPending || !isSaleOpen}
-            className="inline-flex h-12 items-center justify-center rounded-full border border-primary bg-primary px-7 text-sm font-bold tracking-wide text-white shadow-[0_0_24px_rgba(198,118,215,0.5)] transition hover:bg-primary/85 hover:shadow-[0_0_32px_rgba(198,118,215,0.65)] disabled:pointer-events-none disabled:opacity-50"
+            className="inline-flex h-12 items-center justify-center rounded-full border border-[#9b4aaf] bg-[#9b4aaf] px-7 text-sm font-bold tracking-wide text-white shadow-[0_0_24px_rgba(155,74,175,0.5)] transition hover:bg-[#8a3f9d] hover:shadow-[0_0_32px_rgba(155,74,175,0.65)] disabled:pointer-events-none disabled:opacity-50"
           >
             {isPending ? "Minting..." : "Mint now"}
           </button>

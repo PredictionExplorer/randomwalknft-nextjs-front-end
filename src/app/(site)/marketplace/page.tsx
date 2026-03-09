@@ -40,8 +40,8 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
         ? [...offers].sort((left, right) => right.createdAtTimestamp - left.createdAtTimestamp)
         : [...offers].sort((left, right) => left.price - right.price);
 
-  const lowestPrice = offers[0]?.price;
-  const highestPrice = offers.length ? offers[offers.length - 1]?.price : undefined;
+  const lowestPrice = offers.length ? Math.min(...offers.map((o) => o.price)) : undefined;
+  const highestPrice = offers.length ? Math.max(...offers.map((o) => o.price)) : undefined;
 
   return (
     <PageShell className="space-y-8 py-16">
@@ -65,7 +65,14 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
 
       <MarketplaceToolbar state={state} totalOffers={offers.length} />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="border-primary/30 bg-primary/[0.06]">
+          <CardContent className="space-y-2 p-5">
+            <p className="text-xs uppercase tracking-[0.24em] text-primary">Platform fee</p>
+            <p className="text-2xl font-bold text-primary">0%</p>
+            <p className="text-xs leading-5 text-muted-foreground">No cuts — the full amount goes directly between buyer and seller.</p>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="space-y-2 p-5">
             <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Total listings</p>

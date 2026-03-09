@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu, Wallet } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { PageShell } from "@/components/common/page-shell";
 import { ConnectWalletButton } from "@/components/layout/connect-wallet-button";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useMounted } from "@/lib/use-mounted";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +19,18 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { navItems } from "@/lib/content/nav";
 import { cn } from "@/lib/utils";
 
+function WalletButtonPlaceholder() {
+  return (
+    <Button variant="secondary" size="sm" disabled>
+      <Wallet className="h-4 w-4" />
+      Connect Wallet
+    </Button>
+  );
+}
+
 export function SiteHeader() {
   const pathname = usePathname();
+  const mounted = useMounted();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/84 backdrop-blur-xl">
@@ -80,7 +91,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto hidden lg:block">
-          <ConnectWalletButton />
+          {mounted ? <ConnectWalletButton /> : <WalletButtonPlaceholder />}
         </div>
 
         <Sheet>
@@ -122,7 +133,7 @@ export function SiteHeader() {
               <div className={cn(buttonVariants({ variant: "ghost" }), "justify-start px-0")}>
                 <Link href="/my-offers">My Offers</Link>
               </div>
-              <ConnectWalletButton />
+              {mounted ? <ConnectWalletButton /> : <WalletButtonPlaceholder />}
             </div>
           </SheetContent>
         </Sheet>

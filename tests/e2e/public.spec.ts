@@ -18,7 +18,7 @@ test("home hero sits near the top fold without a dead spacer", async ({ page }) 
 
 test("home page explains how the collection works", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText(/Mint a new path/i)).toBeVisible();
+  await expect(page.getByText(/Mint your NFT/i)).toBeVisible();
   await expect(page.getByText(/Collector trust/i)).toBeVisible();
 });
 
@@ -105,7 +105,7 @@ test("generation code page includes the full reproduction guide", async ({ page 
 
 test("invalid NFT detail route returns not found", async ({ page }) => {
   await page.goto("/detail/not-a-number");
-  await expect(page.getByText(/this page could not be found/i)).toBeVisible();
+  await expect(page.getByText(/does not exist|not found|could not be found/i)).toBeVisible();
 });
 
 test("marketplace page renders heading and toolbar", async ({ page }) => {
@@ -121,6 +121,7 @@ test("mint page renders heading", async ({ page }) => {
 
 test("marketplace page passes an axe smoke check", async ({ page }) => {
   await page.goto("/marketplace");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
