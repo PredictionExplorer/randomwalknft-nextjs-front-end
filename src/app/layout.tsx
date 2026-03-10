@@ -43,7 +43,8 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
   icons: {
-    icon: "/images/logo.svg"
+    icon: [{ url: "/images/logo2.png", type: "image/png" }],
+    apple: [{ url: "/images/logo2.png" }]
   },
   alternates: {
     canonical: "/"
