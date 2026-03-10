@@ -2,7 +2,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 
-import { GET } from "@/app/api/assets/[...path]/route";
+import { GET, HEAD } from "@/app/api/assets/[...path]/route";
 
 describe("assets route", () => {
   it("rejects disallowed paths", async () => {
@@ -34,6 +34,7 @@ describe("assets route", () => {
       expect.objectContaining({ next: { revalidate: 3600 } })
     );
     expect(response.status).toBe(200);
+    expect(response.headers.get("x-asset-status")).toBe("ready");
     expect(response.headers.get("Cache-Control")).toContain("s-maxage=3600");
 
     fetchMock.mockRestore();
@@ -67,16 +68,49 @@ describe("assets route", () => {
     fetchMock.mockRestore();
   });
 
-  it("returns upstream error status when asset is not found", async () => {
+  it("returns a placeholder image when a generated image asset is not found", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(null, { status: 404 })
     );
     const response = await GET(new Request("http://localhost"), {
       params: Promise.resolve({ path: ["000001_black_thumb.jpg"] })
     });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("image/svg+xml");
+    expect(response.headers.get("x-asset-status")).toBe("placeholder");
+    const body = await response.text();
+    expect(body).toContain("Generating media");
+    expect(body).toContain("NFT 000001");
+    fetchMock.mockRestore();
+  });
+
+  it("returns upstream error status when a missing video asset is requested", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(null, { status: 404 })
+    );
+    const response = await GET(new Request("http://localhost"), {
+      params: Promise.resolve({ path: ["000001_black_single.mp4"] })
+    });
     expect(response.status).toBe(404);
+    expect(response.headers.get("x-asset-status")).toBeNull();
     const body = await response.json();
     expect(body.error).toBe("Asset not found.");
+    fetchMock.mockRestore();
+  });
+
+  it("supports HEAD requests for probing asset availability", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(null, { status: 404 })
+    );
+
+    const response = await HEAD(new Request("http://localhost", { method: "HEAD" }), {
+      params: Promise.resolve({ path: ["000001_black_thumb.jpg"] })
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-asset-status")).toBe("placeholder");
+    expect(await response.text()).toBe("");
+
     fetchMock.mockRestore();
   });
 });

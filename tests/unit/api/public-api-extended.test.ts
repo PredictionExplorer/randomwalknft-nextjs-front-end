@@ -1,18 +1,20 @@
 // @vitest-environment node
 
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   getOffersForToken,
   getRandomPair,
   getRatingOrder,
   getTokenDetail,
+  getTokenDetailOrFallback,
   getTradingHistory,
   getVoteCount,
   submitBeautyVote
 } from "@/lib/api/public";
 import { API_BASE_URL, NFT_ADDRESS, RWALK_BASE_URL, MARKET_ADDRESS } from "@/lib/config";
+import { publicClient } from "@/lib/web3/public-client";
 import { server } from "../../setup/msw/server";
 
 const offerPayload = (
@@ -175,6 +177,35 @@ describe("getTokenDetail", () => {
     expect(nft.tokenHistory[0]?.recordType).toBe(1);
     expect(nft.mintedAt).toBe("2023-11-14T00:00:00Z");
     expect(nft.assets.blackThumb).toContain("000005");
+  });
+
+  it("falls back to on-chain token data when the token API has not indexed a fresh mint yet", async () => {
+    const readContractMock = vi.spyOn(publicClient, "readContract");
+    readContractMock
+      .mockResolvedValueOnce("0xowner")
+      .mockResolvedValueOnce("0xseed")
+      .mockResolvedValueOnce("");
+
+    server.use(
+      http.get(`${API_BASE_URL}/tokens/8`, () =>
+        HttpResponse.json({ error: "Not found" }, { status: 404 })
+      ),
+      http.get(`${RWALK_BASE_URL}/tokens/history/8/${NFT_ADDRESS}/0/1000`, () =>
+        HttpResponse.json({ error: "Not found" }, { status: 404 })
+      )
+    );
+
+    const nft = await getTokenDetailOrFallback(8, { fresh: true });
+
+    expect(nft).toMatchObject({
+      id: 8,
+      owner: "0xowner",
+      seed: "0xseed",
+      isPendingMetadata: true
+    });
+    expect(nft?.tokenHistory).toEqual([]);
+
+    readContractMock.mockRestore();
   });
 });
 

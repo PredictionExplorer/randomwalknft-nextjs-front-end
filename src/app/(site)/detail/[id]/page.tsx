@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/common/json-ld";
 import { NftDetailExperience } from "@/components/feature/nft-detail-experience";
-import { getOffersForToken, getTokenDetail } from "@/lib/api/public";
+import { getOffersForToken, getTokenDetailOrFallback } from "@/lib/api/public";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
 import type { AssetTheme, AssetVariant, Offer } from "@/lib/types";
 import { formatId } from "@/lib/utils";
@@ -20,14 +20,22 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   }
 
   try {
-    const nft = await getTokenDetail(tokenId);
+    const nft = await getTokenDetailOrFallback(tokenId);
+    if (!nft) {
+      return { title: "NFT Detail" };
+    }
+
     return {
       title: `NFT ${formatId(nft.id)}`,
-      description: `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed. View, trade, and explore its history.`,
+      description: nft.isPendingMetadata
+        ? `Random Walk NFT ${formatId(nft.id)} was just minted on Arbitrum. Metadata and media are still processing.`
+        : `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed. View, trade, and explore its history.`,
       alternates: { canonical: `/detail/${nft.id}` },
       openGraph: {
         title: `NFT ${formatId(nft.id)} | ${SITE_NAME}`,
-        description: `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed.`,
+        description: nft.isPendingMetadata
+          ? `Random Walk NFT ${formatId(nft.id)} was just minted on Arbitrum. Metadata and media are still processing.`
+          : `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed.`,
         images: [nft.assets.blackThumb]
       },
       twitter: {
@@ -51,12 +59,13 @@ export default async function DetailPage({
 }) {
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   const tokenId = Number(id);
+  const message = typeof resolvedSearchParams.message === "string" ? resolvedSearchParams.message : undefined;
 
   if (!Number.isInteger(tokenId) || tokenId < 0) {
     notFound();
   }
 
-  const nft = await getTokenDetail(tokenId).catch(() => null);
+  const nft = await getTokenDetailOrFallback(tokenId, { fresh: true });
   if (!nft) {
     notFound();
   }
@@ -65,11 +74,11 @@ export default async function DetailPage({
     sellOffers: [] as Offer[]
   }));
 
-  const message = typeof resolvedSearchParams.message === "string" ? resolvedSearchParams.message : undefined;
   const initialTheme: AssetTheme =
     resolvedSearchParams.theme === "white" ? "white" : "black";
   const initialMedia: AssetVariant =
-    resolvedSearchParams.media === "singleVideo" || resolvedSearchParams.media === "tripleVideo"
+    !nft.isPendingMetadata &&
+      (resolvedSearchParams.media === "singleVideo" || resolvedSearchParams.media === "tripleVideo")
       ? resolvedSearchParams.media
       : "image";
 
@@ -80,7 +89,9 @@ export default async function DetailPage({
           "@context": "https://schema.org",
           "@type": "CreativeWork",
           name: nft.name || formatId(nft.id),
-          description: `${SITE_DESCRIPTION} Details for ${formatId(nft.id)}.`,
+          description: nft.isPendingMetadata
+            ? `Random Walk NFT ${formatId(nft.id)} was minted on-chain and is still processing metadata and media.`
+            : `${SITE_DESCRIPTION} Details for ${formatId(nft.id)}.`,
           image: nft.assets.blackThumb,
           url: `${SITE_URL}/detail/${nft.id}`,
           creator: { "@type": "Organization", name: SITE_NAME },

@@ -68,6 +68,30 @@ const mediaLabels: Record<AssetVariant, string> = {
   tripleVideo: "Triple video"
 };
 
+const allMediaReady: Record<AssetVariant, boolean> = {
+  image: true,
+  singleVideo: true,
+  tripleVideo: true
+};
+
+const noMediaReady: Record<AssetVariant, boolean> = {
+  image: false,
+  singleVideo: false,
+  tripleVideo: false
+};
+
+async function probeAssetReady(url: string) {
+  try {
+    const response = await fetch(url, {
+      method: "HEAD",
+      cache: "no-store"
+    });
+    return response.ok && response.headers.get("x-asset-status") === "ready";
+  } catch {
+    return false;
+  }
+}
+
 export function NftDetailExperience({
   nft,
   buyOffers,
@@ -87,6 +111,7 @@ export function NftDetailExperience({
   const [tokenName, setTokenName] = useState(nft.name);
   const [transferAddress, setTransferAddress] = useState("");
   const [isMutating, setIsMutating] = useState(false);
+  const [flashMessage, setFlashMessage] = useState(message);
 
   const { data: ownerOf } = useReadNftOwnerOf({
     args: [BigInt(nft.id)]
@@ -111,6 +136,8 @@ export function NftDetailExperience({
   const setTokenNameMutation = useWriteNftSetTokenName();
 
   const owner = ownerOf ?? nft.owner;
+  const isPendingMetadata = Boolean(nft.isPendingMetadata);
+  const shouldProbeMedia = isPendingMetadata || message === "success";
   const isOwner = address?.toLowerCase() === owner.toLowerCase();
   const wrongNetwork = isWrongNetwork;
   const activeSellOffer = sellOffers[0];
@@ -119,6 +146,9 @@ export function NftDetailExperience({
   const currentWalletIndex = walletTokenIds.indexOf(nft.id);
   const userSellOffer = sellOffers.find((offer) => offer.seller.toLowerCase() === address?.toLowerCase());
   const userBuyOffer = buyOffers.find((offer) => offer.buyer.toLowerCase() === address?.toLowerCase());
+  const [mediaAvailability, setMediaAvailability] = useState<Record<AssetVariant, boolean>>(
+    shouldProbeMedia ? noMediaReady : allMediaReady
+  );
   const currentAssetThumb = getAssetPreview(nft.assets, theme);
   const modalSource =
     modal === null
@@ -126,11 +156,20 @@ export function NftDetailExperience({
       : modal === "image"
         ? getAssetImage(nft.assets, theme)
         : getAssetBySelection(nft.assets, theme, modal);
+  const activeMediaReady = mediaAvailability[activeMedia];
+  const imageZoomReady = mediaAvailability.image;
+  const singleVideoReady = mediaAvailability.singleVideo;
+  const tripleVideoReady = mediaAvailability.tripleVideo;
+  const hasPendingMedia = !imageZoomReady || !singleVideoReady || !tripleVideoReady;
+
+  useEffect(() => {
+    setFlashMessage(message);
+  }, [message]);
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (message) {
-      params.set("message", message);
+    if (flashMessage) {
+      params.set("message", flashMessage);
     }
     if (theme !== "black") {
       params.set("theme", theme);
@@ -141,7 +180,7 @@ export function NftDetailExperience({
 
     const href = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
     router.replace(href as Route, { scroll: false });
-  }, [activeMedia, message, pathname, router, theme]);
+  }, [activeMedia, flashMessage, pathname, router, theme]);
 
   useEffect(() => {
     if (!totalSupply) {
@@ -162,10 +201,76 @@ export function NftDetailExperience({
   }, [nft.id, router, totalSupply]);
 
   useEffect(() => {
-    if (message === "success") {
+    if (flashMessage === "success") {
       toast.success("Media files are being generated. Refresh in a few minutes if assets are still processing.");
+      setFlashMessage(undefined);
     }
-  }, [message]);
+  }, [flashMessage]);
+
+  useEffect(() => {
+    if (!isPendingMetadata) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      router.refresh();
+    }, 15000);
+
+    return () => window.clearInterval(interval);
+  }, [isPendingMetadata, router]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!shouldProbeMedia) {
+      setMediaAvailability(allMediaReady);
+      return;
+    }
+
+    void Promise.all([
+      probeAssetReady(getAssetImage(nft.assets, theme)),
+      probeAssetReady(getAssetBySelection(nft.assets, theme, "singleVideo")),
+      probeAssetReady(getAssetBySelection(nft.assets, theme, "tripleVideo"))
+    ]).then(([image, singleVideo, tripleVideo]) => {
+      if (cancelled) {
+        return;
+      }
+
+      setMediaAvailability({
+        image,
+        singleVideo,
+        tripleVideo
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [nft.assets, shouldProbeMedia, theme]);
+
+  useEffect(() => {
+    if (activeMedia === "singleVideo" && !singleVideoReady) {
+      setActiveMedia("image");
+    }
+
+    if (activeMedia === "tripleVideo" && !tripleVideoReady) {
+      setActiveMedia("image");
+    }
+  }, [activeMedia, singleVideoReady, tripleVideoReady]);
+
+  useEffect(() => {
+    if (modal === "image" && !imageZoomReady) {
+      setModal(null);
+    }
+
+    if (modal === "singleVideo" && !singleVideoReady) {
+      setModal(null);
+    }
+
+    if (modal === "tripleVideo" && !tripleVideoReady) {
+      setModal(null);
+    }
+  }, [imageZoomReady, modal, singleVideoReady, tripleVideoReady]);
 
   async function runMutation(action: () => Promise<void>) {
     try {
@@ -358,8 +463,13 @@ export function NftDetailExperience({
             <CardContent className="relative p-0">
               <button
                 type="button"
-                className="relative block aspect-[1.6/1] w-full cursor-zoom-in overflow-hidden"
-                onClick={() => setModal(activeMedia)}
+                disabled={!activeMediaReady}
+                className={`relative block aspect-[1.6/1] w-full overflow-hidden ${activeMediaReady ? "cursor-zoom-in" : "cursor-default"}`}
+                onClick={() => {
+                  if (activeMediaReady) {
+                    setModal(activeMedia);
+                  }
+                }}
               >
                 <Image
                   src={currentAssetThumb}
@@ -368,6 +478,7 @@ export function NftDetailExperience({
                   className="object-cover transition duration-500 hover:scale-[1.02]"
                   sizes="(max-width: 1200px) 100vw, 60vw"
                   priority
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <div className="absolute left-5 top-5 flex flex-wrap gap-2">
@@ -377,6 +488,11 @@ export function NftDetailExperience({
                   <span className="rounded-full border border-border/80 bg-background/75 px-3 py-1 text-xs uppercase tracking-[0.22em] text-muted-foreground backdrop-blur">
                     {theme === "black" ? "Dark edition" : "Light edition"}
                   </span>
+                  {!imageZoomReady ? (
+                    <span className="rounded-full border border-amber-300/50 bg-background/85 px-3 py-1 text-xs uppercase tracking-[0.22em] text-amber-200 backdrop-blur">
+                      Image processing
+                    </span>
+                  ) : null}
                 </div>
                 <div className="absolute bottom-5 left-5 flex flex-wrap items-center gap-3">
                   <span className="rounded-full border border-border bg-background/70 px-4 py-2 text-sm tracking-[0.18em] text-secondary backdrop-blur">
@@ -406,7 +522,7 @@ export function NftDetailExperience({
                 <Button
                   variant={activeMedia === "image" ? "default" : "outline"}
                   className="gap-2.5"
-                  onClick={() => { setActiveMedia("image"); setModal("image"); }}
+                  onClick={() => { setActiveMedia("image"); }}
                 >
                   <ImageIcon className="h-4 w-4" />
                   Image
@@ -414,7 +530,8 @@ export function NftDetailExperience({
                 <Button
                   variant={activeMedia === "singleVideo" ? "secondary" : "outline"}
                   className="gap-2.5 border-primary/40"
-                  onClick={() => { setActiveMedia("singleVideo"); setModal("singleVideo"); }}
+                  disabled={!singleVideoReady}
+                  onClick={() => { setActiveMedia("singleVideo"); }}
                 >
                   <Play className="h-4 w-4" />
                   Single video
@@ -422,12 +539,20 @@ export function NftDetailExperience({
                 <Button
                   variant={activeMedia === "tripleVideo" ? "secondary" : "outline"}
                   className="gap-2.5 border-primary/40"
-                  onClick={() => { setActiveMedia("tripleVideo"); setModal("tripleVideo"); }}
+                  disabled={!tripleVideoReady}
+                  onClick={() => { setActiveMedia("tripleVideo"); }}
                 >
                   <Film className="h-4 w-4" />
                   Triple video
                 </Button>
               </div>
+              {hasPendingMedia ? (
+                <p className="text-xs text-muted-foreground">
+                  {!imageZoomReady ? "Full-size image is still processing." : null}
+                  {!imageZoomReady && (!singleVideoReady || !tripleVideoReady) ? " " : null}
+                  {!singleVideoReady || !tripleVideoReady ? "Video variants will unlock when processing completes." : null}
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -464,6 +589,15 @@ export function NftDetailExperience({
         </div>
 
         <div className="space-y-6">
+          {isPendingMetadata ? (
+            <Card className="border-primary/30 bg-card/75">
+              <CardContent className="space-y-2 p-5 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">This token is minted on-chain and still processing.</p>
+                <p>The detail page will refresh automatically while metadata and media files are generated.</p>
+              </CardContent>
+            </Card>
+          ) : null}
+
           {!isConnected || wrongNetwork ? (
             <WalletStatusCard
               disconnectedTitle="Wallet required"
@@ -485,7 +619,7 @@ export function NftDetailExperience({
               </div>
               <div>
                 <span className="block text-xs uppercase tracking-[0.24em]">Beauty score</span>
-                <span>{nft.rating.toFixed(2)}</span>
+                <span>{isPendingMetadata ? "Processing" : nft.rating.toFixed(2)}</span>
               </div>
               <div className="min-w-0 sm:col-span-2">
                 <span className="block text-xs uppercase tracking-[0.24em]">Seed</span>
@@ -500,7 +634,7 @@ export function NftDetailExperience({
               </div>
               <div>
                 <span className="block text-xs uppercase tracking-[0.24em]">Minted</span>
-                <span>{nft.tokenHistory[0] ? formatDateTimeFromUnix(nft.tokenHistory[0].timestamp) : "Pending"}</span>
+                <span>{nft.tokenHistory[0] ? formatDateTimeFromUnix(nft.tokenHistory[0].timestamp) : isPendingMetadata ? "Just minted" : "Pending"}</span>
               </div>
               <div>
                 <span className="block text-xs uppercase tracking-[0.24em]">Highest bid</span>
@@ -677,6 +811,7 @@ export function NftDetailExperience({
               </Button>
               <Button
                 variant="outline"
+                disabled={!imageZoomReady}
                 onClick={() =>
                   navigator.clipboard
                     .writeText(getAssetImage(nft.assets, theme))
@@ -687,6 +822,7 @@ export function NftDetailExperience({
               </Button>
               <Button
                 variant="outline"
+                disabled={!singleVideoReady}
                 onClick={() =>
                   navigator.clipboard
                     .writeText(getAssetBySelection(nft.assets, theme, "singleVideo"))
@@ -759,14 +895,22 @@ export function NftDetailExperience({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {nft.tokenHistory.map((record, index) => (
-                    <TableRow key={`${record.recordType}-${record.timestamp}-${index}`}>
-                      <TableCell>{record.recordType === 1 ? "Mint" : "Transfer / Market"}</TableCell>
-                      <TableCell>{shortenAddress(record.owner ?? record.buyer ?? record.seller ?? owner)}</TableCell>
-                      <TableCell>{record.price ? formatEth(record.price) : "N/A"}</TableCell>
-                      <TableCell>{formatDateTimeFromUnix(record.timestamp)}</TableCell>
+                  {nft.tokenHistory.length ? (
+                    nft.tokenHistory.map((record, index) => (
+                      <TableRow key={`${record.recordType}-${record.timestamp}-${index}`}>
+                        <TableCell>{record.recordType === 1 ? "Mint" : "Transfer / Market"}</TableCell>
+                        <TableCell>{shortenAddress(record.owner ?? record.buyer ?? record.seller ?? owner)}</TableCell>
+                        <TableCell>{record.price ? formatEth(record.price) : "N/A"}</TableCell>
+                        <TableCell>{formatDateTimeFromUnix(record.timestamp)}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                        {isPendingMetadata ? "History is still syncing." : "No history yet."}
+                      </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -820,6 +964,7 @@ export function NftDetailExperience({
               width={1600}
               height={1000}
               className="h-auto w-full"
+              unoptimized
             />
           ) : modalSource ? (
             <video autoPlay controls className="max-h-[80vh] w-full" src={modalSource} />

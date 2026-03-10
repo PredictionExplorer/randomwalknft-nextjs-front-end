@@ -33,9 +33,13 @@ export async function fetchApi<T>(
       Accept: "application/json",
       ...headers
     },
-    next: {
-      revalidate
-    }
+    ...(rest.cache === "no-store"
+      ? {}
+      : {
+          next: {
+            revalidate
+          }
+        })
   });
 
   return parseResponse(response, schema);
@@ -54,9 +58,13 @@ export async function fetchRwalk<T>(
       Accept: "application/json",
       ...headers
     },
-    next: {
-      revalidate
-    }
+    ...(rest.cache === "no-store"
+      ? {}
+      : {
+          next: {
+            revalidate
+          }
+        })
   });
 
   return parseResponse(response, schema);

@@ -54,7 +54,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         tokenId,
         flow: "mint"
       });
-      router.push(`/detail/${tokenId}` as Route);
+      router.push(`/detail/${tokenId}?message=success` as Route);
     });
   }, [hash, isSuccess, publicClient, router]);
 

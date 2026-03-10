@@ -43,16 +43,10 @@ function normalizeOffer(
   };
 }
 
-export const getTokenDetail = cache(async (tokenId: number): Promise<Nft> => {
-  const [token, historyResponse] = await Promise.all([
-    fetchApi(`tokens/${tokenId}`, { revalidate: REVALIDATE_MEDIUM }, tokenDetailSchema),
-    fetchRwalk(
-      `tokens/history/${tokenId}/${NFT_ADDRESS}/0/1000`,
-      { revalidate: REVALIDATE_SHORT },
-      tokenHistorySchema
-    )
-  ]);
-
+function normalizeTokenDetail(
+  token: z.infer<typeof tokenDetailSchema>,
+  historyResponse: z.infer<typeof tokenHistorySchema>
+): Nft {
   const tokenHistory = historyResponse.TokenHistory.map((entry) => ({
     recordType: entry.RecordType,
     blockNumber: entry.Record.BlockNum,
@@ -73,9 +67,83 @@ export const getTokenDetail = cache(async (tokenId: number): Promise<Nft> => {
     rating: token.rating,
     assets: createAssetUrls(token.id),
     tokenHistory,
-    mintedAt: tokenHistory[0]?.dateTime
+    mintedAt: tokenHistory[0]?.dateTime,
+    isPendingMetadata: false
   };
+}
+
+async function fetchTokenDetail(
+  tokenId: number,
+  init: { cache?: RequestCache; revalidate?: number } = { revalidate: REVALIDATE_MEDIUM }
+): Promise<Nft> {
+  const [token, historyResponse] = await Promise.all([
+    fetchApi(`tokens/${tokenId}`, init, tokenDetailSchema),
+    fetchRwalk(
+      `tokens/history/${tokenId}/${NFT_ADDRESS}/0/1000`,
+      init.cache === "no-store" ? { cache: "no-store" } : { revalidate: REVALIDATE_SHORT },
+      tokenHistorySchema
+    )
+  ]);
+
+  return normalizeTokenDetail(token, historyResponse);
+}
+
+async function getPendingTokenDetail(tokenId: number): Promise<Nft | null> {
+  try {
+    const [owner, seed, name] = await Promise.all([
+      publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "ownerOf",
+        args: [BigInt(tokenId)]
+      }) as Promise<`0x${string}`>,
+      publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "seeds",
+        args: [BigInt(tokenId)]
+      }) as Promise<`0x${string}`>,
+      publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "tokenNames",
+        args: [BigInt(tokenId)]
+      }) as Promise<string>
+    ]);
+
+    return {
+      id: tokenId,
+      name,
+      owner,
+      seed,
+      rating: 0,
+      assets: createAssetUrls(tokenId),
+      tokenHistory: [],
+      isPendingMetadata: true
+    };
+  } catch {
+    return null;
+  }
+}
+
+export const getTokenDetail = cache(async (tokenId: number): Promise<Nft> => {
+  return fetchTokenDetail(tokenId);
 });
+
+export async function getTokenDetailFresh(tokenId: number): Promise<Nft> {
+  return fetchTokenDetail(tokenId, { cache: "no-store" });
+}
+
+export async function getTokenDetailOrFallback(
+  tokenId: number,
+  options: { fresh?: boolean } = {}
+): Promise<Nft | null> {
+  try {
+    return options.fresh ? await getTokenDetailFresh(tokenId) : await getTokenDetail(tokenId);
+  } catch {
+    return getPendingTokenDetail(tokenId);
+  }
+}
 
 export const getTokenInfo = cache(async (tokenId: number) => {
   return fetchRwalk(

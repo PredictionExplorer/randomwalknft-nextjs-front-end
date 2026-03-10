@@ -36,6 +36,7 @@ export type Nft = {
   assets: NftAssetUrls;
   tokenHistory: NftHistoryRecord[];
   mintedAt?: string | undefined;
+  isPendingMetadata?: boolean | undefined;
 };
 
 export type Offer = {
