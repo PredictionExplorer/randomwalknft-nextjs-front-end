@@ -37,6 +37,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import {
   marketAbi,
+  nftAbi,
   useReadNftIsApprovedForAll,
   useReadNftOwnerOf,
   useReadNftTotalSupply,
@@ -50,6 +51,7 @@ import {
   useWriteNftSetTokenName,
   useWriteNftTransferFrom
 } from "@/generated/wagmi";
+import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 
 type NftDetailExperienceProps = {
   nft: Nft;
@@ -189,17 +191,41 @@ export function NftDetailExperience({
       throw new Error("Enter a valid ETH price.");
     }
 
-    if (!approvedForAll) {
-      const approvalHash = await approveAll.writeContractAsync({
-        args: [MARKET_ADDRESS, true]
-      });
-      await publicClient?.waitForTransactionReceipt({ hash: approvalHash });
+    if (!publicClient || !address) {
+      throw new Error("Connect your wallet to continue.");
     }
 
-    const hash = await makeSellOffer.writeContractAsync({
-      args: [NFT_ADDRESS, BigInt(nft.id), parseEther(price)]
+    const priceValue = parseEther(price);
+
+    if (!approvedForAll) {
+      const { gas: approvalGas } = await prepareContractWrite({
+        publicClient,
+        account: address,
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "setApprovalForAll",
+        args: [MARKET_ADDRESS, true]
+      });
+      const approvalHash = await approveAll.writeContractAsync({
+        args: [MARKET_ADDRESS, true],
+        gas: approvalGas
+      });
+      await publicClient.waitForTransactionReceipt({ hash: approvalHash });
+    }
+
+    const { gas } = await prepareContractWrite({
+      publicClient,
+      account: address,
+      address: MARKET_ADDRESS,
+      abi: marketAbi,
+      functionName: "makeSellOffer",
+      args: [NFT_ADDRESS, BigInt(nft.id), priceValue]
     });
-    await publicClient?.waitForTransactionReceipt({ hash });
+    const hash = await makeSellOffer.writeContractAsync({
+      args: [NFT_ADDRESS, BigInt(nft.id), priceValue],
+      gas
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
   }
 
   async function createBuyOffer() {
@@ -207,11 +233,26 @@ export function NftDetailExperience({
       throw new Error("Enter a valid ETH price.");
     }
 
+    if (!publicClient || !address) {
+      throw new Error("Connect your wallet to continue.");
+    }
+
+    const bidValue = parseEther(price);
+    const { gas } = await prepareContractWrite({
+      publicClient,
+      account: address,
+      address: MARKET_ADDRESS,
+      abi: marketAbi,
+      functionName: "makeBuyOffer",
+      args: [NFT_ADDRESS, BigInt(nft.id)],
+      value: bidValue
+    });
     const hash = await makeBuyOffer.writeContractAsync({
       args: [NFT_ADDRESS, BigInt(nft.id)],
-      value: parseEther(price)
+      value: bidValue,
+      gas
     });
-    await publicClient?.waitForTransactionReceipt({ hash });
+    await publicClient.waitForTransactionReceipt({ hash });
   }
 
   async function renameToken() {
@@ -219,10 +260,23 @@ export function NftDetailExperience({
       throw new Error("Name cannot be empty.");
     }
 
-    const hash = await setTokenNameMutation.writeContractAsync({
+    if (!publicClient || !address) {
+      throw new Error("Connect your wallet to continue.");
+    }
+
+    const { gas } = await prepareContractWrite({
+      publicClient,
+      account: address,
+      address: NFT_ADDRESS,
+      abi: nftAbi,
+      functionName: "setTokenName",
       args: [BigInt(nft.id), tokenName.trim()]
     });
-    await publicClient?.waitForTransactionReceipt({ hash });
+    const hash = await setTokenNameMutation.writeContractAsync({
+      args: [BigInt(nft.id), tokenName.trim()],
+      gas
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
   }
 
   async function transferToken() {
@@ -230,10 +284,23 @@ export function NftDetailExperience({
       throw new Error("Enter a valid wallet address.");
     }
 
-    const hash = await transferFrom.writeContractAsync({
-      args: [address!, transferAddress as `0x${string}`, BigInt(nft.id)]
+    if (!publicClient || !address) {
+      throw new Error("Connect your wallet to continue.");
+    }
+
+    const { gas } = await prepareContractWrite({
+      publicClient,
+      account: address,
+      address: NFT_ADDRESS,
+      abi: nftAbi,
+      functionName: "transferFrom",
+      args: [address, transferAddress as `0x${string}`, BigInt(nft.id)]
     });
-    await publicClient?.waitForTransactionReceipt({ hash });
+    const hash = await transferFrom.writeContractAsync({
+      args: [address, transferAddress as `0x${string}`, BigInt(nft.id)],
+      gas
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
   }
 
   async function acceptCurrentSellOffer() {
@@ -241,18 +308,32 @@ export function NftDetailExperience({
       throw new Error("There is no active sell offer to accept.");
     }
 
-    const offer = await publicClient?.readContract({
+    if (!publicClient || !address) {
+      throw new Error("Connect your wallet to continue.");
+    }
+
+    const offer = await publicClient.readContract({
       abi: marketAbi,
       address: MARKET_ADDRESS,
       functionName: "offers",
       args: [BigInt(activeSellOffer.offerId)]
     });
     const priceValue = Array.isArray(offer) ? offer[2] : BigInt(0);
-    const hash = await acceptSellOffer.writeContractAsync({
+    const { gas } = await prepareContractWrite({
+      publicClient,
+      account: address,
+      address: MARKET_ADDRESS,
+      abi: marketAbi,
+      functionName: "acceptSellOffer",
       args: [BigInt(activeSellOffer.offerId)],
       value: priceValue as bigint
     });
-    await publicClient?.waitForTransactionReceipt({ hash });
+    const hash = await acceptSellOffer.writeContractAsync({
+      args: [BigInt(activeSellOffer.offerId)],
+      value: priceValue as bigint,
+      gas
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
   }
 
   return (
@@ -489,7 +570,7 @@ export function NftDetailExperience({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {!userSellOffer ? (
+                  {!userSellOffer && !userBuyOffer ? (
                     <div className="space-y-2">
                       <label htmlFor="bid-price" className="text-sm text-muted-foreground">
                         Make an offer
@@ -506,6 +587,9 @@ export function NftDetailExperience({
                         />
                         <Button onClick={() => void runMutation(createBuyOffer)}>Bid</Button>
                       </div>
+                      <p className="text-xs text-muted-foreground">
+                        Your bid amount becomes the exact on-chain offer. Keep a little extra ETH in your wallet for gas.
+                      </p>
                     </div>
                   ) : null}
 
@@ -514,10 +598,23 @@ export function NftDetailExperience({
                       variant="outline"
                       onClick={() =>
                         void runMutation(async () => {
-                          const hash = await cancelSellOffer.writeContractAsync({
+                          if (!publicClient || !address) {
+                            throw new Error("Connect your wallet to continue.");
+                          }
+
+                          const { gas } = await prepareContractWrite({
+                            publicClient,
+                            account: address,
+                            address: MARKET_ADDRESS,
+                            abi: marketAbi,
+                            functionName: "cancelSellOffer",
                             args: [BigInt(userSellOffer.offerId)]
                           });
-                          await publicClient?.waitForTransactionReceipt({ hash });
+                          const hash = await cancelSellOffer.writeContractAsync({
+                            args: [BigInt(userSellOffer.offerId)],
+                            gas
+                          });
+                          await publicClient.waitForTransactionReceipt({ hash });
                         })
                       }
                     >
@@ -530,10 +627,23 @@ export function NftDetailExperience({
                       variant="outline"
                       onClick={() =>
                         void runMutation(async () => {
-                          const hash = await cancelBuyOffer.writeContractAsync({
+                          if (!publicClient || !address) {
+                            throw new Error("Connect your wallet to continue.");
+                          }
+
+                          const { gas } = await prepareContractWrite({
+                            publicClient,
+                            account: address,
+                            address: MARKET_ADDRESS,
+                            abi: marketAbi,
+                            functionName: "cancelBuyOffer",
                             args: [BigInt(userBuyOffer.offerId)]
                           });
-                          await publicClient?.waitForTransactionReceipt({ hash });
+                          const hash = await cancelBuyOffer.writeContractAsync({
+                            args: [BigInt(userBuyOffer.offerId)],
+                            gas
+                          });
+                          await publicClient.waitForTransactionReceipt({ hash });
                         })
                       }
                     >

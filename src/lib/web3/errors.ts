@@ -20,7 +20,8 @@ const INSUFFICIENT_FUNDS_PATTERNS = [
   "insufficient funds",
   "exceeds the balance",
   "not enough balance",
-  "insufficient balance"
+  "insufficient balance",
+  "plus gas"
 ];
 
 const NETWORK_PATTERNS = [
@@ -60,7 +61,10 @@ export function classifyWalletError(error: unknown): WalletError {
 
   if (raw && matchesAny(raw, INSUFFICIENT_FUNDS_PATTERNS)) {
     return {
-      message: "Insufficient funds to complete this transaction.",
+      message:
+        raw.toLowerCase().includes("plus gas")
+          ? raw
+          : "Insufficient funds to cover the transaction value and gas.",
       severity: "warning"
     };
   }

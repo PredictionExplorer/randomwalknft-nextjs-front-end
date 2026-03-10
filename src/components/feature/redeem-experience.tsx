@@ -1,6 +1,6 @@
 "use client";
 
-import { useWaitForTransactionReceipt } from "wagmi";
+import { usePublicClient, useWaitForTransactionReceipt } from "wagmi";
 import { toast } from "sonner";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
@@ -10,15 +10,18 @@ import { PageShell } from "@/components/common/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
-import { useReadNftLastMinter, useReadNftTimeUntilWithdrawal, useReadNftWithdrawalAmount, useWriteNftWithdraw } from "@/generated/wagmi";
 import { trackEvent } from "@/lib/analytics";
+import { NFT_ADDRESS } from "@/lib/config";
+import { nftAbi, useReadNftLastMinter, useReadNftTimeUntilWithdrawal, useReadNftWithdrawalAmount, useWriteNftWithdraw } from "@/generated/wagmi";
 import { formatDateTimeFromUnix, formatEth } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
+import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 
 export function RedeemExperience() {
-  const { isReady } = useWalletStatus();
+  const publicClient = usePublicClient();
+  const { address, isReady } = useWalletStatus();
   const { data: withdrawalSeconds } = useReadNftTimeUntilWithdrawal();
   const { data: lastMinter } = useReadNftLastMinter();
   const { data: withdrawalAmount } = useReadNftWithdrawalAmount();
@@ -102,10 +105,22 @@ export function RedeemExperience() {
           <Button
             onClick={async () => {
               try {
+                if (!publicClient || !address) {
+                  throw new Error("Connect your wallet to continue.");
+                }
+
+                const { gas } = await prepareContractWrite({
+                  publicClient,
+                  account: address,
+                  address: NFT_ADDRESS,
+                  abi: nftAbi,
+                  functionName: "withdraw"
+                });
+
                 trackEvent("transaction_submitted", {
                   flow: "redeem"
                 });
-                await writeContractAsync({});
+                await writeContractAsync({ gas });
               } catch (error) {
                 trackEvent("transaction_failed", {
                   flow: "redeem",

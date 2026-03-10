@@ -13,8 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useWriteMarketCancelBuyOffer, useWriteMarketCancelSellOffer } from "@/generated/wagmi";
+import { marketAbi, useWriteMarketCancelBuyOffer, useWriteMarketCancelSellOffer } from "@/generated/wagmi";
+import { MARKET_ADDRESS } from "@/lib/config";
 import { useMounted } from "@/lib/use-mounted";
+import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { formatEth, formatId } from "@/lib/utils";
 
@@ -60,12 +62,25 @@ export function MyOffersView() {
 
   const handleCancel = async (offerId: number, kind: "buy" | "sell") => {
     try {
+      if (!publicClient || !address) {
+        throw new Error("Connect your wallet to continue.");
+      }
+
+      const { gas } = await prepareContractWrite({
+        publicClient,
+        account: address,
+        address: MARKET_ADDRESS,
+        abi: marketAbi,
+        functionName: kind === "buy" ? "cancelBuyOffer" : "cancelSellOffer",
+        args: [BigInt(offerId)]
+      });
+
       const hash =
         kind === "buy"
-          ? await buyMutation.writeContractAsync({ args: [BigInt(offerId)] })
-          : await sellMutation.writeContractAsync({ args: [BigInt(offerId)] });
+          ? await buyMutation.writeContractAsync({ args: [BigInt(offerId)], gas })
+          : await sellMutation.writeContractAsync({ args: [BigInt(offerId)], gas });
 
-      await publicClient?.waitForTransactionReceipt({ hash });
+      await publicClient.waitForTransactionReceipt({ hash });
       toast.success("Offer cancelled.");
       await offersQuery.refetch();
     } catch (error) {

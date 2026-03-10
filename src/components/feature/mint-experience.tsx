@@ -3,11 +3,13 @@
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
-import { parseEther } from "viem";
-import { useWaitForTransactionReceipt } from "wagmi";
+import { formatEther } from "viem";
+import { usePublicClient, useWaitForTransactionReceipt } from "wagmi";
 import { toast } from "sonner";
 
 import { trackEvent } from "@/lib/analytics";
+import { NFT_ADDRESS, MARKET_ADDRESS } from "@/lib/config";
+import { nftAbi, useReadNftGetMintPrice, useReadNftTimeUntilSale, useReadNftWithdrawalAmount, useWriteNftMint } from "@/generated/wagmi";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { Countdown } from "@/components/common/countdown";
 import { ExternalLink } from "@/components/common/external-link";
@@ -16,17 +18,18 @@ import { PageShell } from "@/components/common/page-shell";
 import { NftCard } from "@/components/nft/nft-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
-import { useReadNftGetMintPrice, useReadNftTimeUntilSale, useReadNftWithdrawalAmount, useWriteNftMint } from "@/generated/wagmi";
-import { NFT_ADDRESS, MARKET_ADDRESS } from "@/lib/config";
 import { getErrorMessage } from "@/lib/web3/errors";
+import { applyBasisPointsBuffer, prepareContractWrite } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
-import { publicClient } from "@/lib/web3/public-client";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { arbiscanContractUrl, createAssetUrls } from "@/lib/utils";
 
+const MINT_VALUE_BUFFER_BPS = 10_025n;
+
 export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
   const router = useRouter();
-  const { isConnected, isReady, chain } = useWalletStatus();
+  const publicClient = usePublicClient();
+  const { address, isConnected, isReady, chain } = useWalletStatus();
   const { data: mintPrice } = useReadNftGetMintPrice();
   const { data: withdrawalAmount } = useReadNftWithdrawalAmount();
   const { data: saleSeconds } = useReadNftTimeUntilSale();
@@ -35,14 +38,14 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
   const [countdownCompleted, setCountdownCompleted] = useState(false);
 
   useEffect(() => {
-    if (!hash || !isSuccess) {
+    if (!hash || !isSuccess || !publicClient) {
       return;
     }
 
     startTransition(async () => {
       const totalSupply = (await publicClient.readContract({
         address: NFT_ADDRESS,
-        abi: (await import("@/generated/wagmi")).nftAbi,
+        abi: nftAbi,
         functionName: "totalSupply"
       })) as bigint;
       const tokenId = Number(totalSupply) - 1;
@@ -53,11 +56,11 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
       });
       router.push(`/detail/${tokenId}` as Route);
     });
-  }, [hash, isSuccess, router]);
+  }, [hash, isSuccess, publicClient, router]);
 
   const isSaleOpen = !saleSeconds || Number(saleSeconds) <= 0 || countdownCompleted;
-  const mintPriceEth = mintPrice ? Number(mintPrice) / 1e18 : 0;
-  const withdrawalEth = withdrawalAmount ? Number(withdrawalAmount) / 1e18 : 0;
+  const mintPriceEth = mintPrice ? Number(formatEther(mintPrice)) : 0;
+  const withdrawalEth = withdrawalAmount ? Number(formatEther(withdrawalAmount)) : 0;
 
   const handleMint = async () => {
     try {
@@ -66,13 +69,34 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         return;
       }
 
+      if (!publicClient || !address) {
+        toast.error("Connect your wallet to mint.");
+        return;
+      }
+
+      const latestMintPrice = (await publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "getMintPrice"
+      })) as bigint;
+      const mintValue = applyBasisPointsBuffer(latestMintPrice, MINT_VALUE_BUFFER_BPS);
+      const { gas } = await prepareContractWrite({
+        publicClient,
+        account: address,
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "mint",
+        value: mintValue
+      });
+
       trackEvent("transaction_submitted", {
         flow: "mint",
         connected: isConnected,
         chainId: chain?.id
       });
       await writeContractAsync({
-        value: parseEther(mintPriceEth.toFixed(6))
+        value: mintValue,
+        gas
       });
       toast.info("Mint transaction submitted.");
     } catch (error) {
@@ -160,6 +184,9 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           >
             {isPending ? "Minting..." : "Mint now"}
           </button>
+          <p className="text-sm text-muted-foreground">
+            The app sends a small refundable buffer on mint so price changes while you sign are less likely to cause a failure.
+          </p>
 
           <div id="how-it-works" className="grid gap-4 md:grid-cols-3">
             {[

@@ -71,7 +71,7 @@ describe("classifyWalletError", () => {
     it("classifies 'insufficient funds' as warning", () => {
       const result = classifyWalletError(new Error("insufficient funds for gas * price + value"));
       expect(result.severity).toBe("warning");
-      expect(result.message).toBe("Insufficient funds to complete this transaction.");
+      expect(result.message).toBe("Insufficient funds to cover the transaction value and gas.");
     });
 
     it("classifies 'exceeds the balance' as warning", () => {
@@ -82,6 +82,16 @@ describe("classifyWalletError", () => {
     it("classifies 'not enough balance' as warning", () => {
       const result = classifyWalletError(new Error("not enough balance in account"));
       expect(result.severity).toBe("warning");
+    });
+
+    it("preserves the friendlier preflight message for balance plus gas failures", () => {
+      const result = classifyWalletError(
+        new Error("Insufficient funds to cover this transaction plus gas. Add about 0.001 ETH or lower the amount.")
+      );
+      expect(result.severity).toBe("warning");
+      expect(result.message).toBe(
+        "Insufficient funds to cover this transaction plus gas. Add about 0.001 ETH or lower the amount."
+      );
     });
   });
 

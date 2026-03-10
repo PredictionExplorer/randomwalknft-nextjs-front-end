@@ -19,7 +19,7 @@ describe("showWalletError", () => {
 
   it("shows warning toast for insufficient funds", () => {
     showWalletError(new Error("insufficient funds for gas"));
-    expect(toast.warning).toHaveBeenCalledWith("Insufficient funds to complete this transaction.");
+    expect(toast.warning).toHaveBeenCalledWith("Insufficient funds to cover the transaction value and gas.");
   });
 
   it("shows warning toast for network errors", () => {
