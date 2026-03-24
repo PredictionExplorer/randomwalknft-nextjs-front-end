@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { CodeArtifactCard } from "@/components/code/code-artifact-card";
+import { IpfsLink } from "@/components/code/ipfs-link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generatorFiles } from "@/lib/content/generation-code";
@@ -58,6 +59,23 @@ export default function CodePage() {
               Run `python3 randomWalkGen.py &lt;NFT number&gt;` and the generator will fetch the seed from Arbitrum, then render both black and white outputs locally.
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card/70">
+        <CardContent className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Permanent IPFS backup</p>
+            <p className="text-sm leading-7 text-muted-foreground">
+              All generation code and files shown on this page are also stored on IPFS.
+              If this website ever becomes unavailable, you can retrieve everything
+              from IPFS and recreate the artwork from scratch.
+            </p>
+          </div>
+          <IpfsLink
+            uri="ipfs://QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W"
+            gatewayUrl="https://ipfs.io/ipfs/QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W"
+          />
         </CardContent>
       </Card>
 
