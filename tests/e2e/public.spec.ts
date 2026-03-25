@@ -92,7 +92,7 @@ test("random image page links to an NFT detail page", async ({ page }) => {
   await expect(page.locator('a[href^="/detail/"]')).toBeVisible();
 });
 
-test("generation code page includes the full reproduction guide", async ({ page }) => {
+test("open source page includes the full reproduction guide", async ({ page }) => {
   await page.goto("/code");
   await expect(page.getByText(/python3 randomWalkGen\.py 3456/i)).toBeVisible();
 

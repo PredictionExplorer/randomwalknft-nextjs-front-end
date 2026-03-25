@@ -10,14 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generatorFiles } from "@/lib/content/generation-code";
 
 export const metadata: Metadata = {
-  title: "Generation Code",
+  title: "Open Source",
   description:
-    "View the complete Python generator, pinned dependencies, and step-by-step instructions to reproduce any Random Walk NFT artwork locally.",
+    "Every Random Walk NFT can be independently verified. View the complete source code, dependencies, and reproduction steps — nothing is hidden.",
   alternates: { canonical: "/code" },
   openGraph: {
-    title: "Generation Code | Random Walk NFT",
+    title: "Open Source | Random Walk NFT",
     description:
-      "View the complete Python generator, pinned dependencies, and step-by-step instructions to reproduce any Random Walk NFT artwork locally."
+      "Every Random Walk NFT can be independently verified. View the complete source code, dependencies, and reproduction steps — nothing is hidden."
   }
 };
 
@@ -27,36 +27,36 @@ export default function CodePage() {
       <Breadcrumbs
         items={[
           { href: "/", label: "Home" },
-          { label: "Generation Code" }
+          { label: "Open Source" }
         ]}
       />
       <PageHeading
-        eyebrow="Full reproducibility"
+        eyebrow="Fully verifiable"
         title={[
-          { text: "GENERATION" },
-          { text: "CODE", tone: "secondary" }
+          { text: "OPEN" },
+          { text: "SOURCE", tone: "secondary" }
         ]}
-        description="The complete Python generator, the exact dependencies, and the local reproduction steps needed to regenerate Random Walk NFT media on your own machine."
+        description="Every Random Walk NFT can be independently verified. The complete source code, dependencies, and reproduction steps are published here — nothing is hidden."
       />
 
       <Card className="bg-card/70">
         <CardContent className="grid gap-5 p-6 md:grid-cols-3">
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-secondary">1. Install system packages</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-secondary">1. Set up your environment</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              The original generator expects OpenCV at the system level. On Ubuntu the documented path is `apt-get update && apt-get install -y python3-opencv`.
+              The generator requires a system-level image library. The Guide tab below walks you through installing it on Ubuntu or any compatible system.
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-secondary">2. Install Python deps</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-secondary">2. Install dependencies</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Use the exact requirements file below to install Pillow, NumPy, OpenCV, and requests in a clean Python environment.
+              Install the pinned library versions listed in the Dependencies tab to ensure your output matches exactly.
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-secondary">3. Generate from a token</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-secondary">3. Generate your artwork</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Run `python3 randomWalkGen.py &lt;NFT number&gt;` and the generator will fetch the seed from Arbitrum, then render both black and white outputs locally.
+              Run the generator with any token number. It fetches the seed from Arbitrum and renders both the black and white image and video variants.
             </p>
           </div>
         </CardContent>
@@ -81,30 +81,30 @@ export default function CodePage() {
 
       <Tabs defaultValue="guide">
         <TabsList>
-          <TabsTrigger value="guide">Guide</TabsTrigger>
-          <TabsTrigger value="requirements">Requirements</TabsTrigger>
-          <TabsTrigger value="source">Full source</TabsTrigger>
+          <TabsTrigger value="guide">How to reproduce</TabsTrigger>
+          <TabsTrigger value="requirements">Dependencies</TabsTrigger>
+          <TabsTrigger value="source">Source code</TabsTrigger>
         </TabsList>
         <TabsContent value="guide">
           <CodeArtifactCard
-            title="Reproduction steps"
-            description="The exact instructions bundled with the generator so collectors can reproduce the media on their own machine."
+            title="Reproduction guide"
+            description="Step-by-step instructions to generate any Random Walk NFT artwork on your own computer."
             content={generatorFiles.readme}
             fileName={generatorFiles.readmeFileName}
           />
         </TabsContent>
         <TabsContent value="requirements">
           <CodeArtifactCard
-            title="Python requirements"
-            description="Install these pinned Python dependencies before running the generator."
+            title="Pinned dependencies"
+            description="The exact library versions used by the generator — install these before running."
             content={generatorFiles.requirements}
             fileName={generatorFiles.requirementsFileName}
           />
         </TabsContent>
         <TabsContent value="source">
           <CodeArtifactCard
-            title="Complete Python generator"
-            description="This is the full generator code, including RPC seed lookup, image rendering, and single/triple video generation."
+            title="Generator source code"
+            description="The complete code that turns an on-chain seed into images and videos."
             content={generatorFiles.source}
             fileName={generatorFiles.sourceFileName}
           />

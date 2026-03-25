@@ -30,7 +30,7 @@ Random Walk NFT is a generative art collection deployed on Arbitrum (Ethereum La
 - Beauty Contest (community voting): ${SITE_URL}/compare
 - Random Image Viewer: ${SITE_URL}/random
 - Random Video Viewer: ${SITE_URL}/random-video
-- Generation Code (full source): ${SITE_URL}/code
+- Open Source (full generator source): ${SITE_URL}/code
 - FAQ: ${SITE_URL}/faq
 - Redeem (mint pool withdrawal): ${SITE_URL}/redeem
 

@@ -13,7 +13,7 @@ export const navItems = [
       { title: "Random Image", href: "/random" },
       { title: "Random Video", href: "/random-video" },
       { title: "Beauty Contest", href: "/compare" },
-      { title: "Generation Code", href: "/code" }
+      { title: "Open Source", href: "/code" }
     ]
   }
 ] as const;
