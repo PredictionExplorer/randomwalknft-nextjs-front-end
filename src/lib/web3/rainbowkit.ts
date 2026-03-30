@@ -1,6 +1,6 @@
 import { darkTheme } from "@rainbow-me/rainbowkit";
 
-import { SITE_NAME, SITE_URL } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 
 export const rainbowKitTheme = darkTheme({
   accentColor: "#c676d7",
@@ -9,7 +9,10 @@ export const rainbowKitTheme = darkTheme({
   overlayBlur: "small"
 });
 
-export const rainbowKitAppInfo = {
-  appName: SITE_NAME,
-  learnMoreUrl: SITE_URL
-};
+export function getRainbowKitAppInfo() {
+  const { SITE_NAME, SITE_URL } = getConfig();
+  return {
+    appName: SITE_NAME,
+    learnMoreUrl: SITE_URL
+  };
+}

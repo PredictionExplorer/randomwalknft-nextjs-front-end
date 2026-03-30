@@ -7,8 +7,8 @@ import { useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
 import { Toaster } from "sonner";
 
-import { wagmiConfig } from "@/lib/web3/wagmi";
-import { rainbowKitAppInfo, rainbowKitTheme } from "@/lib/web3/rainbowkit";
+import { getWagmiConfig } from "@/lib/web3/wagmi";
+import { getRainbowKitAppInfo, rainbowKitTheme } from "@/lib/web3/rainbowkit";
 
 type AppProvidersProps = {
   children: React.ReactNode;
@@ -30,9 +30,9 @@ export function AppProviders({ children, initialState }: AppProvidersProps) {
   );
 
   return (
-    <WagmiProvider config={wagmiConfig} initialState={initialState}>
+    <WagmiProvider config={getWagmiConfig()} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider appInfo={rainbowKitAppInfo} modalSize="compact" theme={rainbowKitTheme}>
+        <RainbowKitProvider appInfo={getRainbowKitAppInfo()} modalSize="compact" theme={rainbowKitTheme}>
           {children}
         </RainbowKitProvider>
         <Toaster position="top-right" richColors />

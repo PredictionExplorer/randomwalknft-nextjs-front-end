@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 
 import { faqItems } from "@/lib/content/faq";
 import { homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
-import { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 
 export function GET() {
+  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
   const faqSection = faqItems
     .map((item) => `### ${item.summary}\n\n${item.detail}`)
     .join("\n\n");

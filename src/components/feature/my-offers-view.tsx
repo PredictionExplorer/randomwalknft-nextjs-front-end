@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { marketAbi, useWriteMarketCancelBuyOffer, useWriteMarketCancelSellOffer } from "@/generated/wagmi";
-import { MARKET_ADDRESS } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import { useMounted } from "@/lib/use-mounted";
 import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
@@ -45,6 +45,7 @@ async function fetchOffers(account: string): Promise<OfferResponse> {
 }
 
 export function MyOffersView() {
+  const { MARKET_ADDRESS } = getConfig();
   const mounted = useMounted();
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();

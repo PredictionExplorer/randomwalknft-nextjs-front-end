@@ -8,7 +8,7 @@ import { usePublicClient, useWaitForTransactionReceipt } from "wagmi";
 import { toast } from "sonner";
 
 import { trackEvent } from "@/lib/analytics";
-import { NFT_ADDRESS, MARKET_ADDRESS } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import { nftAbi, useReadNftGetMintPrice, useReadNftTimeUntilSale, useReadNftWithdrawalAmount, useWriteNftMint } from "@/generated/wagmi";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { Countdown } from "@/components/common/countdown";
@@ -27,6 +27,7 @@ import { arbiscanContractUrl, createAssetUrls } from "@/lib/utils";
 const MINT_VALUE_BUFFER_BPS = 10_025n;
 
 export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
+  const { MARKET_ADDRESS, NFT_ADDRESS } = getConfig();
   const router = useRouter();
   const publicClient = usePublicClient();
   const { address, isConnected, isReady, chain } = useWalletStatus();

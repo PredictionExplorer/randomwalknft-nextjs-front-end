@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { trackEvent } from "@/lib/analytics";
-import { NFT_ADDRESS } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import { nftAbi, useReadNftLastMinter, useReadNftTimeUntilWithdrawal, useReadNftWithdrawalAmount, useWriteNftWithdraw } from "@/generated/wagmi";
 import { formatDateTimeFromUnix, formatEth } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
@@ -20,6 +20,7 @@ import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 
 export function RedeemExperience() {
+  const { NFT_ADDRESS } = getConfig();
   const publicClient = usePublicClient();
   const { address, isReady } = useWalletStatus();
   const { data: withdrawalSeconds } = useReadNftTimeUntilWithdrawal();

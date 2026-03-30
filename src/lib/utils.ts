@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
-import { ASSET_BASE_URL } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import type { AssetTheme, AssetVariant, NftAssetUrls } from "@/lib/types";
 
 export function arbiscanAddressUrl(address: string) {
@@ -49,25 +49,22 @@ export function formatDateTimeFromUnix(timestamp: number) {
 }
 
 export function getAssetUrl(fileName: string) {
-  return `${ASSET_BASE_URL}/${fileName}`;
-}
-
-export function getAssetProxyUrl(fileName: string) {
-  return `/api/assets/${fileName}`;
+  const base = getConfig().ASSET_BASE_URL.replace(/\/+$/, "");
+  return `${base}/${fileName.replace(/^\/+/, "")}`;
 }
 
 export function createAssetUrls(tokenId: number): NftAssetUrls {
   const fileName = tokenId.toString().padStart(6, "0");
 
   return {
-    blackImage: getAssetProxyUrl(`${fileName}_black.png`),
-    blackThumb: getAssetProxyUrl(`${fileName}_black_thumb.jpg`),
-    blackSingleVideo: getAssetProxyUrl(`${fileName}_black_single.mp4`),
-    blackTripleVideo: getAssetProxyUrl(`${fileName}_black_triple.mp4`),
-    whiteImage: getAssetProxyUrl(`${fileName}_white.png`),
-    whiteThumb: getAssetProxyUrl(`${fileName}_white_thumb.jpg`),
-    whiteSingleVideo: getAssetProxyUrl(`${fileName}_white_single.mp4`),
-    whiteTripleVideo: getAssetProxyUrl(`${fileName}_white_triple.mp4`)
+    blackImage: getAssetUrl(`${fileName}_black.png`),
+    blackThumb: getAssetUrl(`${fileName}_black_thumb.jpg`),
+    blackSingleVideo: getAssetUrl(`${fileName}_black_single.mp4`),
+    blackTripleVideo: getAssetUrl(`${fileName}_black_triple.mp4`),
+    whiteImage: getAssetUrl(`${fileName}_white.png`),
+    whiteThumb: getAssetUrl(`${fileName}_white_thumb.jpg`),
+    whiteSingleVideo: getAssetUrl(`${fileName}_white_single.mp4`),
+    whiteTripleVideo: getAssetUrl(`${fileName}_white_triple.mp4`)
   };
 }
 

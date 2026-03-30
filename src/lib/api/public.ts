@@ -4,17 +4,22 @@ import { cache } from "react";
 import { z } from "zod";
 
 import {
-  MARKET_ADDRESS,
-  NFT_ADDRESS,
+  getConfig,
   REVALIDATE_LONG,
   REVALIDATE_MEDIUM,
   REVALIDATE_SHORT
 } from "@/lib/config";
 import { fetchApi, fetchRwalk, postApi } from "@/lib/api/client";
+
+/** Go GET /api/rwalk/current_offers/... returns { Offers, status, error }. */
+const rwCurrentOffersResponseSchema = z
+  .object({
+    Offers: offerSchema.array()
+  })
+  .passthrough();
 import {
   actionResponseSchema,
   offerSchema,
-  tokenDetailSchema,
   tokenHistorySchema,
   tokenInfoSchema,
   tradingRecordSchema,
@@ -76,20 +81,31 @@ async function fetchTokenDetail(
   tokenId: number,
   init: { cache?: RequestCache; revalidate?: number } = { revalidate: REVALIDATE_MEDIUM }
 ): Promise<Nft> {
-  const [token, historyResponse] = await Promise.all([
-    fetchApi(`tokens/${tokenId}`, init, tokenDetailSchema),
-    fetchRwalk(
-      `tokens/history/${tokenId}/${NFT_ADDRESS}/0/1000`,
-      init.cache === "no-store" ? { cache: "no-store" } : { revalidate: REVALIDATE_SHORT },
-      tokenHistorySchema
-    )
+  const { NFT_ADDRESS } = getConfig();
+  const historyInit =
+    init.cache === "no-store" ? { cache: "no-store" as const } : { revalidate: REVALIDATE_SHORT };
+
+  const [infoResponse, historyResponse] = await Promise.all([
+    fetchRwalk(`tokens/info/${NFT_ADDRESS}/${tokenId}`, init, tokenInfoSchema),
+    fetchRwalk(`tokens/history/${tokenId}/${NFT_ADDRESS}/0/1000`, historyInit, tokenHistorySchema)
   ]);
+
+  const t = infoResponse.TokenInfo;
+  const token = {
+    id: t.TokenId,
+    name: t.CurName,
+    owner: t.CurOwnerAddr,
+    seed: t.SeedHex,
+    rating: 0,
+    status: 1
+  };
 
   return normalizeTokenDetail(token, historyResponse);
 }
 
 async function getPendingTokenDetail(tokenId: number): Promise<Nft | null> {
   try {
+    const { NFT_ADDRESS } = getConfig();
     const [owner, seed, name] = await Promise.all([
       publicClient.readContract({
         address: NFT_ADDRESS,
@@ -146,6 +162,7 @@ export async function getTokenDetailOrFallback(
 }
 
 export const getTokenInfo = cache(async (tokenId: number) => {
+  const { NFT_ADDRESS } = getConfig();
   return fetchRwalk(
     `tokens/info/${NFT_ADDRESS}/${tokenId}`,
     { revalidate: REVALIDATE_SHORT },
@@ -154,10 +171,13 @@ export const getTokenInfo = cache(async (tokenId: number) => {
 });
 
 export const getRandomTokenIds = cache(async () => {
-  return fetchApi<number[]>("random_token", { revalidate: REVALIDATE_SHORT });
+  return fetchApi<number[]>("api/randomwalk/explore/random?limit=12", {
+    revalidate: REVALIDATE_SHORT
+  });
 });
 
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
+  const { NFT_ADDRESS } = getConfig();
   const [featuredTokenIds, activeListings, activeBids, recentSales, totalSupply] = await Promise.all([
     getRandomTokenIds(),
     getOffers("sell"),
@@ -193,12 +213,20 @@ export const getRatingOrder = cache(async () => {
   return fetchApi<number[]>("rating_order", { revalidate: REVALIDATE_LONG });
 });
 
-export const getOffers = cache(async (kind: "buy" | "sell") => {
-  const response = await fetchApi(
-    kind === "buy" ? "buy_offer" : "sell_offer",
+const getAllActiveOffersRaw = cache(async () => {
+  const { MARKET_ADDRESS, NFT_ADDRESS } = getConfig();
+  const res = await fetchRwalk(
+    `current_offers/${NFT_ADDRESS}/${MARKET_ADDRESS}/2`,
     { revalidate: REVALIDATE_SHORT },
-    offerSchema.array()
+    rwCurrentOffersResponseSchema
   );
+  return res.Offers;
+});
+
+/** otype 0 = buy, 1 = sell (matches rwcg notibot / DB conventions). */
+export const getOffers = cache(async (kind: "buy" | "sell") => {
+  const wantType = kind === "buy" ? 0 : 1;
+  const response = (await getAllActiveOffersRaw()).filter((item) => item.OfferType === wantType);
 
   return response
     .map((item) => normalizeOffer(item, kind))
@@ -215,6 +243,7 @@ export const getOffersForToken = cache(async (tokenId: number) => {
 });
 
 export const getTradingHistory = cache(async (page: number) => {
+  const { MARKET_ADDRESS } = getConfig();
   const perPage = 20;
   const all = await fetchRwalk(
     `trading/sales/${MARKET_ADDRESS}/0/1000000`,

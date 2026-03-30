@@ -22,10 +22,14 @@ describe("utils", () => {
     expect(formatId(7)).toBe("#000007");
   });
 
-  it("creates proxied asset urls", () => {
+  it("creates absolute asset urls from NEXT_PUBLIC_ASSET_BASE_URL", () => {
     const urls = createAssetUrls(12);
-    expect(urls.blackThumb).toContain("/api/assets/000012_black_thumb.jpg");
-    expect(urls.whiteSingleVideo).toContain("/api/assets/000012_white_single.mp4");
+    expect(urls.blackThumb).toBe(
+      "https://assets.test.example.com/randomwalk/000012_black_thumb.jpg"
+    );
+    expect(urls.whiteSingleVideo).toBe(
+      "https://assets.test.example.com/randomwalk/000012_white_single.mp4"
+    );
   });
 
   it("selects the requested themed asset", () => {

@@ -2,7 +2,7 @@ import "server-only";
 
 import type { ZodSchema } from "zod";
 
-import { API_BASE_URL, REVALIDATE_MEDIUM, RWALK_BASE_URL } from "@/lib/config";
+import { getConfig, REVALIDATE_MEDIUM } from "@/lib/config";
 
 type FetchInit = RequestInit & {
   revalidate?: number;
@@ -25,6 +25,7 @@ export async function fetchApi<T>(
   init: FetchInit = {},
   schema?: ZodSchema<T>
 ) {
+  const { API_BASE_URL } = getConfig();
   const { revalidate = REVALIDATE_MEDIUM, headers, ...rest } = init;
 
   const response = await fetch(`${API_BASE_URL}/${path.replace(/^\/+/, "")}`, {
@@ -50,6 +51,7 @@ export async function fetchRwalk<T>(
   init: FetchInit = {},
   schema?: ZodSchema<T>
 ) {
+  const { RWALK_BASE_URL } = getConfig();
   const { revalidate = REVALIDATE_MEDIUM, headers, ...rest } = init;
 
   const response = await fetch(`${RWALK_BASE_URL}/${path.replace(/^\/+/, "")}`, {
@@ -76,6 +78,7 @@ export async function postApi<T>(
   init: FetchInit = {},
   schema?: ZodSchema<T>
 ) {
+  const { API_BASE_URL } = getConfig();
   const { headers, ...rest } = init;
   const isFormData = body instanceof FormData;
 

@@ -5,6 +5,31 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true"
 });
 
+function assetBaseRemotePattern(): {
+  protocol: "http" | "https";
+  hostname: string;
+  port?: string;
+  pathname: string;
+} | null {
+  const raw = process.env.NEXT_PUBLIC_ASSET_BASE_URL?.trim();
+  if (!raw) {
+    return null;
+  }
+  try {
+    const u = new URL(raw);
+    return {
+      protocol: u.protocol === "https:" ? "https" : "http",
+      hostname: u.hostname,
+      ...(u.port ? { port: u.port } : {}),
+      pathname: "/**"
+    };
+  } catch {
+    return null;
+  }
+}
+
+const assetRemote = assetBaseRemotePattern();
+
 const nextConfig: NextConfig = {
   typedRoutes: true,
   reactStrictMode: true,
@@ -19,6 +44,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "randomwalknft-api.com",
       },
+      ...(assetRemote ? [assetRemote] : []),
     ],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60

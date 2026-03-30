@@ -13,9 +13,11 @@ import {
   getVoteCount,
   submitBeautyVote
 } from "@/lib/api/public";
-import { API_BASE_URL, NFT_ADDRESS, RWALK_BASE_URL, MARKET_ADDRESS } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import { publicClient } from "@/lib/web3/public-client";
 import { server } from "../../setup/msw/server";
+
+const { API_BASE_URL, MARKET_ADDRESS, NFT_ADDRESS, RWALK_BASE_URL } = getConfig();
 
 const offerPayload = (
   id: number,
@@ -83,17 +85,17 @@ describe("getOffersForToken", () => {
   it("filters buy and sell offers by tokenId", async () => {
     const targetTokenId = 42;
     server.use(
-      http.get(`${API_BASE_URL}/buy_offer`, () =>
-        HttpResponse.json([
-          offerPayload(1, 100, targetTokenId, 1.5, "2026-01-01T00:00:01Z", 1),
-          offerPayload(2, 101, 99, 2.0, "2026-01-01T00:00:02Z", 2)
-        ])
-      ),
-      http.get(`${API_BASE_URL}/sell_offer`, () =>
-        HttpResponse.json([
-          offerPayload(3, 102, targetTokenId, 3.0, "2026-01-01T00:00:03Z", 3),
-          offerPayload(4, 103, 88, 4.0, "2026-01-01T00:00:04Z", 4)
-        ])
+      http.get(`${RWALK_BASE_URL}/current_offers/${NFT_ADDRESS}/${MARKET_ADDRESS}/2`, () =>
+        HttpResponse.json({
+          status: 1,
+          error: "",
+          Offers: [
+            { ...offerPayload(1, 100, targetTokenId, 1.5, "2026-01-01T00:00:01Z", 1), OfferType: 0 },
+            { ...offerPayload(2, 101, 99, 2.0, "2026-01-01T00:00:02Z", 2), OfferType: 0 },
+            { ...offerPayload(3, 102, targetTokenId, 3.0, "2026-01-01T00:00:03Z", 3), OfferType: 1 },
+            { ...offerPayload(4, 103, 88, 4.0, "2026-01-01T00:00:04Z", 4), OfferType: 1 }
+          ]
+        })
       )
     );
 
@@ -117,15 +119,15 @@ describe("getOffersForToken", () => {
 
   it("returns empty arrays when no offers match tokenId", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/buy_offer`, () =>
-        HttpResponse.json([
-          offerPayload(1, 100, 1, 1.5, "2026-01-01T00:00:01Z", 1)
-        ])
-      ),
-      http.get(`${API_BASE_URL}/sell_offer`, () =>
-        HttpResponse.json([
-          offerPayload(2, 101, 2, 2.0, "2026-01-01T00:00:02Z", 2)
-        ])
+      http.get(`${RWALK_BASE_URL}/current_offers/${NFT_ADDRESS}/${MARKET_ADDRESS}/2`, () =>
+        HttpResponse.json({
+          status: 1,
+          error: "",
+          Offers: [
+            { ...offerPayload(1, 100, 1, 1.5, "2026-01-01T00:00:01Z", 1), OfferType: 0 },
+            { ...offerPayload(2, 101, 2, 2.0, "2026-01-01T00:00:02Z", 2), OfferType: 1 }
+          ]
+        })
       )
     );
 
@@ -139,14 +141,19 @@ describe("getOffersForToken", () => {
 describe("getTokenDetail", () => {
   it("fetches and transforms token data with history", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/tokens/5`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/info/${NFT_ADDRESS}/5`, () =>
         HttpResponse.json({
-          id: 5,
-          name: "Token Five",
-          owner: "0xowner",
-          seed: "0xseed",
-          rating: 4.5,
-          status: 1
+          status: 1,
+          error: "",
+          TokenInfo: {
+            TokenId: 5,
+            CurOwnerAddr: "0xowner",
+            SeedHex: "0xseed",
+            CurName: "Token Five",
+            LastPrice: 0,
+            TotalVolume: 0,
+            NumTrades: 0
+          }
         })
       ),
       http.get(`${RWALK_BASE_URL}/tokens/history/5/${NFT_ADDRESS}/0/1000`, () =>
@@ -172,7 +179,7 @@ describe("getTokenDetail", () => {
     expect(nft.name).toBe("Token Five");
     expect(nft.owner).toBe("0xowner");
     expect(nft.seed).toBe("0xseed");
-    expect(nft.rating).toBe(4.5);
+    expect(nft.rating).toBe(0);
     expect(nft.tokenHistory).toHaveLength(1);
     expect(nft.tokenHistory[0]?.recordType).toBe(1);
     expect(nft.mintedAt).toBe("2023-11-14T00:00:00Z");
@@ -187,7 +194,7 @@ describe("getTokenDetail", () => {
       .mockResolvedValueOnce("");
 
     server.use(
-      http.get(`${API_BASE_URL}/tokens/8`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/info/${NFT_ADDRESS}/8`, () =>
         HttpResponse.json({ error: "Not found" }, { status: 404 })
       ),
       http.get(`${RWALK_BASE_URL}/tokens/history/8/${NFT_ADDRESS}/0/1000`, () =>

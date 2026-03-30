@@ -57,14 +57,13 @@ describe("assets route", () => {
     fetchMock.mockRestore();
   });
 
-  it("allows files matching supported extensions", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response("ok", { status: 200, headers: { "content-type": "image/png" } })
-    );
+  it("rejects filenames outside the RandomWalk asset pattern", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
     const response = await GET(new Request("http://localhost"), {
       params: Promise.resolve({ path: ["custom_name.png"] })
     });
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
     fetchMock.mockRestore();
   });
 

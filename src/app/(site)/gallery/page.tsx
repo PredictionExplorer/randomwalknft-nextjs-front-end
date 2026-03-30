@@ -9,7 +9,7 @@ import { CollectionToolbar } from "@/components/collection/collection-toolbar";
 import { NftGrid } from "@/components/nft/nft-grid";
 import { nftAbi } from "@/generated/wagmi";
 import { getRatingOrder } from "@/lib/api/public";
-import { NFT_ADDRESS, PAGE_SIZE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
+import { getConfig, PAGE_SIZE } from "@/lib/config";
 import { getDescendingTokenPage, paginateItems } from "@/lib/pagination";
 import { buildCollectionSearchParams, parseCollectionQueryState } from "@/lib/query-state";
 import { createAssetUrls } from "@/lib/utils";
@@ -30,6 +30,7 @@ export const metadata: Metadata = {
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function GalleryPage({ searchParams }: { searchParams: SearchParams }) {
+  const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
   const resolvedSearchParams = await searchParams;
   const state = parseCollectionQueryState(resolvedSearchParams);
   const { address, sortBy, query, page: requestedPage, view } = state;

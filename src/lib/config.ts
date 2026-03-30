@@ -1,14 +1,54 @@
-export const SITE_URL = "https://www.randomwalknft.com";
-export const SITE_NAME = "Random Walk NFT";
-export const SITE_DESCRIPTION =
-  "A generative art collection on Arbitrum where every mint creates unique images and videos — and ETH flows back to collectors, not creators.";
+import { getPublicEnvSnapshot, REQUIRED_ENV_KEYS, type RequiredEnvKey } from "@/lib/env";
 
-export const NFT_ADDRESS = "0x895a6F444BE4ba9d124F61DF736605792B35D66b";
-export const MARKET_ADDRESS = "0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08";
+function req(snap: Record<RequiredEnvKey, string | undefined>, name: RequiredEnvKey): string {
+  const v = snap[name]?.trim();
+  if (!v) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return v;
+}
 
-export const API_BASE_URL = process.env.API_BASE_URL ?? "https://nfts.cosmicsignature.com";
-export const RWALK_BASE_URL = process.env.RWALK_BASE_URL ?? "http://69.10.55.2:9291/api/rwalk";
-export const ASSET_BASE_URL = process.env.ASSET_BASE_URL ?? "https://nfts.cosmicsignature.com/images/randomwalk";
+export type AppConfig = {
+  SITE_URL: string;
+  SITE_NAME: string;
+  SITE_DESCRIPTION: string;
+  NFT_ADDRESS: `0x${string}`;
+  MARKET_ADDRESS: `0x${string}`;
+  API_BASE_URL: string;
+  RWALK_BASE_URL: string;
+  ASSET_BASE_URL: string;
+};
+
+let cached: AppConfig | null = null;
+
+/**
+ * Resolved lazily. Call only when the app shell is mounted (env validated in root layout).
+ * Throws if any required variable is missing — use only after {@link isEnvConfigured} / layout gate.
+ */
+export function getConfig(): AppConfig {
+  if (cached) {
+    return cached;
+  }
+  const snap = getPublicEnvSnapshot();
+  const missing = REQUIRED_ENV_KEYS.filter((key) => {
+    const v = snap[key];
+    return typeof v !== "string" || v.trim() === "";
+  });
+  if (missing.length > 0) {
+    throw new Error("ENV_NOT_CONFIGURED");
+  }
+  cached = {
+    SITE_URL: req(snap, "NEXT_PUBLIC_SITE_URL"),
+    SITE_NAME: req(snap, "NEXT_PUBLIC_SITE_NAME"),
+    SITE_DESCRIPTION: req(snap, "NEXT_PUBLIC_SITE_DESCRIPTION"),
+    NFT_ADDRESS: req(snap, "NEXT_PUBLIC_NFT_ADDRESS") as `0x${string}`,
+    MARKET_ADDRESS: req(snap, "NEXT_PUBLIC_MARKET_ADDRESS") as `0x${string}`,
+    API_BASE_URL: req(snap, "NEXT_PUBLIC_API_BASE_URL"),
+    RWALK_BASE_URL: req(snap, "NEXT_PUBLIC_RWALK_BASE_URL"),
+    ASSET_BASE_URL: req(snap, "NEXT_PUBLIC_ASSET_BASE_URL")
+  };
+  return cached;
+}
 
 export const SUPPORTED_ASSET_EXTENSIONS = [
   ".png",

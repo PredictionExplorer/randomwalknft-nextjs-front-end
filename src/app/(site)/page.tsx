@@ -13,16 +13,20 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getHomepageStats } from "@/lib/api/public";
 import { homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
-import { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Home",
-  description: SITE_DESCRIPTION,
-  alternates: { canonical: "/" }
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { SITE_DESCRIPTION } = getConfig();
+  return {
+    title: "Home",
+    description: SITE_DESCRIPTION,
+    alternates: { canonical: "/" }
+  };
+}
 
 export default async function HomePage() {
+  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
   const stats = await getHomepageStats();
   const [featuredId] = stats.featuredTokenIds;
   const featuredCards = stats.featuredTokenIds.slice(0, 3);

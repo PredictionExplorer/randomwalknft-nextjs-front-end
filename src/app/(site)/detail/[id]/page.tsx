@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/common/json-ld";
 import { NftDetailExperience } from "@/components/feature/nft-detail-experience";
 import { getOffersForToken, getTokenDetailOrFallback } from "@/lib/api/public";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import type { AssetTheme, AssetVariant, Offer } from "@/lib/types";
 import { formatId } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { SITE_NAME } = getConfig();
   const { id } = await params;
   const tokenId = Number(id);
 
@@ -57,6 +58,7 @@ export default async function DetailPage({
   params: Params;
   searchParams: SearchParams;
 }) {
+  const { SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   const tokenId = Number(id);
   const message = typeof resolvedSearchParams.message === "string" ? resolvedSearchParams.message : undefined;

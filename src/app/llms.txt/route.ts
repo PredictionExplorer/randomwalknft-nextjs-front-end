@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 
 export function GET() {
+  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
   const content = `# ${SITE_NAME}
 
 > ${SITE_DESCRIPTION}

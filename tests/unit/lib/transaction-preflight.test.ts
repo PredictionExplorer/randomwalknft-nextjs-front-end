@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { PublicClient } from "viem";
 
 import { marketAbi } from "@/generated/wagmi";
-import { MARKET_ADDRESS, NFT_ADDRESS } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import {
   applyBasisPointsBuffer,
   applyGasBuffer,
@@ -20,6 +20,8 @@ function createPublicClientMock(overrides?: Partial<PublicClient>) {
 }
 
 describe("transaction preflight", () => {
+  const { MARKET_ADDRESS, NFT_ADDRESS } = getConfig();
+
   it("adds a 20% gas buffer", () => {
     expect(applyGasBuffer(100n)).toBe(120n);
   });

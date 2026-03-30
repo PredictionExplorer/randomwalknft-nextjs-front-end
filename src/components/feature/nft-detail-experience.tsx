@@ -10,7 +10,7 @@ import { usePublicClient } from "wagmi";
 import { toast } from "sonner";
 
 import { trackEvent } from "@/lib/analytics";
-import { MARKET_ADDRESS, NFT_ADDRESS } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 import type { AssetTheme, AssetVariant, Nft, Offer } from "@/lib/types";
 import {
   formatDateTimeFromUnix,
@@ -100,6 +100,7 @@ export function NftDetailExperience({
   initialTheme,
   initialMedia
 }: NftDetailExperienceProps) {
+  const { MARKET_ADDRESS, NFT_ADDRESS } = getConfig();
   const pathname = usePathname();
   const router = useRouter();
   const publicClient = usePublicClient();

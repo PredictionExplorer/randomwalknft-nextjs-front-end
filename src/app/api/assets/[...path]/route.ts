@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 
-import { ASSET_BASE_URL, SUPPORTED_ASSET_EXTENSIONS } from "@/lib/config";
+import { getConfig } from "@/lib/config";
 
+function joinAssetUrl(base: string, fileName: string) {
+  return `${base.replace(/\/+$/, "")}/${fileName.replace(/^\/+/, "")}`;
+}
+
+/** Matches on-disk RandomWalk filenames under ASSET_BASE_URL (e.g. randomwalk/000001_black.png). */
 function isAllowedFile(path: string) {
-  return (
-    /^\d{6}_(black|white)_(thumb\.jpg|single\.mp4|triple\.mp4|\.png)$/.test(path) ||
-    SUPPORTED_ASSET_EXTENSIONS.some((extension) => path.endsWith(extension))
-  );
+  return /^\d{6}_(black|white)(\.png|_thumb\.jpg|_single\.mp4|_triple\.mp4)$/.test(path);
 }
 
 function createImagePlaceholder(fileName: string, includeBody: boolean) {
@@ -59,12 +61,23 @@ async function handleAssetRequest(
   }
 
   const isVideo = fileName.endsWith(".mp4");
-  const upstream = await fetch(
-    `${ASSET_BASE_URL}/${fileName}`,
-    isVideo
-      ? { cache: "no-store", method }
-      : { next: { revalidate: 3600 }, method }
-  );
+  const { ASSET_BASE_URL } = getConfig();
+  const url = joinAssetUrl(ASSET_BASE_URL, fileName);
+
+  let upstream: Response;
+  try {
+    upstream = await fetch(
+      url,
+      isVideo
+        ? { cache: "no-store", method }
+        : { next: { revalidate: 3600 }, method }
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Asset server unreachable (check NEXT_PUBLIC_ASSET_BASE_URL and that the host is up)." },
+      { status: 502 }
+    );
+  }
 
   if (!upstream.ok) {
     const placeholder = createImagePlaceholder(fileName, method === "GET");
