@@ -7,7 +7,8 @@ import { cookieToInitialState } from "wagmi";
 import { AppProviders } from "@/components/providers/app-providers";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { getConfig } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
+import { getAppConfig } from "@/lib/server/app-config";
 import { getWagmiConfig } from "@/lib/web3/wagmi";
 
 import "@/app/globals.css";
@@ -35,7 +36,7 @@ const kelson = localFont({
 });
 
 export async function buildRootMetadata(): Promise<Metadata> {
-  const { SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
+  const { SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getBaseConfig();
   return {
     metadataBase: new URL(SITE_URL),
     title: {
@@ -69,6 +70,7 @@ export async function buildRootMetadata(): Promise<Metadata> {
 export async function RootLayoutShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const cookie = (await headers()).get("cookie");
   const initialState = cookieToInitialState(getWagmiConfig(), cookie);
+  const { MARKET_ADDRESS, NFT_ADDRESS } = await getAppConfig();
 
   return (
     <html lang="en" className={kelson.variable}>
@@ -79,7 +81,10 @@ export async function RootLayoutShell({ children }: Readonly<{ children: React.R
         >
           Skip to content
         </a>
-        <AppProviders initialState={initialState}>
+        <AppProviders
+          initialState={initialState}
+          contracts={{ NFT_ADDRESS, MARKET_ADDRESS }}
+        >
           <div className="flex min-h-screen flex-col">
             <SiteHeader />
             <main id="main-content" className="flex-1">

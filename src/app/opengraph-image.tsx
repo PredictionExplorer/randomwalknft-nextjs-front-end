@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-import { getConfig } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 
 export const size = {
   width: 1200,
@@ -10,7 +10,7 @@ export const size = {
 export const contentType = "image/png";
 
 export default function OpenGraphImage() {
-  const { SITE_DESCRIPTION, SITE_NAME } = getConfig();
+  const { SITE_DESCRIPTION, SITE_NAME } = getBaseConfig();
   return new ImageResponse(
     (
       <div

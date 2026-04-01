@@ -7,12 +7,12 @@ import { getConfig } from "@/lib/config";
 import { getOffers } from "@/lib/api/public";
 import { server } from "../../setup/msw/server";
 
-const { MARKET_ADDRESS, NFT_ADDRESS, RWALK_BASE_URL } = getConfig();
+const { RWALK_BASE_URL } = getConfig();
 
 describe("public api normalization", () => {
   it("normalizes and sorts offers", async () => {
     server.use(
-      http.get(`${RWALK_BASE_URL}/current_offers/${NFT_ADDRESS}/${MARKET_ADDRESS}/2`, () =>
+      http.get(`${RWALK_BASE_URL}/current_offers/2`, () =>
         HttpResponse.json({
           status: 1,
           error: "",

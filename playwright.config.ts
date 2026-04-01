@@ -2,6 +2,16 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 3100;
 
+/** Required for `next build` / `next start` (NEXT_PUBLIC_* are inlined at build time). */
+const webServerEnv = {
+  NEXT_PUBLIC_NETWORK: "mainnet",
+  NEXT_PUBLIC_API_BASE_URL: "https://api.test.example.com",
+  NEXT_PUBLIC_RPC_URL: "https://arb1.arbitrum.io/rpc",
+  NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${PORT}`,
+  NEXT_PUBLIC_NFT_ADDRESS: "0x895a6F444BE4ba9d124F61DF736605792B35D66b",
+  NEXT_PUBLIC_MARKET_ADDRESS: "0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08"
+};
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
@@ -18,7 +28,8 @@ export default defineConfig({
     command: "pnpm build && pnpm exec next start --hostname 127.0.0.1 --port 3100",
     port: PORT,
     reuseExistingServer: !process.env.CI,
-    timeout: 180000
+    timeout: 180000,
+    env: { ...process.env, ...webServerEnv }
   },
   projects: [
     {

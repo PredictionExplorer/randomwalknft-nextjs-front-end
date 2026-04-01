@@ -20,15 +20,18 @@ export function EnvMissingPage({ missingKeys }: EnvMissingPageProps) {
       }}
     >
       <h1 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem" }}>
-        Environment variables are not set
+        Environment variables unset, can&apos;t run
       </h1>
       <p style={{ maxWidth: "36rem", textAlign: "center", marginBottom: "1.25rem", lineHeight: 1.6 }}>
-        This application cannot continue until all required variables are defined (e.g. in{" "}
-        <code style={{ color: "#a78bfa" }}>.env.local</code>). Copy{" "}
-        <code style={{ color: "#a78bfa" }}>.env.example</code> and fill in every value.
+        Set every required variable in the environment of the process that starts Next.js (for example{" "}
+        <code style={{ color: "#a78bfa" }}>export NEXT_PUBLIC_…=…</code> in the same shell as{" "}
+        <code style={{ color: "#a78bfa" }}>pnpm dev</code>
+        ). <code style={{ color: "#a78bfa" }}>NEXT_PUBLIC_NETWORK</code> must be one of:{" "}
+        <code style={{ color: "#a78bfa" }}>local</code>, <code style={{ color: "#a78bfa" }}>sepolia</code>,{" "}
+        <code style={{ color: "#a78bfa" }}>mainnet</code>.
       </p>
       <p style={{ fontSize: "0.875rem", color: "#a1a1aa", marginBottom: "0.75rem" }}>
-        Missing or empty:
+        Missing or invalid:
       </p>
       <ul
         style={{

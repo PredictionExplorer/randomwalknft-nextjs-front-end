@@ -1,6 +1,6 @@
 "use client";
 
-import { usePublicClient, useWaitForTransactionReceipt } from "wagmi";
+import { usePublicClient, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { toast } from "sonner";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
@@ -11,22 +11,35 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { trackEvent } from "@/lib/analytics";
-import { getConfig } from "@/lib/config";
-import { nftAbi, useReadNftLastMinter, useReadNftTimeUntilWithdrawal, useReadNftWithdrawalAmount, useWriteNftWithdraw } from "@/generated/wagmi";
+import { useContracts } from "@/components/providers/contracts-context";
+import { nftAbi } from "@/generated/wagmi";
 import { formatDateTimeFromUnix, formatEth } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
 import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
+import { getChainDisplayName } from "@/lib/web3/evm-chain";
 
 export function RedeemExperience() {
-  const { NFT_ADDRESS } = getConfig();
+  const { NFT_ADDRESS } = useContracts();
   const publicClient = usePublicClient();
   const { address, isReady } = useWalletStatus();
-  const { data: withdrawalSeconds } = useReadNftTimeUntilWithdrawal();
-  const { data: lastMinter } = useReadNftLastMinter();
-  const { data: withdrawalAmount } = useReadNftWithdrawalAmount();
-  const { writeContractAsync, data: hash, isPending } = useWriteNftWithdraw();
+  const { data: withdrawalSeconds } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "timeUntilWithdrawal"
+  });
+  const { data: lastMinter } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "lastMinter"
+  });
+  const { data: withdrawalAmount } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "withdrawalAmount"
+  });
+  const { writeContractAsync, data: hash, isPending } = useWriteContract();
   const { isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const seconds = Number(withdrawalSeconds ?? 0n);
@@ -63,7 +76,7 @@ export function RedeemExperience() {
         <WalletStatusCard
           disconnectedTitle="Wallet required"
           disconnectedBody="Connect your wallet to check if you are eligible for the withdrawal. Only the most recent minter qualifies."
-          wrongNetworkBody="Switch to Arbitrum to check eligibility and withdraw."
+          wrongNetworkBody={`Switch to ${getChainDisplayName()} to check eligibility and withdraw.`}
         />
       ) : null}
 
@@ -121,7 +134,12 @@ export function RedeemExperience() {
                 trackEvent("transaction_submitted", {
                   flow: "redeem"
                 });
-                await writeContractAsync({ gas });
+                await writeContractAsync({
+                  address: NFT_ADDRESS,
+                  abi: nftAbi,
+                  functionName: "withdraw",
+                  gas
+                });
               } catch (error) {
                 trackEvent("transaction_failed", {
                   flow: "redeem",

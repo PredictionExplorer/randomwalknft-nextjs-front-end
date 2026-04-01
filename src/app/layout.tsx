@@ -8,7 +8,7 @@ import { buildRootMetadata, RootLayoutShell } from "./root-layout-shell";
 export async function generateMetadata(): Promise<Metadata> {
   if (getMissingEnvKeys().length > 0) {
     return {
-      title: "Configuration required"
+      title: "Environment variables unset"
     };
   }
   return buildRootMetadata();

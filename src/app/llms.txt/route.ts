@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { getConfig } from "@/lib/config";
+import { getAppConfig } from "@/lib/server/app-config";
 
-export function GET() {
-  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
+export async function GET() {
+  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const content = `# ${SITE_NAME}
 
 > ${SITE_DESCRIPTION}

@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 
 import { faqItems } from "@/lib/content/faq";
 import { homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
-import { getConfig } from "@/lib/config";
+import { getAppConfig } from "@/lib/server/app-config";
 
-export function GET() {
-  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
+export async function GET() {
+  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const faqSection = faqItems
     .map((item) => `### ${item.summary}\n\n${item.detail}`)
     .join("\n\n");

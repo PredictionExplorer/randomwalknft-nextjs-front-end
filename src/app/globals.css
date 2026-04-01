@@ -1,4 +1,5 @@
-@import "tailwindcss";
+/* Relative path: bare `tailwindcss` resolves from a wrong workspace root when a parent lockfile exists. */
+@import "../../node_modules/tailwindcss/index.css";
 
 @theme inline {
   --font-sans: var(--font-kelson);

@@ -6,11 +6,11 @@ import { Film, Image as ImageIcon, Play } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { isAddress, parseEther } from "viem";
-import { usePublicClient } from "wagmi";
+import { usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { toast } from "sonner";
 
 import { trackEvent } from "@/lib/analytics";
-import { getConfig } from "@/lib/config";
+import { useContracts } from "@/components/providers/contracts-context";
 import type { AssetTheme, AssetVariant, Nft, Offer } from "@/lib/types";
 import {
   formatDateTimeFromUnix,
@@ -21,6 +21,7 @@ import {
   getAssetPreview,
   shortenAddress
 } from "@/lib/utils";
+import { getChainDisplayName } from "@/lib/web3/evm-chain";
 import { getErrorMessage } from "@/lib/web3/errors";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
@@ -35,22 +36,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
-import {
-  marketAbi,
-  nftAbi,
-  useReadNftIsApprovedForAll,
-  useReadNftOwnerOf,
-  useReadNftTotalSupply,
-  useReadNftWalletOfOwner,
-  useWriteMarketAcceptSellOffer,
-  useWriteMarketCancelBuyOffer,
-  useWriteMarketCancelSellOffer,
-  useWriteMarketMakeBuyOffer,
-  useWriteMarketMakeSellOffer,
-  useWriteNftSetApprovalForAll,
-  useWriteNftSetTokenName,
-  useWriteNftTransferFrom
-} from "@/generated/wagmi";
+import { marketAbi, nftAbi } from "@/generated/wagmi";
 import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 
 type NftDetailExperienceProps = {
@@ -100,7 +86,7 @@ export function NftDetailExperience({
   initialTheme,
   initialMedia
 }: NftDetailExperienceProps) {
-  const { MARKET_ADDRESS, NFT_ADDRESS } = getConfig();
+  const { MARKET_ADDRESS, NFT_ADDRESS } = useContracts();
   const pathname = usePathname();
   const router = useRouter();
   const publicClient = usePublicClient();
@@ -114,27 +100,33 @@ export function NftDetailExperience({
   const [isMutating, setIsMutating] = useState(false);
   const [flashMessage, setFlashMessage] = useState(message);
 
-  const { data: ownerOf } = useReadNftOwnerOf({
+  const { data: ownerOf } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "ownerOf",
     args: [BigInt(nft.id)]
   });
-  const { data: totalSupply } = useReadNftTotalSupply();
-  const { data: accountTokenIds } = useReadNftWalletOfOwner({
+  const { data: totalSupply } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "totalSupply"
+  });
+  const { data: accountTokenIds } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "walletOfOwner",
     args: address ? [address] : undefined,
     query: { enabled: Boolean(address) }
   });
-  const { data: approvedForAll } = useReadNftIsApprovedForAll({
+  const { data: approvedForAll } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "isApprovedForAll",
     args: address ? [address, MARKET_ADDRESS] : undefined,
     query: { enabled: Boolean(address) }
   });
 
-  const approveAll = useWriteNftSetApprovalForAll();
-  const makeSellOffer = useWriteMarketMakeSellOffer();
-  const makeBuyOffer = useWriteMarketMakeBuyOffer();
-  const cancelSellOffer = useWriteMarketCancelSellOffer();
-  const cancelBuyOffer = useWriteMarketCancelBuyOffer();
-  const acceptSellOffer = useWriteMarketAcceptSellOffer();
-  const transferFrom = useWriteNftTransferFrom();
-  const setTokenNameMutation = useWriteNftSetTokenName();
+  const { writeContractAsync } = useWriteContract();
 
   const owner = ownerOf ?? nft.owner;
   const isPendingMetadata = Boolean(nft.isPendingMetadata);
@@ -312,7 +304,10 @@ export function NftDetailExperience({
         functionName: "setApprovalForAll",
         args: [MARKET_ADDRESS, true]
       });
-      const approvalHash = await approveAll.writeContractAsync({
+      const approvalHash = await writeContractAsync({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "setApprovalForAll",
         args: [MARKET_ADDRESS, true],
         gas: approvalGas
       });
@@ -327,7 +322,10 @@ export function NftDetailExperience({
       functionName: "makeSellOffer",
       args: [NFT_ADDRESS, BigInt(nft.id), priceValue]
     });
-    const hash = await makeSellOffer.writeContractAsync({
+    const hash = await writeContractAsync({
+      address: MARKET_ADDRESS,
+      abi: marketAbi,
+      functionName: "makeSellOffer",
       args: [NFT_ADDRESS, BigInt(nft.id), priceValue],
       gas
     });
@@ -353,7 +351,10 @@ export function NftDetailExperience({
       args: [NFT_ADDRESS, BigInt(nft.id)],
       value: bidValue
     });
-    const hash = await makeBuyOffer.writeContractAsync({
+    const hash = await writeContractAsync({
+      address: MARKET_ADDRESS,
+      abi: marketAbi,
+      functionName: "makeBuyOffer",
       args: [NFT_ADDRESS, BigInt(nft.id)],
       value: bidValue,
       gas
@@ -378,7 +379,10 @@ export function NftDetailExperience({
       functionName: "setTokenName",
       args: [BigInt(nft.id), tokenName.trim()]
     });
-    const hash = await setTokenNameMutation.writeContractAsync({
+    const hash = await writeContractAsync({
+      address: NFT_ADDRESS,
+      abi: nftAbi,
+      functionName: "setTokenName",
       args: [BigInt(nft.id), tokenName.trim()],
       gas
     });
@@ -402,7 +406,10 @@ export function NftDetailExperience({
       functionName: "transferFrom",
       args: [address, transferAddress as `0x${string}`, BigInt(nft.id)]
     });
-    const hash = await transferFrom.writeContractAsync({
+    const hash = await writeContractAsync({
+      address: NFT_ADDRESS,
+      abi: nftAbi,
+      functionName: "transferFrom",
       args: [address, transferAddress as `0x${string}`, BigInt(nft.id)],
       gas
     });
@@ -434,7 +441,10 @@ export function NftDetailExperience({
       args: [BigInt(activeSellOffer.offerId)],
       value: priceValue as bigint
     });
-    const hash = await acceptSellOffer.writeContractAsync({
+    const hash = await writeContractAsync({
+      address: MARKET_ADDRESS,
+      abi: marketAbi,
+      functionName: "acceptSellOffer",
       args: [BigInt(activeSellOffer.offerId)],
       value: priceValue as bigint,
       gas
@@ -603,7 +613,7 @@ export function NftDetailExperience({
             <WalletStatusCard
               disconnectedTitle="Wallet required"
               disconnectedBody="Connect your wallet to buy, bid, list, rename, or transfer this NFT."
-              wrongNetworkBody="Switch to Arbitrum to interact with this token."
+              wrongNetworkBody={`Switch to ${getChainDisplayName()} to interact with this token.`}
             />
           ) : null}
 
@@ -745,7 +755,10 @@ export function NftDetailExperience({
                             functionName: "cancelSellOffer",
                             args: [BigInt(userSellOffer.offerId)]
                           });
-                          const hash = await cancelSellOffer.writeContractAsync({
+                          const hash = await writeContractAsync({
+                            address: MARKET_ADDRESS,
+                            abi: marketAbi,
+                            functionName: "cancelSellOffer",
                             args: [BigInt(userSellOffer.offerId)],
                             gas
                           });
@@ -774,7 +787,10 @@ export function NftDetailExperience({
                             functionName: "cancelBuyOffer",
                             args: [BigInt(userBuyOffer.offerId)]
                           });
-                          const hash = await cancelBuyOffer.writeContractAsync({
+                          const hash = await writeContractAsync({
+                            address: MARKET_ADDRESS,
+                            abi: marketAbi,
+                            functionName: "cancelBuyOffer",
                             args: [BigInt(userBuyOffer.offerId)],
                             gas
                           });

@@ -3,31 +3,29 @@ import "server-only";
 import { cache } from "react";
 import { z } from "zod";
 
-import {
-  getConfig,
-  REVALIDATE_LONG,
-  REVALIDATE_MEDIUM,
-  REVALIDATE_SHORT
-} from "@/lib/config";
+import { REVALIDATE_LONG, REVALIDATE_MEDIUM, REVALIDATE_SHORT } from "@/lib/config";
+import { getAppConfig } from "@/lib/server/app-config";
 import { fetchApi, fetchRwalk, postApi } from "@/lib/api/client";
-
-/** Go GET /api/rwalk/current_offers/... returns { Offers, status, error }. */
-const rwCurrentOffersResponseSchema = z
-  .object({
-    Offers: offerSchema.array()
-  })
-  .passthrough();
 import {
   actionResponseSchema,
   offerSchema,
+  tokenDetailSchema,
   tokenHistorySchema,
   tokenInfoSchema,
   tradingRecordSchema,
   voteCountSchema
 } from "@/lib/api/schemas";
+
+/** Go GET /api/randomwalk/current_offers/:order_by returns { Offers, status, error }. */
+const rwCurrentOffersResponseSchema = z
+  .object({
+    Offers: offerSchema.array()
+  })
+  .passthrough();
 import { nftAbi } from "@/generated/wagmi";
 import type { HomepageStats, Nft, Offer, TradingRecord } from "@/lib/types";
 import { createAssetUrls } from "@/lib/utils";
+import { getCurrentNetworkName } from "@/lib/web3/evm-chain";
 import { publicClient } from "@/lib/web3/public-client";
 
 function normalizeOffer(
@@ -81,13 +79,13 @@ async function fetchTokenDetail(
   tokenId: number,
   init: { cache?: RequestCache; revalidate?: number } = { revalidate: REVALIDATE_MEDIUM }
 ): Promise<Nft> {
-  const { NFT_ADDRESS } = getConfig();
+  const { NFT_ADDRESS } = await getAppConfig();
   const historyInit =
     init.cache === "no-store" ? { cache: "no-store" as const } : { revalidate: REVALIDATE_SHORT };
 
   const [infoResponse, historyResponse] = await Promise.all([
-    fetchRwalk(`tokens/info/${NFT_ADDRESS}/${tokenId}`, init, tokenInfoSchema),
-    fetchRwalk(`tokens/history/${tokenId}/${NFT_ADDRESS}/0/1000`, historyInit, tokenHistorySchema)
+    fetchRwalk(`tokens/info/${tokenId}`, init, tokenInfoSchema),
+    fetchRwalk(`tokens/history/${tokenId}/0/1000`, historyInit, tokenHistorySchema)
   ]);
 
   const t = infoResponse.TokenInfo;
@@ -105,7 +103,7 @@ async function fetchTokenDetail(
 
 async function getPendingTokenDetail(tokenId: number): Promise<Nft | null> {
   try {
-    const { NFT_ADDRESS } = getConfig();
+    const { NFT_ADDRESS } = await getAppConfig();
     const [owner, seed, name] = await Promise.all([
       publicClient.readContract({
         address: NFT_ADDRESS,
@@ -162,23 +160,43 @@ export async function getTokenDetailOrFallback(
 }
 
 export const getTokenInfo = cache(async (tokenId: number) => {
-  const { NFT_ADDRESS } = getConfig();
-  return fetchRwalk(
-    `tokens/info/${NFT_ADDRESS}/${tokenId}`,
-    { revalidate: REVALIDATE_SHORT },
-    tokenInfoSchema
-  );
+  return fetchRwalk(`tokens/info/${tokenId}`, { revalidate: REVALIDATE_SHORT }, tokenInfoSchema);
 });
 
-export const getRandomTokenIds = cache(async () => {
-  return fetchApi<number[]>("api/randomwalk/explore/random?limit=12", {
+export const getRandomTokenIds = cache(async (): Promise<number[]> => {
+  const raw = await fetchApi<number[] | null>("api/randomwalk/explore/random?limit=12", {
     revalidate: REVALIDATE_SHORT
   });
+  // Go encodes a nil slice as JSON `null`; treat as empty.
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.map((id) => Number(id)).filter((n) => Number.isFinite(n) && n >= 0);
 });
 
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
-  const { NFT_ADDRESS } = getConfig();
-  const [featuredTokenIds, activeListings, activeBids, recentSales, totalSupply] = await Promise.all([
+  const { NFT_ADDRESS } = await getAppConfig();
+
+  if (getCurrentNetworkName() === "local") {
+    const supplyResult = await Promise.allSettled([
+      publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "totalSupply"
+      }) as Promise<bigint>
+    ]);
+    const totalSupply = supplyResult[0].status === "fulfilled" ? supplyResult[0].value : 0n;
+    return {
+      mintedCount: Number(totalSupply),
+      activeListings: 0,
+      activeBids: 0,
+      recentSales: [],
+      latestSalePrice: undefined,
+      featuredTokenIds: []
+    };
+  }
+
+  const [featuredResult, sellResult, buyResult, historyResult, supplyResult] = await Promise.allSettled([
     getRandomTokenIds(),
     getOffers("sell"),
     getOffers("buy"),
@@ -190,12 +208,22 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     }) as Promise<bigint>
   ]);
 
+  const featuredTokenIds = featuredResult.status === "fulfilled" ? featuredResult.value : [];
+  const activeListings =
+    sellResult.status === "fulfilled" ? sellResult.value.length : 0;
+  const activeBids = buyResult.status === "fulfilled" ? buyResult.value.length : 0;
+  const recentSalesPage =
+    historyResult.status === "fulfilled"
+      ? historyResult.value
+      : { tradingHistory: [] as TradingRecord[], totalCount: 0 };
+  const totalSupply = supplyResult.status === "fulfilled" ? supplyResult.value : 0n;
+
   return {
     mintedCount: Number(totalSupply),
-    activeListings: activeListings.length,
-    activeBids: activeBids.length,
-    recentSales: recentSales.tradingHistory.slice(0, 4),
-    latestSalePrice: recentSales.tradingHistory[0]?.price,
+    activeListings,
+    activeBids,
+    recentSales: recentSalesPage.tradingHistory.slice(0, 4),
+    latestSalePrice: recentSalesPage.tradingHistory[0]?.price,
     featuredTokenIds
   };
 });
@@ -214,9 +242,8 @@ export const getRatingOrder = cache(async () => {
 });
 
 const getAllActiveOffersRaw = cache(async () => {
-  const { MARKET_ADDRESS, NFT_ADDRESS } = getConfig();
   const res = await fetchRwalk(
-    `current_offers/${NFT_ADDRESS}/${MARKET_ADDRESS}/2`,
+    `current_offers/2`,
     { revalidate: REVALIDATE_SHORT },
     rwCurrentOffersResponseSchema
   );
@@ -243,10 +270,9 @@ export const getOffersForToken = cache(async (tokenId: number) => {
 });
 
 export const getTradingHistory = cache(async (page: number) => {
-  const { MARKET_ADDRESS } = getConfig();
   const perPage = 20;
   const all = await fetchRwalk(
-    `trading/sales/${MARKET_ADDRESS}/0/1000000`,
+    `trading/sales/0/1000000`,
     { revalidate: REVALIDATE_SHORT },
     z.object({ Trading: tradingRecordSchema.array() })
   );
@@ -260,7 +286,7 @@ export const getTradingHistory = cache(async (page: number) => {
   }
 
   const response = await fetchRwalk(
-    `trading/sales/${MARKET_ADDRESS}/${start}/${count}`,
+    `trading/sales/${start}/${count}`,
     { revalidate: REVALIDATE_SHORT },
     z.object({ Trading: tradingRecordSchema.array() })
   );

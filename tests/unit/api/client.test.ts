@@ -5,10 +5,10 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { fetchApi, fetchRwalk, postApi } from "@/lib/api/client";
-import { getConfig } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 import { server } from "../../setup/msw/server";
 
-const { API_BASE_URL, RWALK_BASE_URL } = getConfig();
+const { API_BASE_URL, RWALK_BASE_URL } = getBaseConfig();
 
 const validSchema = z.object({ id: z.number(), name: z.string() });
 

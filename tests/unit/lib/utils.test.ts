@@ -22,13 +22,13 @@ describe("utils", () => {
     expect(formatId(7)).toBe("#000007");
   });
 
-  it("creates absolute asset urls from NEXT_PUBLIC_ASSET_BASE_URL", () => {
+  it("creates absolute asset urls from derived ASSET_BASE_URL (NEXT_PUBLIC_API_BASE_URL + /images/randomwalk)", () => {
     const urls = createAssetUrls(12);
     expect(urls.blackThumb).toBe(
-      "https://assets.test.example.com/randomwalk/000012_black_thumb.jpg"
+      "https://api.test.example.com/images/randomwalk/000012_black_thumb.jpg"
     );
     expect(urls.whiteSingleVideo).toBe(
-      "https://assets.test.example.com/randomwalk/000012_white_single.mp4"
+      "https://api.test.example.com/images/randomwalk/000012_white_single.mp4"
     );
   });
 

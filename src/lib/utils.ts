@@ -2,19 +2,20 @@ import { clsx, type ClassValue } from "clsx";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
-import { getConfig } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 import type { AssetTheme, AssetVariant, NftAssetUrls } from "@/lib/types";
+import { getExplorerBaseUrl } from "@/lib/web3/evm-chain";
 
 export function arbiscanAddressUrl(address: string) {
-  return `https://arbiscan.io/address/${address}`;
+  return `${getExplorerBaseUrl()}/address/${address}`;
 }
 
 export function arbiscanContractUrl(address: string) {
-  return `https://arbiscan.io/address/${address}#code`;
+  return `${getExplorerBaseUrl()}/address/${address}#code`;
 }
 
 export function arbiscanTxUrl(hash: string) {
-  return `https://arbiscan.io/tx/${hash}`;
+  return `${getExplorerBaseUrl()}/tx/${hash}`;
 }
 
 export function cn(...inputs: ClassValue[]) {
@@ -49,7 +50,7 @@ export function formatDateTimeFromUnix(timestamp: number) {
 }
 
 export function getAssetUrl(fileName: string) {
-  const base = getConfig().ASSET_BASE_URL.replace(/\/+$/, "");
+  const base = getBaseConfig().ASSET_BASE_URL.replace(/\/+$/, "");
   return `${base}/${fileName.replace(/^\/+/, "")}`;
 }
 

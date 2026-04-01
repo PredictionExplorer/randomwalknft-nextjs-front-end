@@ -17,7 +17,7 @@ import { getConfig } from "@/lib/config";
 import { publicClient } from "@/lib/web3/public-client";
 import { server } from "../../setup/msw/server";
 
-const { API_BASE_URL, MARKET_ADDRESS, NFT_ADDRESS, RWALK_BASE_URL } = getConfig();
+const { API_BASE_URL, RWALK_BASE_URL } = getConfig();
 
 const offerPayload = (
   id: number,
@@ -85,7 +85,7 @@ describe("getOffersForToken", () => {
   it("filters buy and sell offers by tokenId", async () => {
     const targetTokenId = 42;
     server.use(
-      http.get(`${RWALK_BASE_URL}/current_offers/${NFT_ADDRESS}/${MARKET_ADDRESS}/2`, () =>
+      http.get(`${RWALK_BASE_URL}/current_offers/2`, () =>
         HttpResponse.json({
           status: 1,
           error: "",
@@ -119,7 +119,7 @@ describe("getOffersForToken", () => {
 
   it("returns empty arrays when no offers match tokenId", async () => {
     server.use(
-      http.get(`${RWALK_BASE_URL}/current_offers/${NFT_ADDRESS}/${MARKET_ADDRESS}/2`, () =>
+      http.get(`${RWALK_BASE_URL}/current_offers/2`, () =>
         HttpResponse.json({
           status: 1,
           error: "",
@@ -141,7 +141,7 @@ describe("getOffersForToken", () => {
 describe("getTokenDetail", () => {
   it("fetches and transforms token data with history", async () => {
     server.use(
-      http.get(`${RWALK_BASE_URL}/tokens/info/${NFT_ADDRESS}/5`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/info/5`, () =>
         HttpResponse.json({
           status: 1,
           error: "",
@@ -156,7 +156,7 @@ describe("getTokenDetail", () => {
           }
         })
       ),
-      http.get(`${RWALK_BASE_URL}/tokens/history/5/${NFT_ADDRESS}/0/1000`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/history/5/0/1000`, () =>
         HttpResponse.json({
           TokenHistory: [
             {
@@ -194,10 +194,10 @@ describe("getTokenDetail", () => {
       .mockResolvedValueOnce("");
 
     server.use(
-      http.get(`${RWALK_BASE_URL}/tokens/info/${NFT_ADDRESS}/8`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/info/8`, () =>
         HttpResponse.json({ error: "Not found" }, { status: 404 })
       ),
-      http.get(`${RWALK_BASE_URL}/tokens/history/8/${NFT_ADDRESS}/0/1000`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/history/8/0/1000`, () =>
         HttpResponse.json({ error: "Not found" }, { status: 404 })
       )
     );
@@ -233,7 +233,7 @@ describe("getTradingHistory", () => {
   it("paginates and transforms trading records for page 1", async () => {
     const tradingRecords = makeTradingRecords(25);
     server.use(
-      http.get(new RegExp(`${RWALK_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/trading/sales/${MARKET_ADDRESS}`), () =>
+      http.get(`${RWALK_BASE_URL}/trading/sales/:start/:count`, () =>
         HttpResponse.json({ Trading: tradingRecords })
       )
     );
@@ -250,7 +250,7 @@ describe("getTradingHistory", () => {
   it("handles page beyond available data (start < 0 branch)", async () => {
     const tradingRecords = makeTradingRecords(10);
     server.use(
-      http.get(new RegExp(`${RWALK_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/trading/sales/${MARKET_ADDRESS}`), () =>
+      http.get(`${RWALK_BASE_URL}/trading/sales/:start/:count`, () =>
         HttpResponse.json({ Trading: tradingRecords })
       )
     );

@@ -1,19 +1,24 @@
 "use client";
 
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { NftGrid } from "@/components/nft/nft-grid";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useReadNftWalletOfOwner } from "@/generated/wagmi";
+import { useContracts } from "@/components/providers/contracts-context";
+import { nftAbi } from "@/generated/wagmi";
 import { useMounted } from "@/lib/use-mounted";
 
 export function MyNftsView() {
+  const { NFT_ADDRESS } = useContracts();
   const mounted = useMounted();
   const { address, isConnected } = useAccount();
-  const { data } = useReadNftWalletOfOwner({
+  const { data } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "walletOfOwner",
     args: address ? [address] : undefined,
     query: {
       enabled: Boolean(address)

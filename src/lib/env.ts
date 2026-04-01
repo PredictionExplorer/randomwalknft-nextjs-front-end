@@ -1,44 +1,45 @@
 /**
- * All deployment-specific values must come from the shell / .env — no hardcoded defaults.
- * See .env.example for the full list.
+ * Required public env: set in the **process environment** before `next dev` / `next build`
+ * (e.g. `export …` in the shell, or your host’s env UI). All three must be non-empty.
+ *
+ * Contract addresses: GET {API}/api/randomwalk/contracts (and see `rwalk-contracts.ts` for env shortcuts on non-local networks).
  */
+
 export const REQUIRED_ENV_KEYS = [
-  "NEXT_PUBLIC_SITE_URL",
-  "NEXT_PUBLIC_SITE_NAME",
-  "NEXT_PUBLIC_SITE_DESCRIPTION",
-  "NEXT_PUBLIC_NFT_ADDRESS",
-  "NEXT_PUBLIC_MARKET_ADDRESS",
+  "NEXT_PUBLIC_NETWORK",
   "NEXT_PUBLIC_API_BASE_URL",
-  "NEXT_PUBLIC_RWALK_BASE_URL",
-  "NEXT_PUBLIC_ASSET_BASE_URL"
+  "NEXT_PUBLIC_RPC_URL"
 ] as const;
 
 export type RequiredEnvKey = (typeof REQUIRED_ENV_KEYS)[number];
 
+const VALID_NETWORKS = new Set(["local", "sepolia", "mainnet"]);
+
 /**
- * Each NEXT_PUBLIC_* must be read with a static `process.env.NEXT_PUBLIC_*` expression.
- * Dynamic `process.env[key]` is not inlined in client bundles, so it is always undefined
- * in the browser and breaks getConfig() / Wagmi even when .env.local is correct.
+ * Static `process.env.NEXT_PUBLIC_*` reads — required for client bundle inlining.
  */
 export function getPublicEnvSnapshot(): Record<RequiredEnvKey, string | undefined> {
   return {
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-    NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
-    NEXT_PUBLIC_SITE_DESCRIPTION: process.env.NEXT_PUBLIC_SITE_DESCRIPTION,
-    NEXT_PUBLIC_NFT_ADDRESS: process.env.NEXT_PUBLIC_NFT_ADDRESS,
-    NEXT_PUBLIC_MARKET_ADDRESS: process.env.NEXT_PUBLIC_MARKET_ADDRESS,
+    NEXT_PUBLIC_NETWORK: process.env.NEXT_PUBLIC_NETWORK,
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
-    NEXT_PUBLIC_RWALK_BASE_URL: process.env.NEXT_PUBLIC_RWALK_BASE_URL,
-    NEXT_PUBLIC_ASSET_BASE_URL: process.env.NEXT_PUBLIC_ASSET_BASE_URL
+    NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URL
   };
 }
 
 export function getMissingEnvKeys(): RequiredEnvKey[] {
   const snap = getPublicEnvSnapshot();
-  return REQUIRED_ENV_KEYS.filter((key) => {
+  const empty = REQUIRED_ENV_KEYS.filter((key) => {
     const v = snap[key];
     return typeof v !== "string" || v.trim() === "";
   });
+  if (empty.length > 0) {
+    return empty;
+  }
+  const net = snap.NEXT_PUBLIC_NETWORK?.trim().toLowerCase();
+  if (!net || !VALID_NETWORKS.has(net)) {
+    return ["NEXT_PUBLIC_NETWORK"];
+  }
+  return [];
 }
 
 export function isEnvConfigured(): boolean {

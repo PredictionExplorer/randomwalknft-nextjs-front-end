@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getConfig } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 
 function joinAssetUrl(base: string, fileName: string) {
   return `${base.replace(/\/+$/, "")}/${fileName.replace(/^\/+/, "")}`;
@@ -61,7 +61,7 @@ async function handleAssetRequest(
   }
 
   const isVideo = fileName.endsWith(".mp4");
-  const { ASSET_BASE_URL } = getConfig();
+  const { ASSET_BASE_URL } = getBaseConfig();
   const url = joinAssetUrl(ASSET_BASE_URL, fileName);
 
   let upstream: Response;
@@ -74,7 +74,7 @@ async function handleAssetRequest(
     );
   } catch {
     return NextResponse.json(
-      { error: "Asset server unreachable (check NEXT_PUBLIC_ASSET_BASE_URL and that the host is up)." },
+      { error: "Asset server unreachable (check NEXT_PUBLIC_API_BASE_URL and that the host serves /images/randomwalk)." },
       { status: 502 }
     );
   }

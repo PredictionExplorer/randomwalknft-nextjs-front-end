@@ -16,9 +16,9 @@ import {
   injected
 } from "wagmi";
 import type { Config } from "wagmi";
-import { arbitrum } from "wagmi/chains";
 
-import { getConfig } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
+import { getConfiguredEvmChain, getRpcHttpUrl } from "@/lib/web3/evm-chain";
 
 export const walletConnectProjectId =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID?.trim() ?? "";
@@ -31,9 +31,12 @@ export function getWagmiConfig(): Config {
   if (wagmiConfigSingleton) {
     return wagmiConfigSingleton;
   }
-  const { SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getConfig();
+  const chain = getConfiguredEvmChain();
+  const { SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getBaseConfig();
+  // SITE_URL is WalletConnect / dapp metadata only (e.g. http://localhost:3000). It is NOT the chain
+  // JSON-RPC URL — that comes from getRpcHttpUrl() on `chain.rpcUrls` and `transports` below.
   wagmiConfigSingleton = createConfig({
-    chains: [arbitrum],
+    chains: [chain],
     connectors: walletConnectEnabled
       ? connectorsForWallets(
           [
@@ -61,7 +64,7 @@ export function getWagmiConfig(): Config {
     ssr: true,
     storage: createStorage({ storage: cookieStorage }),
     transports: {
-      [arbitrum.id]: http()
+      [chain.id]: http(getRpcHttpUrl())
     }
   });
   return wagmiConfigSingleton;
