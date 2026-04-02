@@ -271,13 +271,23 @@ describe("submitBeautyVote", () => {
       })
     );
 
-    const response = await submitBeautyVote(10, 20, 10);
+    const response = await submitBeautyVote({
+      firstId: 10,
+      secondId: 20,
+      winner: 10,
+      signNonce: "sn",
+      signature: "0x" + "11".repeat(65),
+      chainId: 42161
+    });
 
     expect(response).toEqual({ result: "ok" });
     expect(capturedBody).toEqual({
       nft1: 10,
       nft2: 20,
-      nft1_win: 1
+      nft1_win: 1,
+      sign_nonce: "sn",
+      signature: "0x" + "11".repeat(65),
+      chain_id: 42161
     });
   });
 
@@ -290,13 +300,23 @@ describe("submitBeautyVote", () => {
       })
     );
 
-    const response = await submitBeautyVote(10, 20, 20);
+    const response = await submitBeautyVote({
+      firstId: 10,
+      secondId: 20,
+      winner: 20,
+      signNonce: "sn2",
+      signature: "0x" + "22".repeat(65),
+      chainId: 42161
+    });
 
     expect(response).toEqual({ result: "success" });
     expect(capturedBody).toEqual({
       nft1: 10,
       nft2: 20,
-      nft1_win: 0
+      nft1_win: 0,
+      sign_nonce: "sn2",
+      signature: "0x" + "22".repeat(65),
+      chain_id: 42161
     });
   });
 });

@@ -174,6 +174,20 @@ export const getRandomTokenIds = cache(async (): Promise<number[]> => {
   return raw.map((id) => Number(id)).filter((n) => Number.isFinite(n) && n >= 0);
 });
 
+/**
+ * Same as getRandomTokenIds but bypasses Next.js Data Cache. Use on /random so each navigation
+ * (including client <Link>) refetches the explore pool and re-runs server-side random choice.
+ */
+export async function getRandomTokenIdsFresh(): Promise<number[]> {
+  const raw = await fetchApi<number[] | null>("api/randomwalk/explore/random?limit=12", {
+    cache: "no-store"
+  });
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.map((id) => Number(id)).filter((n) => Number.isFinite(n) && n >= 0);
+}
+
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
   const { NFT_ADDRESS } = await getAppConfig();
 
@@ -232,8 +246,35 @@ export const getRandomPair = cache(async () => {
   return fetchApi<number[]>("random", { revalidate: REVALIDATE_SHORT });
 });
 
+const beautyPairIdsSchema = z.object({
+  token_ids: z.array(z.number()),
+  pair_exhausted: z.boolean()
+});
+
+/** Two token ids for /compare; pass wallet address to avoid pairs already voted on-chain. */
+export async function fetchBeautyComparePairIds(
+  voterAddress: string | undefined,
+  options?: { skipPairFilter?: boolean }
+) {
+  const params = new URLSearchParams();
+  if (voterAddress && voterAddress.trim() !== "") {
+    params.set("voter", voterAddress.trim());
+  }
+  if (options?.skipPairFilter) {
+    params.set("skip_pair_filter", "1");
+  }
+  const q = params.toString();
+  const suffix = q ? `?${q}` : "";
+  return fetchApi(
+    `api/randomwalk/ranking/beauty-pair-ids${suffix}`,
+    { cache: "no-store" },
+    beautyPairIdsSchema
+  );
+}
+
+/** Cached per-request only; fetch is no-store so /compare refetches show an up-to-date total after each vote. */
 export const getVoteCount = cache(async () => {
-  const response = await fetchApi("vote_count", { revalidate: REVALIDATE_SHORT }, voteCountSchema);
+  const response = await fetchApi("vote_count", { cache: "no-store" }, voteCountSchema);
   return response.total_count;
 });
 
@@ -311,13 +352,39 @@ export const getTradingHistory = cache(async (page: number) => {
   };
 });
 
-export async function submitBeautyVote(firstId: number, secondId: number, winner: number) {
+const rankingSignChallengeSchema = z.object({
+  nonce: z.string().min(1)
+});
+
+/** One-time nonce for wallet-signed beauty votes (Go GET .../ranking/sign-challenge). */
+export async function fetchRankingSignChallenge() {
+  return fetchApi(
+    "api/randomwalk/ranking/sign-challenge",
+    { cache: "no-store" },
+    rankingSignChallengeSchema
+  );
+}
+
+export type BeautyVoteSignedPayload = {
+  firstId: number;
+  secondId: number;
+  winner: number;
+  signNonce: string;
+  signature: `0x${string}`;
+  chainId: number;
+};
+
+export async function submitBeautyVote(payload: BeautyVoteSignedPayload) {
+  const { firstId, secondId, winner, signNonce, signature, chainId } = payload;
   return postApi(
     "add_game",
     JSON.stringify({
       nft1: firstId,
       nft2: secondId,
-      nft1_win: winner === firstId ? 1 : 0
+      nft1_win: winner === firstId ? 1 : 0,
+      sign_nonce: signNonce,
+      signature,
+      chain_id: chainId
     }),
     {},
     actionResponseSchema

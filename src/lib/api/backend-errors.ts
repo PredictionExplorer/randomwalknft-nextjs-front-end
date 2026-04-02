@@ -23,7 +23,9 @@ export function isFetchConnectionError(error: unknown): boolean {
     code === "ENOTFOUND" ||
     code === "EAI_AGAIN" ||
     code === "ETIMEDOUT" ||
-    code === "ECONNRESET"
+    code === "ECONNRESET" ||
+    code === "UND_ERR_SOCKET" ||
+    code === "UND_ERR_HEADERS_TIMEOUT"
   );
 }
 

@@ -13,12 +13,12 @@ import bundleAnalyzer from "@next/bundle-analyzer";
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 
 /**
- * When the network preset is local, drop NFT/market overrides so contract addresses come from the API
- * (`rw_contracts`), not stale env.
+ * When the network preset is local, drop NEXT_PUBLIC NFT/market overrides so the **client bundle**
+ * never inlines mainnet addresses. The server loads addresses from the Go API and caches them in
+ * memory for the process (`rwalk-contracts.ts`).
  *
  * `delete process.env` alone is unreliable: Next may load `.env*` / shell after config evaluation and
- * re-apply `NEXT_PUBLIC_*`. Setting `env` below forces the **client bundle** to see empty strings so
- * production addresses are never inlined for `local`.
+ * re-apply `NEXT_PUBLIC_*`. Setting `env` below forces the **client bundle** to see empty strings.
  */
 const network = process.env.NEXT_PUBLIC_NETWORK?.trim().toLowerCase();
 const stripLocalContractEnv = !network || network === "local";

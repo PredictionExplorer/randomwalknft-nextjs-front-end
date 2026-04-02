@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
+import { randomUUID } from "node:crypto";
+import nextDynamic from "next/dynamic";
+import { unstable_noStore as noStore } from "next/cache";
 
 import { PageShell } from "@/components/common/page-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const RandomVideoExperience = dynamic(
+/** Same as /random: client navigations must remount so useRandomTokenHistory refetches /api/random-token. */
+export const dynamic = "force-dynamic";
+
+const RandomVideoExperience = nextDynamic(
   () => import("@/components/feature/random-video-experience").then((mod) => mod.RandomVideoExperience),
   {
     loading: () => (
@@ -28,5 +33,7 @@ export const metadata: Metadata = {
 };
 
 export default function RandomVideoPage() {
-  return <RandomVideoExperience />;
+  noStore();
+  const visitKey = randomUUID();
+  return <RandomVideoExperience key={visitKey} />;
 }

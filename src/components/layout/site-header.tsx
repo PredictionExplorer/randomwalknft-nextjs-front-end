@@ -67,7 +67,14 @@ export function SiteHeader() {
                   <DropdownMenuContent align="center">
                     {item.children.map((child) => (
                       <DropdownMenuItem key={child.href} asChild>
-                        <Link href={child.href}>{child.title}</Link>
+                        <Link
+                          href={child.href}
+                          {...(child.href === "/random" || child.href === "/random-video"
+                            ? { prefetch: false as const }
+                            : {})}
+                        >
+                          {child.title}
+                        </Link>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -107,6 +114,7 @@ export function SiteHeader() {
                 <div key={item.title} className="space-y-2">
                   <Link
                     href={item.href}
+                    {...(item.href === "/random" ? { prefetch: false as const } : {})}
                     className={cn(
                       "block text-lg font-medium tracking-[0.14em]",
                       pathname === item.href ? "text-secondary" : "text-foreground"
@@ -117,7 +125,14 @@ export function SiteHeader() {
                   {"children" in item && item.children ? (
                     <div className="space-y-1 pl-4">
                       {item.children.map((child: (typeof item.children)[number]) => (
-                        <Link key={child.href} href={child.href} className="block text-sm text-muted-foreground">
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          {...(child.href === "/random" || child.href === "/random-video"
+                            ? { prefetch: false as const }
+                            : {})}
+                          className="block text-sm text-muted-foreground"
+                        >
                           {child.title}
                         </Link>
                       ))}

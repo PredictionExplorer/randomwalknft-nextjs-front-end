@@ -2,10 +2,28 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CompareExperience } from "@/components/feature/compare-experience";
 import { server } from "../../setup/msw/server";
+
+const signMessageAsync = vi.fn();
+
+vi.mock("wagmi", () => ({
+  useAccount: () => ({
+    address: "0x0000000000000000000000000000000000000001",
+    isConnected: true
+  }),
+  useSignMessage: () => ({ signMessageAsync })
+}));
+
+vi.mock("@/lib/web3/evm-chain", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/web3/evm-chain")>("@/lib/web3/evm-chain");
+  return {
+    ...actual,
+    getConfiguredEvmChain: () => ({ id: 31337 })
+  };
+});
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient({
@@ -15,10 +33,14 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe("CompareExperience", () => {
+  beforeEach(() => {
+    signMessageAsync.mockResolvedValue(("0x" + "11".repeat(65)) as `0x${string}`);
+  });
+
   it("renders loading skeleton initially", () => {
     server.use(
       http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [1, 2], totalCount: 42 })
+        HttpResponse.json({ tokenIds: [1, 2], totalCount: 42, signNonce: "n" })
       )
     );
 
@@ -29,7 +51,7 @@ describe("CompareExperience", () => {
   it("renders two pick buttons after data loads", async () => {
     server.use(
       http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [10, 20], totalCount: 5 })
+        HttpResponse.json({ tokenIds: [10, 20], totalCount: 5, signNonce: "n" })
       )
     );
 
@@ -45,11 +67,11 @@ describe("CompareExperience", () => {
 
     server.use(
       http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [3, 7], totalCount: 10 })
+        HttpResponse.json({ tokenIds: [3, 7], totalCount: 10, signNonce: "nonce-xyz" })
       ),
       http.post("/api/compare", async ({ request }) => {
         votedPayload = await request.json();
-        return HttpResponse.json({});
+        return HttpResponse.json({ result: "success" });
       })
     );
 
@@ -59,13 +81,20 @@ describe("CompareExperience", () => {
     const pickButton = await screen.findByText("Pick 3");
     await user.click(pickButton);
 
-    expect(votedPayload).toEqual({ firstId: 3, secondId: 7, winner: 3 });
+    expect(signMessageAsync).toHaveBeenCalled();
+    expect(votedPayload).toMatchObject({
+      firstId: 3,
+      secondId: 7,
+      winner: 3,
+      signNonce: "nonce-xyz",
+      chainId: 31337
+    });
   });
 
   it("returns null when tokenIds array is empty", async () => {
     server.use(
       http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [], totalCount: 0 })
+        HttpResponse.json({ tokenIds: [], totalCount: 0, signNonce: "n" })
       )
     );
 
@@ -78,7 +107,7 @@ describe("CompareExperience", () => {
   it("shows error toast when vote fails", async () => {
     server.use(
       http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [5, 8], totalCount: 3 })
+        HttpResponse.json({ tokenIds: [5, 8], totalCount: 3, signNonce: "n" })
       ),
       http.post("/api/compare", () =>
         new HttpResponse(null, { status: 500 })

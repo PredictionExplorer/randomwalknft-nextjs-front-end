@@ -23,7 +23,8 @@ export function RandomVideoExperience() {
     }
   };
 
-  if (!currentTokenId) {
+  // Token id 0 is valid; do not use !currentTokenId (0 is falsy).
+  if (currentTokenId === undefined) {
     return <Skeleton className="min-h-[calc(100vh-12rem)] w-full rounded-none" />;
   }
 
