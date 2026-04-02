@@ -1,5 +1,6 @@
 "use client";
 
+import { zeroAddress } from "viem";
 import { usePublicClient, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { toast } from "sonner";
 
@@ -29,7 +30,11 @@ export function RedeemExperience() {
     abi: nftAbi,
     functionName: "timeUntilWithdrawal"
   });
-  const { data: lastMinter } = useReadContract({
+  const {
+    data: lastMinter,
+    isLoading: lastMinterLoading,
+    isError: lastMinterFailed
+  } = useReadContract({
     address: NFT_ADDRESS,
     abi: nftAbi,
     functionName: "lastMinter"
@@ -88,12 +93,21 @@ export function RedeemExperience() {
             <CardTitle>Last minter</CardTitle>
           </CardHeader>
           <CardContent>
-            {lastMinter ? (
+            {lastMinterLoading ? (
+              <span className="text-muted-foreground">Loading…</span>
+            ) : lastMinterFailed ? (
+              <span
+                className="text-sm text-muted-foreground"
+                title="Often: NEXT_PUBLIC_RPC_URL is Ethereum Sepolia while this app uses Arbitrum Sepolia (421614), or the deployed contract has no lastMinter()."
+              >
+                Unavailable (RPC / contract mismatch)
+              </span>
+            ) : lastMinter && lastMinter !== zeroAddress ? (
               <a href={`/gallery?address=${lastMinter}`} className="text-secondary">
                 {lastMinter}
               </a>
             ) : (
-              "Unknown"
+              <span className="text-muted-foreground">None yet (no minter recorded)</span>
             )}
           </CardContent>
         </Card>
@@ -123,7 +137,7 @@ export function RedeemExperience() {
                   throw new Error("Connect your wallet to continue.");
                 }
 
-                const { gas } = await prepareContractWrite({
+                const prepared = await prepareContractWrite({
                   publicClient,
                   account: address,
                   address: NFT_ADDRESS,
@@ -138,7 +152,7 @@ export function RedeemExperience() {
                   address: NFT_ADDRESS,
                   abi: nftAbi,
                   functionName: "withdraw",
-                  gas
+                  ...prepared
                 });
               } catch (error) {
                 trackEvent("transaction_failed", {

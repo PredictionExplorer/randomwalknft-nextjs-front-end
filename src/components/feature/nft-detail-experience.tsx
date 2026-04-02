@@ -296,7 +296,7 @@ export function NftDetailExperience({
     const priceValue = parseEther(price);
 
     if (!approvedForAll) {
-      const { gas: approvalGas } = await prepareContractWrite({
+      const approvalPrepared = await prepareContractWrite({
         publicClient,
         account: address,
         address: NFT_ADDRESS,
@@ -309,12 +309,12 @@ export function NftDetailExperience({
         abi: nftAbi,
         functionName: "setApprovalForAll",
         args: [MARKET_ADDRESS, true],
-        gas: approvalGas
+        ...approvalPrepared
       });
       await publicClient.waitForTransactionReceipt({ hash: approvalHash });
     }
 
-    const { gas } = await prepareContractWrite({
+    const sellPrepared = await prepareContractWrite({
       publicClient,
       account: address,
       address: MARKET_ADDRESS,
@@ -327,7 +327,7 @@ export function NftDetailExperience({
       abi: marketAbi,
       functionName: "makeSellOffer",
       args: [NFT_ADDRESS, BigInt(nft.id), priceValue],
-      gas
+      ...sellPrepared
     });
     await publicClient.waitForTransactionReceipt({ hash });
   }
@@ -342,7 +342,7 @@ export function NftDetailExperience({
     }
 
     const bidValue = parseEther(price);
-    const { gas } = await prepareContractWrite({
+    const buyPrepared = await prepareContractWrite({
       publicClient,
       account: address,
       address: MARKET_ADDRESS,
@@ -357,7 +357,7 @@ export function NftDetailExperience({
       functionName: "makeBuyOffer",
       args: [NFT_ADDRESS, BigInt(nft.id)],
       value: bidValue,
-      gas
+      ...buyPrepared
     });
     await publicClient.waitForTransactionReceipt({ hash });
   }
@@ -371,7 +371,7 @@ export function NftDetailExperience({
       throw new Error("Connect your wallet to continue.");
     }
 
-    const { gas } = await prepareContractWrite({
+    const renamePrepared = await prepareContractWrite({
       publicClient,
       account: address,
       address: NFT_ADDRESS,
@@ -384,7 +384,7 @@ export function NftDetailExperience({
       abi: nftAbi,
       functionName: "setTokenName",
       args: [BigInt(nft.id), tokenName.trim()],
-      gas
+      ...renamePrepared
     });
     await publicClient.waitForTransactionReceipt({ hash });
   }
@@ -398,7 +398,7 @@ export function NftDetailExperience({
       throw new Error("Connect your wallet to continue.");
     }
 
-    const { gas } = await prepareContractWrite({
+    const transferPrepared = await prepareContractWrite({
       publicClient,
       account: address,
       address: NFT_ADDRESS,
@@ -411,7 +411,7 @@ export function NftDetailExperience({
       abi: nftAbi,
       functionName: "transferFrom",
       args: [address, transferAddress as `0x${string}`, BigInt(nft.id)],
-      gas
+      ...transferPrepared
     });
     await publicClient.waitForTransactionReceipt({ hash });
   }
@@ -432,7 +432,7 @@ export function NftDetailExperience({
       args: [BigInt(activeSellOffer.offerId)]
     });
     const priceValue = Array.isArray(offer) ? offer[2] : BigInt(0);
-    const { gas } = await prepareContractWrite({
+    const acceptPrepared = await prepareContractWrite({
       publicClient,
       account: address,
       address: MARKET_ADDRESS,
@@ -447,7 +447,7 @@ export function NftDetailExperience({
       functionName: "acceptSellOffer",
       args: [BigInt(activeSellOffer.offerId)],
       value: priceValue as bigint,
-      gas
+      ...acceptPrepared
     });
     await publicClient.waitForTransactionReceipt({ hash });
   }
@@ -747,7 +747,7 @@ export function NftDetailExperience({
                             throw new Error("Connect your wallet to continue.");
                           }
 
-                          const { gas } = await prepareContractWrite({
+                          const cancelSellPrepared = await prepareContractWrite({
                             publicClient,
                             account: address,
                             address: MARKET_ADDRESS,
@@ -760,7 +760,7 @@ export function NftDetailExperience({
                             abi: marketAbi,
                             functionName: "cancelSellOffer",
                             args: [BigInt(userSellOffer.offerId)],
-                            gas
+                            ...cancelSellPrepared
                           });
                           await publicClient.waitForTransactionReceipt({ hash });
                         })
@@ -779,7 +779,7 @@ export function NftDetailExperience({
                             throw new Error("Connect your wallet to continue.");
                           }
 
-                          const { gas } = await prepareContractWrite({
+                          const cancelBuyPrepared = await prepareContractWrite({
                             publicClient,
                             account: address,
                             address: MARKET_ADDRESS,
@@ -792,7 +792,7 @@ export function NftDetailExperience({
                             abi: marketAbi,
                             functionName: "cancelBuyOffer",
                             args: [BigInt(userBuyOffer.offerId)],
-                            gas
+                            ...cancelBuyPrepared
                           });
                           await publicClient.waitForTransactionReceipt({ hash });
                         })

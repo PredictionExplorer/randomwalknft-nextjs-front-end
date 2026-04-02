@@ -19,7 +19,10 @@ import { NftCard } from "@/components/nft/nft-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { getErrorMessage } from "@/lib/web3/errors";
-import { applyBasisPointsBuffer } from "@/lib/web3/transaction-preflight";
+import {
+  applyBasisPointsBuffer,
+  estimateBufferedTransactionFees
+} from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { arbiscanContractUrl, createAssetUrls } from "@/lib/utils";
@@ -156,13 +159,15 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         connected: isConnected,
         chainId: chain?.id
       });
+      const feeFields = await estimateBufferedTransactionFees(publicClient);
       // Explicit to + data: some wallets mishandle writeContract(request) serialization.
       const submittedHash = await walletClient.sendTransaction({
         account: address,
         chain: configuredChain,
         to: nftTarget,
         data: mintCalldata,
-        value: mintValue
+        value: mintValue,
+        ...feeFields
       });
       setMintTxHash(submittedHash);
       toast.info("Mint transaction submitted.");

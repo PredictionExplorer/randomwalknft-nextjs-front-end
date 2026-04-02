@@ -14,6 +14,7 @@ function createPublicClientMock(overrides?: Partial<PublicClient>) {
   return {
     estimateContractGas: vi.fn().mockResolvedValue(100n),
     estimateFeesPerGas: vi.fn().mockResolvedValue({ gasPrice: 2n }),
+    getBlock: vi.fn().mockResolvedValue({ baseFeePerGas: null }),
     getBalance: vi.fn().mockResolvedValue(1_000n),
     ...overrides
   } as unknown as PublicClient;
@@ -78,7 +79,7 @@ describe("transaction preflight", () => {
         args: [NFT_ADDRESS, 42n],
         value: 200n
       })
-    ).resolves.toEqual({ gas: 120n });
+    ).resolves.toEqual({ gas: 120n, gasPrice: 4n });
 
     expect(estimateContractGas).toHaveBeenCalledWith({
       address: MARKET_ADDRESS,
@@ -88,5 +89,31 @@ describe("transaction preflight", () => {
       account: "0x0000000000000000000000000000000000000001",
       value: 200n
     });
+  });
+
+  it("prepares EIP-1559 writes with buffered max fees above base fee", async () => {
+    const estimateContractGas = vi.fn().mockResolvedValue(50n);
+    const publicClient = createPublicClientMock({
+      estimateContractGas,
+      estimateFeesPerGas: vi
+        .fn()
+        .mockResolvedValue({ maxFeePerGas: 20_002_000n, maxPriorityFeePerGas: 100n }),
+      getBlock: vi.fn().mockResolvedValue({ baseFeePerGas: 20_004_000n }),
+      getBalance: vi.fn().mockResolvedValue(10n ** 24n)
+    });
+
+    const result = await prepareContractWrite({
+      publicClient,
+      account: "0x0000000000000000000000000000000000000001",
+      address: MARKET_ADDRESS,
+      abi: marketAbi,
+      functionName: "makeBuyOffer",
+      args: [NFT_ADDRESS, 1n],
+      value: 0n
+    });
+
+    expect(result.gas).toBe(60n);
+    expect(result.maxFeePerGas).toBeGreaterThanOrEqual(20_004_000n + result.maxPriorityFeePerGas);
+    expect(result.maxFeePerGas).toBeGreaterThan(20_002_000n);
   });
 });

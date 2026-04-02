@@ -66,7 +66,7 @@ export function MyOffersView() {
         throw new Error("Connect your wallet to continue.");
       }
 
-      const { gas } = await prepareContractWrite({
+      const prepared = await prepareContractWrite({
         publicClient,
         account: address,
         address: MARKET_ADDRESS,
@@ -80,7 +80,7 @@ export function MyOffersView() {
         abi: marketAbi,
         functionName: kind === "buy" ? "cancelBuyOffer" : "cancelSellOffer",
         args: [BigInt(offerId)],
-        gas
+        ...prepared
       });
 
       await publicClient.waitForTransactionReceipt({ hash });
