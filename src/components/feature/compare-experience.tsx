@@ -93,7 +93,7 @@ export function CompareExperience() {
     queryKey: ["compare-pair", address ?? "", isConnected, relaxPairFilter],
     queryFn: () =>
       getComparePair({
-        voter: isConnected && address ? address : undefined,
+        ...(isConnected && address ? { voter: address } : {}),
         skipPairFilter: relaxPairFilter
       })
   });
