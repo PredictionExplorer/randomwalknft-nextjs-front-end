@@ -1,5 +1,4 @@
 import { getPublicEnvSnapshot, REQUIRED_ENV_KEYS, type RequiredEnvKey } from "@/lib/env";
-import { getCurrentNetworkName } from "@/lib/web3/evm-chain";
 
 /** Path segments on the Go webserv origin (see websrv static / API routes). */
 /** JSON API prefix on the Go webserv (RandomWalk NFT data). */
@@ -80,23 +79,6 @@ export function getBaseConfig(): BaseEnvConfig {
     ASSET_BASE_URL: `${origin}${BACKEND_ASSET_PATH}`
   };
   return baseCached;
-}
-
-/** @deprecated Prefer getBaseConfig (sync) or getAppConfig from @/lib/server/app-config (async). */
-export function getConfig(): AppConfig {
-  const base = getBaseConfig();
-  const envNft = process.env.NEXT_PUBLIC_NFT_ADDRESS?.trim();
-  const envMarket = process.env.NEXT_PUBLIC_MARKET_ADDRESS?.trim();
-  if (getCurrentNetworkName() !== "local" && envNft && envMarket) {
-    return {
-      ...base,
-      NFT_ADDRESS: envNft as `0x${string}`,
-      MARKET_ADDRESS: envMarket as `0x${string}`
-    };
-  }
-  throw new Error(
-    "getConfig() requires contract addresses: use await getAppConfig() from @/lib/server/app-config on the server, or useContracts() on the client"
-  );
 }
 
 export const SUPPORTED_ASSET_EXTENSIONS = [".png", ".jpg", ".jpeg", ".mp4", ".webp"] as const;

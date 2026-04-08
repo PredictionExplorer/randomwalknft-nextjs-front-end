@@ -3,11 +3,11 @@
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import { getConfig } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 import { getOffers } from "@/lib/api/public";
 import { server } from "../../setup/msw/server";
 
-const { RWALK_BASE_URL } = getConfig();
+const { RWALK_BASE_URL } = getBaseConfig();
 
 describe("public api normalization", () => {
   it("normalizes and sorts offers", async () => {

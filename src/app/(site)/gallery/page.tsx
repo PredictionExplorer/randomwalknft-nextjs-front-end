@@ -80,6 +80,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
         totalPages: 1,
         page: 1
       };
+      tokenIds = [];
     } else if (pageData.items.length) {
       pageData = {
         items: pageData.items.includes(query) ? [query] : [],

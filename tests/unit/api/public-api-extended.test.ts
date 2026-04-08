@@ -13,11 +13,11 @@ import {
   getVoteCount,
   submitBeautyVote
 } from "@/lib/api/public";
-import { getConfig } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 import { publicClient } from "@/lib/web3/public-client";
 import { server } from "../../setup/msw/server";
 
-const { API_BASE_URL, RWALK_BASE_URL } = getConfig();
+const { API_BASE_URL, RWALK_BASE_URL } = getBaseConfig();
 
 const offerPayload = (
   id: number,
@@ -42,7 +42,7 @@ const offerPayload = (
 describe("getVoteCount", () => {
   it("returns total_count from vote_count endpoint", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/vote_count`, () =>
+      http.get(`${API_BASE_URL}/api/randomwalk/vote_count`, () =>
         HttpResponse.json({ total_count: 42 })
       )
     );
@@ -56,7 +56,7 @@ describe("getVoteCount", () => {
 describe("getRandomPair", () => {
   it("returns number array from random endpoint", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/random`, () =>
+      http.get(`${API_BASE_URL}/api/randomwalk/random`, () =>
         HttpResponse.json([101, 202])
       )
     );
@@ -70,7 +70,7 @@ describe("getRandomPair", () => {
 describe("getRatingOrder", () => {
   it("returns number array from rating_order endpoint", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/rating_order`, () =>
+      http.get(`${API_BASE_URL}/api/randomwalk/rating_order`, () =>
         HttpResponse.json([3, 1, 4, 2, 5])
       )
     );
@@ -265,7 +265,7 @@ describe("submitBeautyVote", () => {
   it("POSTs to add_game with nft1_win 1 when firstId wins", async () => {
     let capturedBody: unknown = null;
     server.use(
-      http.post(`${API_BASE_URL}/add_game`, async ({ request }) => {
+      http.post(`${API_BASE_URL}/api/randomwalk/add_game`, async ({ request }) => {
         capturedBody = await request.json();
         return HttpResponse.json({ result: "ok" });
       })
@@ -294,7 +294,7 @@ describe("submitBeautyVote", () => {
   it("POSTs to add_game with nft1_win 0 when secondId wins", async () => {
     let capturedBody: unknown = null;
     server.use(
-      http.post(`${API_BASE_URL}/add_game`, async ({ request }) => {
+      http.post(`${API_BASE_URL}/api/randomwalk/add_game`, async ({ request }) => {
         capturedBody = await request.json();
         return HttpResponse.json({ result: "success" });
       })

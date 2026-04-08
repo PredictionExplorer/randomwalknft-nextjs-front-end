@@ -2,13 +2,15 @@ import { describe, expect, it, vi } from "vitest";
 import type { PublicClient } from "viem";
 
 import { marketAbi } from "@/generated/wagmi";
-import { getConfig } from "@/lib/config";
 import {
   applyBasisPointsBuffer,
   applyGasBuffer,
   assertSufficientBalanceForTransaction,
   prepareContractWrite
 } from "@/lib/web3/transaction-preflight";
+
+const NFT_ADDRESS = "0x895a6F444BE4ba9d124F61DF736605792B35D66b" as const;
+const MARKET_ADDRESS = "0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08" as const;
 
 function createPublicClientMock(overrides?: Partial<PublicClient>) {
   return {
@@ -21,8 +23,6 @@ function createPublicClientMock(overrides?: Partial<PublicClient>) {
 }
 
 describe("transaction preflight", () => {
-  const { MARKET_ADDRESS, NFT_ADDRESS } = getConfig();
-
   it("adds a 20% gas buffer", () => {
     expect(applyGasBuffer(100n)).toBe(120n);
   });

@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   const { firstId, secondId, winner, signNonce, signature, chainId } = result.data;
   const { API_BASE_URL } = getBaseConfig();
 
-  const upstream = await fetch(`${API_BASE_URL}/add_game`, {
+  const upstream = await fetch(`${API_BASE_URL}/api/randomwalk/add_game`, {
     method: "POST",
     headers: {
       Accept: "application/json",

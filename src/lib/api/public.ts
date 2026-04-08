@@ -243,7 +243,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
 });
 
 export const getRandomPair = cache(async () => {
-  return fetchApi<number[]>("random", { revalidate: REVALIDATE_SHORT });
+  return fetchApi<number[]>("api/randomwalk/random", { revalidate: REVALIDATE_SHORT });
 });
 
 const beautyPairIdsSchema = z.object({
@@ -274,12 +274,12 @@ export async function fetchBeautyComparePairIds(
 
 /** Cached per-request only; fetch is no-store so /compare refetches show an up-to-date total after each vote. */
 export const getVoteCount = cache(async () => {
-  const response = await fetchApi("vote_count", { cache: "no-store" }, voteCountSchema);
+  const response = await fetchApi("api/randomwalk/vote_count", { cache: "no-store" }, voteCountSchema);
   return response.total_count;
 });
 
 export const getRatingOrder = cache(async () => {
-  return fetchApi<number[]>("rating_order", { revalidate: REVALIDATE_LONG });
+  return fetchApi<number[]>("api/randomwalk/rating_order", { revalidate: REVALIDATE_LONG });
 });
 
 const getAllActiveOffersRaw = cache(async () => {
@@ -377,7 +377,7 @@ export type BeautyVoteSignedPayload = {
 export async function submitBeautyVote(payload: BeautyVoteSignedPayload) {
   const { firstId, secondId, winner, signNonce, signature, chainId } = payload;
   return postApi(
-    "add_game",
+    "api/randomwalk/add_game",
     JSON.stringify({
       nft1: firstId,
       nft2: secondId,

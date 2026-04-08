@@ -2,12 +2,12 @@
  * Required public env: set in the **process environment** before `next dev` / `next build`
  * (e.g. `export …` in the shell, or your host’s env UI). All three must be non-empty.
  *
- * Beauty contest votes use wallet signatures on `/add_game` (no admin key). `RANKING_ADMIN_KEY` still
+ * Beauty contest votes use wallet signatures on `POST /api/randomwalk/add_game` (no admin key). `RANKING_ADMIN_KEY` still
  * applies to `POST /api/randomwalk/token-ranking/match` when set.
  *
  * Contract addresses: server code loads them from GET {API}/api/randomwalk/contracts and caches
- * them in memory for the Node process (`rwalk-contracts.ts`). For `NEXT_PUBLIC_NETWORK=local`, Next
- * clears `NEXT_PUBLIC_NFT_ADDRESS` / `NEXT_PUBLIC_MARKET_ADDRESS` in the client bundle by design.
+ * them in memory for the Node process (`rwalk-contracts.ts`). The client receives them via
+ * `ContractsProvider` from the root layout.
  */
 
 export const REQUIRED_ENV_KEYS = [

@@ -79,7 +79,7 @@ describe("compare route", () => {
 
     await expect(response.json()).resolves.toEqual({ result: "success" });
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://api.test/add_game",
+      "http://api.test/api/randomwalk/add_game",
       expect.objectContaining({
         method: "POST"
       })

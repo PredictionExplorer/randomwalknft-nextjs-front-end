@@ -12,21 +12,6 @@ import bundleAnalyzer from "@next/bundle-analyzer";
  */
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 
-/**
- * When the network preset is local, drop NEXT_PUBLIC NFT/market overrides so the **client bundle**
- * never inlines mainnet addresses. The server loads addresses from the Go API and caches them in
- * memory for the process (`rwalk-contracts.ts`).
- *
- * `delete process.env` alone is unreliable: Next may load `.env*` / shell after config evaluation and
- * re-apply `NEXT_PUBLIC_*`. Setting `env` below forces the **client bundle** to see empty strings.
- */
-const network = process.env.NEXT_PUBLIC_NETWORK?.trim().toLowerCase();
-const stripLocalContractEnv = !network || network === "local";
-if (stripLocalContractEnv) {
-  delete process.env.NEXT_PUBLIC_NFT_ADDRESS;
-  delete process.env.NEXT_PUBLIC_MARKET_ADDRESS;
-}
-
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true"
 });
@@ -65,14 +50,6 @@ const asyncStorageStubWebpack = path.join(projectRoot, "src/stubs/async-storage.
 const asyncStorageStubTurbopack = "./src/stubs/async-storage.ts";
 
 const nextConfig: NextConfig = {
-  ...(stripLocalContractEnv
-    ? {
-        env: {
-          NEXT_PUBLIC_NFT_ADDRESS: "",
-          NEXT_PUBLIC_MARKET_ADDRESS: ""
-        }
-      }
-    : {}),
   /**
    * Both must match (see `next/dist/server/config.js`): otherwise Next falls back to lockfile-based
    * inference when a parent directory has another lockfile.
