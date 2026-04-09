@@ -6,6 +6,7 @@ import { AlertTriangle, CheckCircle2, PlugZap, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trackEvent } from "@/lib/analytics";
+import { getChainDisplayName, getCurrentNetworkName, getRpcHttpUrl } from "@/lib/web3/evm-chain";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 
 type WalletStatusCardProps = {
@@ -30,11 +31,17 @@ export function WalletStatusCard({
       ? "Wrong network"
       : "Wallet connected";
 
+  const siteOrigin = typeof window !== "undefined" ? window.location.origin : "";
+  const localRpcNote =
+    getCurrentNetworkName() === "local"
+      ? ` MetaMask may show this site as ${siteOrigin || "this origin"} — that is only the app URL, not the blockchain node. In MetaMask → Networks, set this chain’s RPC URL to ${getRpcHttpUrl()} (Hardhat, port 8545).`
+      : "";
+
   const body = !isConnected
     ? disconnectedBody
     : isWrongNetwork
-      ? wrongNetworkBody
-      : "Your wallet is connected on Arbitrum and ready for transactions.";
+      ? `${wrongNetworkBody}${getCurrentNetworkName() === "local" ? ` After switching, set the network’s RPC to ${getRpcHttpUrl()} if needed (not ${siteOrigin || "this site’s port"}).` : ""}`
+      : `Your wallet is connected on ${getChainDisplayName()} and ready for transactions.${localRpcNote}`;
 
   return (
     <Card className="border-border/80 bg-background/60">

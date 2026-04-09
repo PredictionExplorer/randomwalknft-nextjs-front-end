@@ -4,9 +4,9 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
 import { AlertTriangle, ChevronDown, ExternalLink as ExternalLinkIcon, LogOut, Wallet } from "lucide-react";
 import { useDisconnect } from "wagmi";
-import { arbitrum } from "wagmi/chains";
 
 import { trackEvent } from "@/lib/analytics";
+import { getChainDisplayName, getConfiguredEvmChain } from "@/lib/web3/evm-chain";
 import { arbiscanAddressUrl } from "@/lib/utils";
 import { ExternalLink } from "@/components/common/external-link";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,8 @@ export function ConnectWalletButton() {
 
         const currentAccount = account!;
         const currentChain = chain!;
-        const wrongNetwork = currentChain.id !== arbitrum.id || currentChain.unsupported;
+        const expectedChainId = getConfiguredEvmChain().id;
+        const wrongNetwork = currentChain.id !== expectedChainId || currentChain.unsupported;
 
         return (
           <div className="flex items-center gap-2">
@@ -61,7 +62,7 @@ export function ConnectWalletButton() {
               size="sm"
               onClick={() => {
                 if (wrongNetwork) {
-                  trackEvent("wallet_switch_network", { chainId: arbitrum.id });
+                  trackEvent("wallet_switch_network", { chainId: expectedChainId });
                 }
                 openChainModal();
               }}
@@ -72,7 +73,7 @@ export function ConnectWalletButton() {
                   Switch network
                 </>
               ) : (
-                currentChain.name ?? "Arbitrum"
+                currentChain.name ?? getChainDisplayName()
               )}
             </Button>
 
@@ -93,7 +94,7 @@ export function ConnectWalletButton() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <ExternalLink href={arbiscanAddressUrl(currentAccount.address)}>
-                    View on Arbiscan
+                    View on block explorer
                     <ExternalLinkIcon className="ml-auto h-4 w-4" />
                   </ExternalLink>
                 </DropdownMenuItem>

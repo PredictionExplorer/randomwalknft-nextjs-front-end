@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { useQuery } from "@tanstack/react-query";
-import { useAccount, usePublicClient } from "wagmi";
+import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { marketAbi, useWriteMarketCancelBuyOffer, useWriteMarketCancelSellOffer } from "@/generated/wagmi";
-import { MARKET_ADDRESS } from "@/lib/config";
+import { marketAbi } from "@/generated/wagmi";
+import { useContracts } from "@/components/providers/contracts-context";
 import { useMounted } from "@/lib/use-mounted";
 import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
@@ -45,6 +45,7 @@ async function fetchOffers(account: string): Promise<OfferResponse> {
 }
 
 export function MyOffersView() {
+  const { MARKET_ADDRESS } = useContracts();
   const mounted = useMounted();
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();
@@ -53,8 +54,7 @@ export function MyOffersView() {
     queryFn: () => fetchOffers(address!),
     enabled: Boolean(address)
   });
-  const buyMutation = useWriteMarketCancelBuyOffer();
-  const sellMutation = useWriteMarketCancelSellOffer();
+  const { writeContractAsync } = useWriteContract();
 
   const offers = [...(offersQuery.data?.buyOffers ?? []), ...(offersQuery.data?.sellOffers ?? [])].sort(
     (left, right) => left.offerId - right.offerId
@@ -66,7 +66,7 @@ export function MyOffersView() {
         throw new Error("Connect your wallet to continue.");
       }
 
-      const { gas } = await prepareContractWrite({
+      const prepared = await prepareContractWrite({
         publicClient,
         account: address,
         address: MARKET_ADDRESS,
@@ -75,10 +75,13 @@ export function MyOffersView() {
         args: [BigInt(offerId)]
       });
 
-      const hash =
-        kind === "buy"
-          ? await buyMutation.writeContractAsync({ args: [BigInt(offerId)], gas })
-          : await sellMutation.writeContractAsync({ args: [BigInt(offerId)], gas });
+      const hash = await writeContractAsync({
+        address: MARKET_ADDRESS,
+        abi: marketAbi,
+        functionName: kind === "buy" ? "cancelBuyOffer" : "cancelSellOffer",
+        args: [BigInt(offerId)],
+        ...prepared
+      });
 
       await publicClient.waitForTransactionReceipt({ hash });
       toast.success("Offer cancelled.");

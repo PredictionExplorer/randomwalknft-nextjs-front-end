@@ -167,7 +167,7 @@ describe("ConnectWalletButton", () => {
     expect(screen.getByText(/wallet details/i)).toBeInTheDocument();
     expect(screen.getByText(/my nfts/i)).toBeInTheDocument();
     expect(screen.getByText(/my offers/i)).toBeInTheDocument();
-    expect(screen.getByText(/view on arbiscan/i)).toBeInTheDocument();
+    expect(screen.getByText(/view on block explorer/i)).toBeInTheDocument();
     expect(screen.getByText(/disconnect/i)).toBeInTheDocument();
   });
 });

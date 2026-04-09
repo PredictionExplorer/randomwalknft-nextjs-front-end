@@ -13,9 +13,11 @@ import {
   getVoteCount,
   submitBeautyVote
 } from "@/lib/api/public";
-import { API_BASE_URL, NFT_ADDRESS, RWALK_BASE_URL, MARKET_ADDRESS } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 import { publicClient } from "@/lib/web3/public-client";
 import { server } from "../../setup/msw/server";
+
+const { API_BASE_URL, RWALK_BASE_URL } = getBaseConfig();
 
 const offerPayload = (
   id: number,
@@ -40,7 +42,7 @@ const offerPayload = (
 describe("getVoteCount", () => {
   it("returns total_count from vote_count endpoint", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/vote_count`, () =>
+      http.get(`${API_BASE_URL}/api/randomwalk/vote_count`, () =>
         HttpResponse.json({ total_count: 42 })
       )
     );
@@ -54,7 +56,7 @@ describe("getVoteCount", () => {
 describe("getRandomPair", () => {
   it("returns number array from random endpoint", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/random`, () =>
+      http.get(`${API_BASE_URL}/api/randomwalk/random`, () =>
         HttpResponse.json([101, 202])
       )
     );
@@ -68,7 +70,7 @@ describe("getRandomPair", () => {
 describe("getRatingOrder", () => {
   it("returns number array from rating_order endpoint", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/rating_order`, () =>
+      http.get(`${API_BASE_URL}/api/randomwalk/rating_order`, () =>
         HttpResponse.json([3, 1, 4, 2, 5])
       )
     );
@@ -83,17 +85,17 @@ describe("getOffersForToken", () => {
   it("filters buy and sell offers by tokenId", async () => {
     const targetTokenId = 42;
     server.use(
-      http.get(`${API_BASE_URL}/buy_offer`, () =>
-        HttpResponse.json([
-          offerPayload(1, 100, targetTokenId, 1.5, "2026-01-01T00:00:01Z", 1),
-          offerPayload(2, 101, 99, 2.0, "2026-01-01T00:00:02Z", 2)
-        ])
-      ),
-      http.get(`${API_BASE_URL}/sell_offer`, () =>
-        HttpResponse.json([
-          offerPayload(3, 102, targetTokenId, 3.0, "2026-01-01T00:00:03Z", 3),
-          offerPayload(4, 103, 88, 4.0, "2026-01-01T00:00:04Z", 4)
-        ])
+      http.get(`${RWALK_BASE_URL}/current_offers/2`, () =>
+        HttpResponse.json({
+          status: 1,
+          error: "",
+          Offers: [
+            { ...offerPayload(1, 100, targetTokenId, 1.5, "2026-01-01T00:00:01Z", 1), OfferType: 0 },
+            { ...offerPayload(2, 101, 99, 2.0, "2026-01-01T00:00:02Z", 2), OfferType: 0 },
+            { ...offerPayload(3, 102, targetTokenId, 3.0, "2026-01-01T00:00:03Z", 3), OfferType: 1 },
+            { ...offerPayload(4, 103, 88, 4.0, "2026-01-01T00:00:04Z", 4), OfferType: 1 }
+          ]
+        })
       )
     );
 
@@ -117,15 +119,15 @@ describe("getOffersForToken", () => {
 
   it("returns empty arrays when no offers match tokenId", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/buy_offer`, () =>
-        HttpResponse.json([
-          offerPayload(1, 100, 1, 1.5, "2026-01-01T00:00:01Z", 1)
-        ])
-      ),
-      http.get(`${API_BASE_URL}/sell_offer`, () =>
-        HttpResponse.json([
-          offerPayload(2, 101, 2, 2.0, "2026-01-01T00:00:02Z", 2)
-        ])
+      http.get(`${RWALK_BASE_URL}/current_offers/2`, () =>
+        HttpResponse.json({
+          status: 1,
+          error: "",
+          Offers: [
+            { ...offerPayload(1, 100, 1, 1.5, "2026-01-01T00:00:01Z", 1), OfferType: 0 },
+            { ...offerPayload(2, 101, 2, 2.0, "2026-01-01T00:00:02Z", 2), OfferType: 1 }
+          ]
+        })
       )
     );
 
@@ -139,17 +141,22 @@ describe("getOffersForToken", () => {
 describe("getTokenDetail", () => {
   it("fetches and transforms token data with history", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/tokens/5`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/info/5`, () =>
         HttpResponse.json({
-          id: 5,
-          name: "Token Five",
-          owner: "0xowner",
-          seed: "0xseed",
-          rating: 4.5,
-          status: 1
+          status: 1,
+          error: "",
+          TokenInfo: {
+            TokenId: 5,
+            CurOwnerAddr: "0xowner",
+            SeedHex: "0xseed",
+            CurName: "Token Five",
+            LastPrice: 0,
+            TotalVolume: 0,
+            NumTrades: 0
+          }
         })
       ),
-      http.get(`${RWALK_BASE_URL}/tokens/history/5/${NFT_ADDRESS}/0/1000`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/history/5/0/1000`, () =>
         HttpResponse.json({
           TokenHistory: [
             {
@@ -172,7 +179,7 @@ describe("getTokenDetail", () => {
     expect(nft.name).toBe("Token Five");
     expect(nft.owner).toBe("0xowner");
     expect(nft.seed).toBe("0xseed");
-    expect(nft.rating).toBe(4.5);
+    expect(nft.rating).toBe(0);
     expect(nft.tokenHistory).toHaveLength(1);
     expect(nft.tokenHistory[0]?.recordType).toBe(1);
     expect(nft.mintedAt).toBe("2023-11-14T00:00:00Z");
@@ -187,10 +194,10 @@ describe("getTokenDetail", () => {
       .mockResolvedValueOnce("");
 
     server.use(
-      http.get(`${API_BASE_URL}/tokens/8`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/info/8`, () =>
         HttpResponse.json({ error: "Not found" }, { status: 404 })
       ),
-      http.get(`${RWALK_BASE_URL}/tokens/history/8/${NFT_ADDRESS}/0/1000`, () =>
+      http.get(`${RWALK_BASE_URL}/tokens/history/8/0/1000`, () =>
         HttpResponse.json({ error: "Not found" }, { status: 404 })
       )
     );
@@ -226,7 +233,7 @@ describe("getTradingHistory", () => {
   it("paginates and transforms trading records for page 1", async () => {
     const tradingRecords = makeTradingRecords(25);
     server.use(
-      http.get(new RegExp(`${RWALK_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/trading/sales/${MARKET_ADDRESS}`), () =>
+      http.get(`${RWALK_BASE_URL}/trading/sales/:start/:count`, () =>
         HttpResponse.json({ Trading: tradingRecords })
       )
     );
@@ -243,7 +250,7 @@ describe("getTradingHistory", () => {
   it("handles page beyond available data (start < 0 branch)", async () => {
     const tradingRecords = makeTradingRecords(10);
     server.use(
-      http.get(new RegExp(`${RWALK_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/trading/sales/${MARKET_ADDRESS}`), () =>
+      http.get(`${RWALK_BASE_URL}/trading/sales/:start/:count`, () =>
         HttpResponse.json({ Trading: tradingRecords })
       )
     );
@@ -258,38 +265,58 @@ describe("submitBeautyVote", () => {
   it("POSTs to add_game with nft1_win 1 when firstId wins", async () => {
     let capturedBody: unknown = null;
     server.use(
-      http.post(`${API_BASE_URL}/add_game`, async ({ request }) => {
+      http.post(`${API_BASE_URL}/api/randomwalk/add_game`, async ({ request }) => {
         capturedBody = await request.json();
         return HttpResponse.json({ result: "ok" });
       })
     );
 
-    const response = await submitBeautyVote(10, 20, 10);
+    const response = await submitBeautyVote({
+      firstId: 10,
+      secondId: 20,
+      winner: 10,
+      signNonce: "sn",
+      signature: "0x" + "11".repeat(65),
+      chainId: 42161
+    });
 
     expect(response).toEqual({ result: "ok" });
     expect(capturedBody).toEqual({
       nft1: 10,
       nft2: 20,
-      nft1_win: 1
+      nft1_win: 1,
+      sign_nonce: "sn",
+      signature: "0x" + "11".repeat(65),
+      chain_id: 42161
     });
   });
 
   it("POSTs to add_game with nft1_win 0 when secondId wins", async () => {
     let capturedBody: unknown = null;
     server.use(
-      http.post(`${API_BASE_URL}/add_game`, async ({ request }) => {
+      http.post(`${API_BASE_URL}/api/randomwalk/add_game`, async ({ request }) => {
         capturedBody = await request.json();
         return HttpResponse.json({ result: "success" });
       })
     );
 
-    const response = await submitBeautyVote(10, 20, 20);
+    const response = await submitBeautyVote({
+      firstId: 10,
+      secondId: 20,
+      winner: 20,
+      signNonce: "sn2",
+      signature: "0x" + "22".repeat(65),
+      chainId: 42161
+    });
 
     expect(response).toEqual({ result: "success" });
     expect(capturedBody).toEqual({
       nft1: 10,
       nft2: 20,
-      nft1_win: 0
+      nft1_win: 0,
+      sign_nonce: "sn2",
+      signature: "0x" + "22".repeat(65),
+      chain_id: 42161
     });
   });
 });

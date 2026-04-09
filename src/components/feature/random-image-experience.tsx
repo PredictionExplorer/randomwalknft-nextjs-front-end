@@ -11,7 +11,8 @@ import { useRandomTokenHistory } from "@/lib/use-random-token-history";
 export function RandomImageExperience({ initialTokenId }: { initialTokenId: number }) {
   const { currentTokenId, canGoBack, goBack, goNext } = useRandomTokenHistory(initialTokenId);
 
-  if (!currentTokenId) return null;
+  // Token id 0 is valid; do not use !currentTokenId (0 is falsy).
+  if (currentTokenId === undefined) return null;
 
   const assets = createAssetUrls(currentTokenId);
 

@@ -1,7 +1,10 @@
 import { createPublicClient, http } from "viem";
-import { arbitrum } from "viem/chains";
+
+import { getConfiguredEvmChain, getRpcHttpUrl } from "@/lib/web3/evm-chain";
+
+const chain = getConfiguredEvmChain();
 
 export const publicClient = createPublicClient({
-  chain: arbitrum,
-  transport: http()
+  chain,
+  transport: http(getRpcHttpUrl())
 });

@@ -1,18 +1,27 @@
 "use client";
 
+import { isRandomWalkBackendUnavailableMessage } from "@/lib/api/backend-errors";
+
 export default function GlobalError({
+  error,
   reset
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const backendDown = isRandomWalkBackendUnavailableMessage(error.message);
+
   return (
     <html lang="en">
       <body className="flex min-h-screen items-center justify-center bg-[#050505] text-[#f8f4fb]">
         <div className="space-y-6 text-center">
-          <h1 className="text-3xl font-bold">Something went wrong</h1>
+          <h1 className="text-3xl font-bold">
+            {backendDown ? "RandomWalk backend API is down" : "Something went wrong"}
+          </h1>
           <p className="text-sm text-[#c4c2ca]">
-            A critical error occurred. Please try again.
+            {backendDown
+              ? error.message
+              : "A critical error occurred. Please try again."}
           </p>
           <button
             type="button"

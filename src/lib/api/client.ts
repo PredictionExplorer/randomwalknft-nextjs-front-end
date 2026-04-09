@@ -2,7 +2,8 @@ import "server-only";
 
 import type { ZodSchema } from "zod";
 
-import { API_BASE_URL, REVALIDATE_MEDIUM, RWALK_BASE_URL } from "@/lib/config";
+import { rethrowAsBackendUnavailableIfConnectionFailed } from "@/lib/api/backend-errors";
+import { getBaseConfig, REVALIDATE_MEDIUM } from "@/lib/config";
 
 type FetchInit = RequestInit & {
   revalidate?: number;
@@ -25,22 +26,28 @@ export async function fetchApi<T>(
   init: FetchInit = {},
   schema?: ZodSchema<T>
 ) {
+  const { API_BASE_URL } = getBaseConfig();
   const { revalidate = REVALIDATE_MEDIUM, headers, ...rest } = init;
 
-  const response = await fetch(`${API_BASE_URL}/${path.replace(/^\/+/, "")}`, {
-    ...rest,
-    headers: {
-      Accept: "application/json",
-      ...headers
-    },
-    ...(rest.cache === "no-store"
-      ? {}
-      : {
-          next: {
-            revalidate
-          }
-        })
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/${path.replace(/^\/+/, "")}`, {
+      ...rest,
+      headers: {
+        Accept: "application/json",
+        ...headers
+      },
+      ...(rest.cache === "no-store"
+        ? {}
+        : {
+            next: {
+              revalidate
+            }
+          })
+    });
+  } catch (e) {
+    rethrowAsBackendUnavailableIfConnectionFailed(e);
+  }
 
   return parseResponse(response, schema);
 }
@@ -50,22 +57,28 @@ export async function fetchRwalk<T>(
   init: FetchInit = {},
   schema?: ZodSchema<T>
 ) {
+  const { RWALK_BASE_URL } = getBaseConfig();
   const { revalidate = REVALIDATE_MEDIUM, headers, ...rest } = init;
 
-  const response = await fetch(`${RWALK_BASE_URL}/${path.replace(/^\/+/, "")}`, {
-    ...rest,
-    headers: {
-      Accept: "application/json",
-      ...headers
-    },
-    ...(rest.cache === "no-store"
-      ? {}
-      : {
-          next: {
-            revalidate
-          }
-        })
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${RWALK_BASE_URL}/${path.replace(/^\/+/, "")}`, {
+      ...rest,
+      headers: {
+        Accept: "application/json",
+        ...headers
+      },
+      ...(rest.cache === "no-store"
+        ? {}
+        : {
+            next: {
+              revalidate
+            }
+          })
+    });
+  } catch (e) {
+    rethrowAsBackendUnavailableIfConnectionFailed(e);
+  }
 
   return parseResponse(response, schema);
 }
@@ -76,20 +89,26 @@ export async function postApi<T>(
   init: FetchInit = {},
   schema?: ZodSchema<T>
 ) {
+  const { API_BASE_URL } = getBaseConfig();
   const { headers, ...rest } = init;
   const isFormData = body instanceof FormData;
 
-  const response = await fetch(`${API_BASE_URL}/${path.replace(/^\/+/, "")}`, {
-    ...rest,
-    method: "POST",
-    body,
-    headers: {
-      Accept: "application/json",
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...headers
-    },
-    cache: "no-store"
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/${path.replace(/^\/+/, "")}`, {
+      ...rest,
+      method: "POST",
+      body,
+      headers: {
+        Accept: "application/json",
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        ...headers
+      },
+      cache: "no-store"
+    });
+  } catch (e) {
+    rethrowAsBackendUnavailableIfConnectionFailed(e);
+  }
 
   return parseResponse(response, schema);
 }

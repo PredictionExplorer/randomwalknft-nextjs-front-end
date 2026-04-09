@@ -7,15 +7,18 @@ import { useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
 import { Toaster } from "sonner";
 
-import { wagmiConfig } from "@/lib/web3/wagmi";
-import { rainbowKitAppInfo, rainbowKitTheme } from "@/lib/web3/rainbowkit";
+import type { ContractsContextValue } from "@/components/providers/contracts-context";
+import { ContractsProvider } from "@/components/providers/contracts-context";
+import { getWagmiConfig } from "@/lib/web3/wagmi";
+import { getRainbowKitAppInfo, rainbowKitTheme } from "@/lib/web3/rainbowkit";
 
 type AppProvidersProps = {
   children: React.ReactNode;
   initialState?: State | undefined;
+  contracts: ContractsContextValue;
 };
 
-export function AppProviders({ children, initialState }: AppProvidersProps) {
+export function AppProviders({ children, initialState, contracts }: AppProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -30,14 +33,16 @@ export function AppProviders({ children, initialState }: AppProvidersProps) {
   );
 
   return (
-    <WagmiProvider config={wagmiConfig} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider appInfo={rainbowKitAppInfo} modalSize="compact" theme={rainbowKitTheme}>
-          {children}
-        </RainbowKitProvider>
+    <ContractsProvider value={contracts}>
+      <WagmiProvider config={getWagmiConfig()} initialState={initialState}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider appInfo={getRainbowKitAppInfo()} modalSize="compact" theme={rainbowKitTheme}>
+            {children}
+          </RainbowKitProvider>
         <Toaster position="top-right" richColors />
         {process.env.NODE_ENV === "development" ? <ReactQueryDevtools initialIsOpen={false} /> : null}
       </QueryClientProvider>
     </WagmiProvider>
+    </ContractsProvider>
   );
 }

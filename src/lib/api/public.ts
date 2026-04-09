@@ -3,13 +3,8 @@ import "server-only";
 import { cache } from "react";
 import { z } from "zod";
 
-import {
-  MARKET_ADDRESS,
-  NFT_ADDRESS,
-  REVALIDATE_LONG,
-  REVALIDATE_MEDIUM,
-  REVALIDATE_SHORT
-} from "@/lib/config";
+import { REVALIDATE_LONG, REVALIDATE_MEDIUM, REVALIDATE_SHORT } from "@/lib/config";
+import { getAppConfig } from "@/lib/server/app-config";
 import { fetchApi, fetchRwalk, postApi } from "@/lib/api/client";
 import {
   actionResponseSchema,
@@ -20,9 +15,17 @@ import {
   tradingRecordSchema,
   voteCountSchema
 } from "@/lib/api/schemas";
+
+/** Go GET /api/randomwalk/current_offers/:order_by returns { Offers, status, error }. */
+const rwCurrentOffersResponseSchema = z
+  .object({
+    Offers: offerSchema.array()
+  })
+  .passthrough();
 import { nftAbi } from "@/generated/wagmi";
 import type { HomepageStats, Nft, Offer, TradingRecord } from "@/lib/types";
 import { createAssetUrls } from "@/lib/utils";
+import { getCurrentNetworkName } from "@/lib/web3/evm-chain";
 import { publicClient } from "@/lib/web3/public-client";
 
 function normalizeOffer(
@@ -76,20 +79,31 @@ async function fetchTokenDetail(
   tokenId: number,
   init: { cache?: RequestCache; revalidate?: number } = { revalidate: REVALIDATE_MEDIUM }
 ): Promise<Nft> {
-  const [token, historyResponse] = await Promise.all([
-    fetchApi(`tokens/${tokenId}`, init, tokenDetailSchema),
-    fetchRwalk(
-      `tokens/history/${tokenId}/${NFT_ADDRESS}/0/1000`,
-      init.cache === "no-store" ? { cache: "no-store" } : { revalidate: REVALIDATE_SHORT },
-      tokenHistorySchema
-    )
+  const { NFT_ADDRESS } = await getAppConfig();
+  const historyInit =
+    init.cache === "no-store" ? { cache: "no-store" as const } : { revalidate: REVALIDATE_SHORT };
+
+  const [infoResponse, historyResponse] = await Promise.all([
+    fetchRwalk(`tokens/info/${tokenId}`, init, tokenInfoSchema),
+    fetchRwalk(`tokens/history/${tokenId}/0/1000`, historyInit, tokenHistorySchema)
   ]);
+
+  const t = infoResponse.TokenInfo;
+  const token = {
+    id: t.TokenId,
+    name: t.CurName,
+    owner: t.CurOwnerAddr,
+    seed: t.SeedHex,
+    rating: 0,
+    status: 1
+  };
 
   return normalizeTokenDetail(token, historyResponse);
 }
 
 async function getPendingTokenDetail(tokenId: number): Promise<Nft | null> {
   try {
+    const { NFT_ADDRESS } = await getAppConfig();
     const [owner, seed, name] = await Promise.all([
       publicClient.readContract({
         address: NFT_ADDRESS,
@@ -146,19 +160,57 @@ export async function getTokenDetailOrFallback(
 }
 
 export const getTokenInfo = cache(async (tokenId: number) => {
-  return fetchRwalk(
-    `tokens/info/${NFT_ADDRESS}/${tokenId}`,
-    { revalidate: REVALIDATE_SHORT },
-    tokenInfoSchema
-  );
+  return fetchRwalk(`tokens/info/${tokenId}`, { revalidate: REVALIDATE_SHORT }, tokenInfoSchema);
 });
 
-export const getRandomTokenIds = cache(async () => {
-  return fetchApi<number[]>("random_token", { revalidate: REVALIDATE_SHORT });
+export const getRandomTokenIds = cache(async (): Promise<number[]> => {
+  const raw = await fetchApi<number[] | null>("api/randomwalk/explore/random?limit=12", {
+    revalidate: REVALIDATE_SHORT
+  });
+  // Go encodes a nil slice as JSON `null`; treat as empty.
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.map((id) => Number(id)).filter((n) => Number.isFinite(n) && n >= 0);
 });
+
+/**
+ * Same as getRandomTokenIds but bypasses Next.js Data Cache. Use on /random so each navigation
+ * (including client <Link>) refetches the explore pool and re-runs server-side random choice.
+ */
+export async function getRandomTokenIdsFresh(): Promise<number[]> {
+  const raw = await fetchApi<number[] | null>("api/randomwalk/explore/random?limit=12", {
+    cache: "no-store"
+  });
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.map((id) => Number(id)).filter((n) => Number.isFinite(n) && n >= 0);
+}
 
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
-  const [featuredTokenIds, activeListings, activeBids, recentSales, totalSupply] = await Promise.all([
+  const { NFT_ADDRESS } = await getAppConfig();
+
+  if (getCurrentNetworkName() === "local") {
+    const supplyResult = await Promise.allSettled([
+      publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "totalSupply"
+      }) as Promise<bigint>
+    ]);
+    const totalSupply = supplyResult[0].status === "fulfilled" ? supplyResult[0].value : 0n;
+    return {
+      mintedCount: Number(totalSupply),
+      activeListings: 0,
+      activeBids: 0,
+      recentSales: [],
+      latestSalePrice: undefined,
+      featuredTokenIds: []
+    };
+  }
+
+  const [featuredResult, sellResult, buyResult, historyResult, supplyResult] = await Promise.allSettled([
     getRandomTokenIds(),
     getOffers("sell"),
     getOffers("buy"),
@@ -170,35 +222,79 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     }) as Promise<bigint>
   ]);
 
+  const featuredTokenIds = featuredResult.status === "fulfilled" ? featuredResult.value : [];
+  const activeListings =
+    sellResult.status === "fulfilled" ? sellResult.value.length : 0;
+  const activeBids = buyResult.status === "fulfilled" ? buyResult.value.length : 0;
+  const recentSalesPage =
+    historyResult.status === "fulfilled"
+      ? historyResult.value
+      : { tradingHistory: [] as TradingRecord[], totalCount: 0 };
+  const totalSupply = supplyResult.status === "fulfilled" ? supplyResult.value : 0n;
+
   return {
     mintedCount: Number(totalSupply),
-    activeListings: activeListings.length,
-    activeBids: activeBids.length,
-    recentSales: recentSales.tradingHistory.slice(0, 4),
-    latestSalePrice: recentSales.tradingHistory[0]?.price,
+    activeListings,
+    activeBids,
+    recentSales: recentSalesPage.tradingHistory.slice(0, 4),
+    latestSalePrice: recentSalesPage.tradingHistory[0]?.price,
     featuredTokenIds
   };
 });
 
 export const getRandomPair = cache(async () => {
-  return fetchApi<number[]>("random", { revalidate: REVALIDATE_SHORT });
+  return fetchApi<number[]>("api/randomwalk/random", { revalidate: REVALIDATE_SHORT });
 });
 
+const beautyPairIdsSchema = z.object({
+  token_ids: z.array(z.number()),
+  pair_exhausted: z.boolean()
+});
+
+/** Two token ids for /compare; pass wallet address to avoid pairs already voted on-chain. */
+export async function fetchBeautyComparePairIds(
+  voterAddress: string | undefined,
+  options?: { skipPairFilter?: boolean }
+) {
+  const params = new URLSearchParams();
+  if (voterAddress && voterAddress.trim() !== "") {
+    params.set("voter", voterAddress.trim());
+  }
+  if (options?.skipPairFilter) {
+    params.set("skip_pair_filter", "1");
+  }
+  const q = params.toString();
+  const suffix = q ? `?${q}` : "";
+  return fetchApi(
+    `api/randomwalk/ranking/beauty-pair-ids${suffix}`,
+    { cache: "no-store" },
+    beautyPairIdsSchema
+  );
+}
+
+/** Cached per-request only; fetch is no-store so /compare refetches show an up-to-date total after each vote. */
 export const getVoteCount = cache(async () => {
-  const response = await fetchApi("vote_count", { revalidate: REVALIDATE_SHORT }, voteCountSchema);
+  const response = await fetchApi("api/randomwalk/vote_count", { cache: "no-store" }, voteCountSchema);
   return response.total_count;
 });
 
 export const getRatingOrder = cache(async () => {
-  return fetchApi<number[]>("rating_order", { revalidate: REVALIDATE_LONG });
+  return fetchApi<number[]>("api/randomwalk/rating_order", { revalidate: REVALIDATE_LONG });
 });
 
-export const getOffers = cache(async (kind: "buy" | "sell") => {
-  const response = await fetchApi(
-    kind === "buy" ? "buy_offer" : "sell_offer",
+const getAllActiveOffersRaw = cache(async () => {
+  const res = await fetchRwalk(
+    `current_offers/2`,
     { revalidate: REVALIDATE_SHORT },
-    offerSchema.array()
+    rwCurrentOffersResponseSchema
   );
+  return res.Offers;
+});
+
+/** otype 0 = buy, 1 = sell (matches rwcg notibot / DB conventions). */
+export const getOffers = cache(async (kind: "buy" | "sell") => {
+  const wantType = kind === "buy" ? 0 : 1;
+  const response = (await getAllActiveOffersRaw()).filter((item) => item.OfferType === wantType);
 
   return response
     .map((item) => normalizeOffer(item, kind))
@@ -217,7 +313,7 @@ export const getOffersForToken = cache(async (tokenId: number) => {
 export const getTradingHistory = cache(async (page: number) => {
   const perPage = 20;
   const all = await fetchRwalk(
-    `trading/sales/${MARKET_ADDRESS}/0/1000000`,
+    `trading/sales/0/1000000`,
     { revalidate: REVALIDATE_SHORT },
     z.object({ Trading: tradingRecordSchema.array() })
   );
@@ -231,7 +327,7 @@ export const getTradingHistory = cache(async (page: number) => {
   }
 
   const response = await fetchRwalk(
-    `trading/sales/${MARKET_ADDRESS}/${start}/${count}`,
+    `trading/sales/${start}/${count}`,
     { revalidate: REVALIDATE_SHORT },
     z.object({ Trading: tradingRecordSchema.array() })
   );
@@ -256,13 +352,39 @@ export const getTradingHistory = cache(async (page: number) => {
   };
 });
 
-export async function submitBeautyVote(firstId: number, secondId: number, winner: number) {
+const rankingSignChallengeSchema = z.object({
+  nonce: z.string().min(1)
+});
+
+/** One-time nonce for wallet-signed beauty votes (Go GET .../ranking/sign-challenge). */
+export async function fetchRankingSignChallenge() {
+  return fetchApi(
+    "api/randomwalk/ranking/sign-challenge",
+    { cache: "no-store" },
+    rankingSignChallengeSchema
+  );
+}
+
+export type BeautyVoteSignedPayload = {
+  firstId: number;
+  secondId: number;
+  winner: number;
+  signNonce: string;
+  signature: `0x${string}`;
+  chainId: number;
+};
+
+export async function submitBeautyVote(payload: BeautyVoteSignedPayload) {
+  const { firstId, secondId, winner, signNonce, signature, chainId } = payload;
   return postApi(
-    "add_game",
+    "api/randomwalk/add_game",
     JSON.stringify({
       nft1: firstId,
       nft2: secondId,
-      nft1_win: winner === firstId ? 1 : 0
+      nft1_win: winner === firstId ? 1 : 0,
+      sign_nonce: signNonce,
+      signature,
+      chain_id: chainId
     }),
     {},
     actionResponseSchema

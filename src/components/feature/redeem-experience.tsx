@@ -1,6 +1,7 @@
 "use client";
 
-import { usePublicClient, useWaitForTransactionReceipt } from "wagmi";
+import { zeroAddress } from "viem";
+import { usePublicClient, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { toast } from "sonner";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
@@ -11,21 +12,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { trackEvent } from "@/lib/analytics";
-import { NFT_ADDRESS } from "@/lib/config";
-import { nftAbi, useReadNftLastMinter, useReadNftTimeUntilWithdrawal, useReadNftWithdrawalAmount, useWriteNftWithdraw } from "@/generated/wagmi";
+import { useContracts } from "@/components/providers/contracts-context";
+import { nftAbi } from "@/generated/wagmi";
 import { formatDateTimeFromUnix, formatEth } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
 import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
+import { getChainDisplayName } from "@/lib/web3/evm-chain";
 
 export function RedeemExperience() {
+  const { NFT_ADDRESS } = useContracts();
   const publicClient = usePublicClient();
   const { address, isReady } = useWalletStatus();
-  const { data: withdrawalSeconds } = useReadNftTimeUntilWithdrawal();
-  const { data: lastMinter } = useReadNftLastMinter();
-  const { data: withdrawalAmount } = useReadNftWithdrawalAmount();
-  const { writeContractAsync, data: hash, isPending } = useWriteNftWithdraw();
+  const { data: withdrawalSeconds } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "timeUntilWithdrawal"
+  });
+  const {
+    data: lastMinter,
+    isLoading: lastMinterLoading,
+    isError: lastMinterFailed
+  } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "lastMinter"
+  });
+  const { data: withdrawalAmount } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: nftAbi,
+    functionName: "withdrawalAmount"
+  });
+  const { writeContractAsync, data: hash, isPending } = useWriteContract();
   const { isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const seconds = Number(withdrawalSeconds ?? 0n);
@@ -62,7 +81,7 @@ export function RedeemExperience() {
         <WalletStatusCard
           disconnectedTitle="Wallet required"
           disconnectedBody="Connect your wallet to check if you are eligible for the withdrawal. Only the most recent minter qualifies."
-          wrongNetworkBody="Switch to Arbitrum to check eligibility and withdraw."
+          wrongNetworkBody={`Switch to ${getChainDisplayName()} to check eligibility and withdraw.`}
         />
       ) : null}
 
@@ -74,12 +93,21 @@ export function RedeemExperience() {
             <CardTitle>Last minter</CardTitle>
           </CardHeader>
           <CardContent>
-            {lastMinter ? (
+            {lastMinterLoading ? (
+              <span className="text-muted-foreground">Loading…</span>
+            ) : lastMinterFailed ? (
+              <span
+                className="text-sm text-muted-foreground"
+                title="Often: NEXT_PUBLIC_RPC_URL is Ethereum Sepolia while this app uses Arbitrum Sepolia (421614), or the deployed contract has no lastMinter()."
+              >
+                Unavailable (RPC / contract mismatch)
+              </span>
+            ) : lastMinter && lastMinter !== zeroAddress ? (
               <a href={`/gallery?address=${lastMinter}`} className="text-secondary">
                 {lastMinter}
               </a>
             ) : (
-              "Unknown"
+              <span className="text-muted-foreground">None yet (no minter recorded)</span>
             )}
           </CardContent>
         </Card>
@@ -109,7 +137,7 @@ export function RedeemExperience() {
                   throw new Error("Connect your wallet to continue.");
                 }
 
-                const { gas } = await prepareContractWrite({
+                const prepared = await prepareContractWrite({
                   publicClient,
                   account: address,
                   address: NFT_ADDRESS,
@@ -120,7 +148,12 @@ export function RedeemExperience() {
                 trackEvent("transaction_submitted", {
                   flow: "redeem"
                 });
-                await writeContractAsync({ gas });
+                await writeContractAsync({
+                  address: NFT_ADDRESS,
+                  abi: nftAbi,
+                  functionName: "withdraw",
+                  ...prepared
+                });
               } catch (error) {
                 trackEvent("transaction_failed", {
                   flow: "redeem",

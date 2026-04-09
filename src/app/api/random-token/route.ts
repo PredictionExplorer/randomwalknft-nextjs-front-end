@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { NFT_ADDRESS } from "@/lib/config";
+import { getAppConfig } from "@/lib/server/app-config";
 import { nftAbi } from "@/generated/wagmi";
 import { publicClient } from "@/lib/web3/public-client";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
+  const { NFT_ADDRESS } = await getAppConfig();
   const { searchParams } = new URL(request.url);
   const excludeParam = searchParams.get("exclude");
   const exclude = excludeParam ? Number(excludeParam) : undefined;

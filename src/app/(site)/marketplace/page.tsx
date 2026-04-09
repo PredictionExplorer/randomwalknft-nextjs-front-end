@@ -9,7 +9,7 @@ import { NftCard } from "@/components/nft/nft-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getOffers } from "@/lib/api/public";
-import { SITE_NAME, SITE_URL } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 import { parseMarketplaceQueryState } from "@/lib/query-state";
 import { createAssetUrls, formatEth, formatId } from "@/lib/utils";
 
@@ -28,6 +28,7 @@ export const metadata: Metadata = {
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function MarketplacePage({ searchParams }: { searchParams: SearchParams }) {
+  const { SITE_NAME, SITE_URL } = getBaseConfig();
   const resolvedSearchParams = await searchParams;
   const state = parseMarketplaceQueryState(resolvedSearchParams);
   const { filter, sort, min, max, query } = state;

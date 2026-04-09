@@ -3,40 +3,46 @@
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import { API_BASE_URL } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 import { getOffers } from "@/lib/api/public";
 import { server } from "../../setup/msw/server";
+
+const { RWALK_BASE_URL } = getBaseConfig();
 
 describe("public api normalization", () => {
   it("normalizes and sorts offers", async () => {
     server.use(
-      http.get(`${API_BASE_URL}/sell_offer`, () =>
-        HttpResponse.json([
-          {
-            Id: 2,
-            OfferId: 101,
-            TokenId: 9,
-            SellerAddr: "0xbbb",
-            BuyerAddr: "0x0000000000000000000000000000000000000000",
-            Active: true,
-            Price: 2.5,
-            TimeStamp: 2,
-            DateTime: "2026-01-01T00:00:02Z",
-            OfferType: 1
-          },
-          {
-            Id: 1,
-            OfferId: 100,
-            TokenId: 7,
-            SellerAddr: "0xaaa",
-            BuyerAddr: "0x0000000000000000000000000000000000000000",
-            Active: true,
-            Price: 1.25,
-            TimeStamp: 1,
-            DateTime: "2026-01-01T00:00:01Z",
-            OfferType: 1
-          }
-        ])
+      http.get(`${RWALK_BASE_URL}/current_offers/2`, () =>
+        HttpResponse.json({
+          status: 1,
+          error: "",
+          Offers: [
+            {
+              Id: 2,
+              OfferId: 101,
+              TokenId: 9,
+              SellerAddr: "0xbbb",
+              BuyerAddr: "0x0000000000000000000000000000000000000000",
+              Active: true,
+              Price: 2.5,
+              TimeStamp: 2,
+              DateTime: "2026-01-01T00:00:02Z",
+              OfferType: 1
+            },
+            {
+              Id: 1,
+              OfferId: 100,
+              TokenId: 7,
+              SellerAddr: "0xaaa",
+              BuyerAddr: "0x0000000000000000000000000000000000000000",
+              Active: true,
+              Price: 1.25,
+              TimeStamp: 1,
+              DateTime: "2026-01-01T00:00:01Z",
+              OfferType: 1
+            }
+          ]
+        })
       )
     );
 

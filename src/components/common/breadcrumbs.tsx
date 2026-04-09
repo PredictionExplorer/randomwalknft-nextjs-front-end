@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Route } from "next";
 
 import { JsonLd } from "@/components/common/json-ld";
-import { SITE_URL } from "@/lib/config";
+import { getBaseConfig } from "@/lib/config";
 
 type BreadcrumbItem = {
   href?: string;
@@ -10,6 +10,7 @@ type BreadcrumbItem = {
 };
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
+  const { SITE_URL } = getBaseConfig();
   return (
     <>
       <JsonLd
