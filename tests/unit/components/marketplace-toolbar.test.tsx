@@ -22,7 +22,7 @@ describe("MarketplaceToolbar", () => {
     expect(screen.getByText(/12 entries/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /reset/i })).toHaveAttribute("href", "/marketplace");
     expect(screen.getByRole("button", { name: /buy offers/i })).toHaveAttribute("value", "buy");
-    expect(screen.getByRole("button", { name: /apply filters/i })).toHaveAttribute("value", "buy");
+    expect(screen.getByRole("button", { name: /apply marketplace filters/i })).toHaveAttribute("value", "buy");
   });
 
   it("renders active filter pills for query, min, and max", () => {

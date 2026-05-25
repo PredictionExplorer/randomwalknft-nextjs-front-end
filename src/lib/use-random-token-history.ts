@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 async function fetchRandomTokenId(exclude?: number): Promise<number | null> {
   const url =
@@ -13,23 +13,37 @@ async function fetchRandomTokenId(exclude?: number): Promise<number | null> {
   return data.totalSupply > 0 ? data.tokenId : null;
 }
 
-/**
- * Random image: parent passes `initialTokenId` from the server. Random video: omit it and we fetch via /api/random-token.
- *
- * On client-side navigations, Next may reuse this hook's component without remounting, so `useState`
- * initializers do not run again. We must reset from `initialTokenId` in `useLayoutEffect` whenever it changes.
- */
-export function useRandomTokenHistory(initialTokenId?: number) {
-  const [history, setHistory] = useState<number[]>(() =>
-    initialTokenId !== undefined ? [initialTokenId] : []
-  );
-  const [index, setIndex] = useState(() => (initialTokenId !== undefined ? 0 : -1));
+type TokenHistoryState = {
+  sourceInitialTokenId: number | undefined;
+  history: number[];
+  index: number;
+};
 
-  useLayoutEffect(() => {
-    if (initialTokenId === undefined) return;
-    setHistory([initialTokenId]);
-    setIndex(0);
-  }, [initialTokenId]);
+function createInitialState(initialTokenId: number | undefined): TokenHistoryState {
+  return {
+    sourceInitialTokenId: initialTokenId,
+    history: initialTokenId !== undefined ? [initialTokenId] : [],
+    index: initialTokenId !== undefined ? 0 : -1
+  };
+}
+
+function resolveHistoryState(
+  state: TokenHistoryState,
+  initialTokenId: number | undefined
+): TokenHistoryState {
+  if (state.sourceInitialTokenId === initialTokenId) {
+    return state;
+  }
+
+  return createInitialState(initialTokenId);
+}
+
+/** Random image passes `initialTokenId`; random video omits it and fetches via /api/random-token. */
+export function useRandomTokenHistory(initialTokenId?: number) {
+  const [storedState, setStoredState] = useState<TokenHistoryState>(() =>
+    createInitialState(initialTokenId)
+  );
+  const { history, index } = resolveHistoryState(storedState, initialTokenId);
 
   useEffect(() => {
     if (initialTokenId !== undefined) return;
@@ -37,8 +51,11 @@ export function useRandomTokenHistory(initialTokenId?: number) {
     let cancelled = false;
     void fetchRandomTokenId().then((id) => {
       if (cancelled || id === null) return;
-      setHistory([id]);
-      setIndex(0);
+      setStoredState({
+        sourceInitialTokenId: undefined,
+        history: [id],
+        index: 0
+      });
     });
     return () => {
       cancelled = true;
@@ -49,12 +66,24 @@ export function useRandomTokenHistory(initialTokenId?: number) {
   const canGoBack = index > 0;
 
   const goBack = useCallback(() => {
-    setIndex((prev) => Math.max(prev - 1, 0));
-  }, []);
+    setStoredState((prev) => {
+      const active = resolveHistoryState(prev, initialTokenId);
+      return {
+        ...active,
+        index: Math.max(active.index - 1, 0)
+      };
+    });
+  }, [initialTokenId]);
 
   const goNext = useCallback(async () => {
     if (index < history.length - 1) {
-      setIndex((prev) => prev + 1);
+      setStoredState((prev) => {
+        const active = resolveHistoryState(prev, initialTokenId);
+        return {
+          ...active,
+          index: active.index + 1
+        };
+      });
       return;
     }
 
@@ -62,9 +91,15 @@ export function useRandomTokenHistory(initialTokenId?: number) {
     const nextId = await fetchRandomTokenId(current);
     if (nextId === null) return;
 
-    setHistory((prev) => [...prev.slice(0, index + 1), nextId]);
-    setIndex((prev) => prev + 1);
-  }, [index, history]);
+    setStoredState((prev) => {
+      const active = resolveHistoryState(prev, initialTokenId);
+      return {
+        sourceInitialTokenId: initialTokenId,
+        history: [...active.history.slice(0, active.index + 1), nextId],
+        index: active.index + 1
+      };
+    });
+  }, [index, history, initialTokenId]);
 
   return { currentTokenId, canGoBack, goBack, goNext };
 }

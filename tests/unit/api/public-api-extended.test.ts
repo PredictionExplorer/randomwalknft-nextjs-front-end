@@ -276,7 +276,7 @@ describe("submitBeautyVote", () => {
       secondId: 20,
       winner: 10,
       signNonce: "sn",
-      signature: "0x" + "11".repeat(65),
+      signature: ("0x" + "11".repeat(65)) as `0x${string}`,
       chainId: 42161
     });
 
@@ -305,7 +305,7 @@ describe("submitBeautyVote", () => {
       secondId: 20,
       winner: 20,
       signNonce: "sn2",
-      signature: "0x" + "22".repeat(65),
+      signature: ("0x" + "22".repeat(65)) as `0x${string}`,
       chainId: 42161
     });
 

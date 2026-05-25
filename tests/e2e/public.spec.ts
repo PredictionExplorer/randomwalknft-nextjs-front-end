@@ -96,10 +96,10 @@ test("open source page includes the full reproduction guide", async ({ page }) =
   await page.goto("/code");
   await expect(page.getByText(/python3 randomWalkGen\.py 3456/i)).toBeVisible();
 
-  await page.getByRole("tab", { name: /requirements/i }).click();
+  await page.getByRole("tab", { name: /dependencies/i }).click();
   await expect(page.getByText(/opencv-python==4\.5\.3\.56/i)).toBeVisible();
 
-  await page.getByRole("tab", { name: /full source/i }).click();
+  await page.getByRole("tab", { name: /source code/i }).click();
   await expect(page.getByText(/def get_seed/i)).toBeVisible();
 });
 

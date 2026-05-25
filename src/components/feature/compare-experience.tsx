@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -83,17 +83,15 @@ export function CompareExperience() {
   const queryClient = useQueryClient();
   const { address, isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
-  const [relaxPairFilter, setRelaxPairFilter] = useState(false);
-
-  useEffect(() => {
-    setRelaxPairFilter(false);
-  }, [address]);
+  const [relaxedVoter, setRelaxedVoter] = useState<string | null>(null);
+  const voter = isConnected && address ? address : undefined;
+  const relaxPairFilter = voter !== undefined && relaxedVoter === voter;
 
   const pairQuery = useQuery({
-    queryKey: ["compare-pair", address ?? "", isConnected, relaxPairFilter],
+    queryKey: ["compare-pair", voter ?? "", isConnected, relaxPairFilter],
     queryFn: () =>
       getComparePair({
-        ...(isConnected && address ? { voter: address } : {}),
+        ...(voter ? { voter } : {}),
         skipPairFilter: relaxPairFilter
       })
   });
@@ -130,7 +128,7 @@ export function CompareExperience() {
     },
     onSuccess: async () => {
       toast.success("Vote submitted.");
-      setRelaxPairFilter(false);
+      setRelaxedVoter(null);
       await queryClient.invalidateQueries({ queryKey: ["compare-pair"] });
     },
     onError: async (e: Error & { status?: number }) => {
@@ -204,7 +202,7 @@ export function CompareExperience() {
             variant="secondary"
             size="sm"
             disabled={pairQuery.isFetching}
-            onClick={() => setRelaxPairFilter(true)}
+            onClick={() => setRelaxedVoter(voter ?? null)}
           >
             {pairQuery.isFetching ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
             Show random pair anyway

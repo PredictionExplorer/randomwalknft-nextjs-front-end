@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { z } from "zod";
+import { formatEther } from "viem";
 
 import { REVALIDATE_LONG, REVALIDATE_MEDIUM, REVALIDATE_SHORT } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
@@ -9,12 +10,12 @@ import { fetchApi, fetchRwalk, postApi } from "@/lib/api/client";
 import {
   actionResponseSchema,
   offerSchema,
-  tokenDetailSchema,
   tokenHistorySchema,
   tokenInfoSchema,
   tradingRecordSchema,
   voteCountSchema
 } from "@/lib/api/schemas";
+import type { tokenDetailSchema } from "@/lib/api/schemas";
 
 /** Go GET /api/randomwalk/current_offers/:order_by returns { Offers, status, error }. */
 const rwCurrentOffersResponseSchema = z
@@ -79,7 +80,6 @@ async function fetchTokenDetail(
   tokenId: number,
   init: { cache?: RequestCache; revalidate?: number } = { revalidate: REVALIDATE_MEDIUM }
 ): Promise<Nft> {
-  const { NFT_ADDRESS } = await getAppConfig();
   const historyInit =
     init.cache === "no-store" ? { cache: "no-store" as const } : { revalidate: REVALIDATE_SHORT };
 
@@ -192,16 +192,25 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
   const { NFT_ADDRESS } = await getAppConfig();
 
   if (getCurrentNetworkName() === "local") {
-    const supplyResult = await Promise.allSettled([
+    const [supplyResult, mintPriceResult] = await Promise.allSettled([
       publicClient.readContract({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: "totalSupply"
+      }) as Promise<bigint>,
+      publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "getMintPrice"
       }) as Promise<bigint>
     ]);
-    const totalSupply = supplyResult[0].status === "fulfilled" ? supplyResult[0].value : 0n;
+    const totalSupply = supplyResult.status === "fulfilled" ? supplyResult.value : 0n;
+    const mintPrice =
+      mintPriceResult.status === "fulfilled" ? Number(formatEther(mintPriceResult.value)) : undefined;
+
     return {
       mintedCount: Number(totalSupply),
+      mintPrice,
       activeListings: 0,
       activeBids: 0,
       recentSales: [],
@@ -210,7 +219,14 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     };
   }
 
-  const [featuredResult, sellResult, buyResult, historyResult, supplyResult] = await Promise.allSettled([
+  const [
+    featuredResult,
+    sellResult,
+    buyResult,
+    historyResult,
+    supplyResult,
+    mintPriceResult
+  ] = await Promise.allSettled([
     getRandomTokenIds(),
     getOffers("sell"),
     getOffers("buy"),
@@ -219,6 +235,11 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "totalSupply"
+    }) as Promise<bigint>,
+    publicClient.readContract({
+      address: NFT_ADDRESS,
+      abi: nftAbi,
+      functionName: "getMintPrice"
     }) as Promise<bigint>
   ]);
 
@@ -231,9 +252,12 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
       ? historyResult.value
       : { tradingHistory: [] as TradingRecord[], totalCount: 0 };
   const totalSupply = supplyResult.status === "fulfilled" ? supplyResult.value : 0n;
+  const mintPrice =
+    mintPriceResult.status === "fulfilled" ? Number(formatEther(mintPriceResult.value)) : undefined;
 
   return {
     mintedCount: Number(totalSupply),
+    mintPrice,
     activeListings,
     activeBids,
     recentSales: recentSalesPage.tradingHistory.slice(0, 4),

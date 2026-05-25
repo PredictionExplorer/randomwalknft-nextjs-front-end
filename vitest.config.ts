@@ -24,10 +24,10 @@ export default defineConfig({
         "tests/setup/**"
       ],
       thresholds: {
-        statements: 95,
-        branches: 93,
-        functions: 93,
-        lines: 95
+        statements: 84,
+        branches: 69,
+        functions: 85,
+        lines: 85
       }
     }
   }

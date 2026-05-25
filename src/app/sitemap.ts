@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { getBaseConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 import { nftAbi } from "@/generated/wagmi";
 import { publicClient } from "@/lib/web3/public-client";
@@ -25,7 +26,7 @@ const staticRoutes: SitemapEntry[] = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { NFT_ADDRESS, SITE_URL } = await getAppConfig();
+  const { SITE_URL } = getBaseConfig();
   const now = new Date();
 
   const staticEntries: MetadataRoute.Sitemap = staticRoutes.map((entry) => ({
@@ -37,6 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let detailEntries: MetadataRoute.Sitemap = [];
   try {
+    const { NFT_ADDRESS } = await getAppConfig();
     const totalSupply = Number(
       (await publicClient.readContract({
         address: NFT_ADDRESS,

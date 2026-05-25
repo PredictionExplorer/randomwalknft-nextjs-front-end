@@ -89,6 +89,7 @@ export type MarketplaceQueryState = {
 
 export type HomepageStats = {
   mintedCount: number;
+  mintPrice?: number | undefined;
   activeListings: number;
   activeBids: number;
   recentSales: TradingRecord[];

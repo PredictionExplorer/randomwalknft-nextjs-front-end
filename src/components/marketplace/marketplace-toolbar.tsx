@@ -53,6 +53,7 @@ export function MarketplaceToolbar({
         <span className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Sort by</span>
         <select
           id="marketplace-sort"
+          aria-label="Sort marketplace offers"
           value={state.sort}
           onChange={(e) => handleSortChange(e.target.value)}
           className="h-9 appearance-none rounded-xl border border-input bg-card/80 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -112,7 +113,7 @@ export function MarketplaceToolbar({
             <Input id="marketplace-max" name="max" type="number" min={0} step="0.001" defaultValue={state.max} />
           </div>
         </div>
-        <Button type="submit" name="filter" value={currentFilter}>
+        <Button type="submit" name="filter" value={currentFilter} aria-label="Apply marketplace filters">
           Apply filters
         </Button>
       </form>

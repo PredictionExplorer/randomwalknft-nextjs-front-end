@@ -99,8 +99,12 @@ export default async function HomePage() {
               </Button>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {[
+                {
+                  label: "Current mint price",
+                  value: stats.mintPrice != null ? formatEth(stats.mintPrice) : "Unavailable"
+                },
                 { label: "Minted", value: formatCompactNumber(stats.mintedCount) },
                 { label: "Active listings", value: formatCompactNumber(stats.activeListings) },
                 { label: "Buy offers", value: formatCompactNumber(stats.activeBids) },

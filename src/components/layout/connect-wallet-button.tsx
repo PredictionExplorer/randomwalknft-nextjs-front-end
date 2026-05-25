@@ -2,6 +2,7 @@
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
+import { useState } from "react";
 import { AlertTriangle, ChevronDown, ExternalLink as ExternalLinkIcon, LogOut, Wallet } from "lucide-react";
 import { useDisconnect } from "wagmi";
 
@@ -17,7 +18,72 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
-export function ConnectWalletButton() {
+type BrowserEthereumProvider = {
+  request(args: { method: string; params?: Array<Record<string, string>> }): Promise<unknown>;
+};
+
+function getBrowserEthereum() {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+  return (window as Window & { ethereum?: BrowserEthereumProvider }).ethereum;
+}
+
+function E2eMockConnectWalletButton() {
+  const [account, setAccount] = useState<string | undefined>();
+  const [chainId, setChainId] = useState<string | undefined>();
+  const expectedChainId = `0x${getConfiguredEvmChain().id.toString(16)}`;
+  const wrongNetwork = Boolean(account && chainId && chainId.toLowerCase() !== expectedChainId);
+
+  async function connect() {
+    const ethereum = getBrowserEthereum();
+    if (!ethereum) {
+      return;
+    }
+    const accounts = (await ethereum.request({ method: "eth_requestAccounts" })) as string[];
+    const currentChainId = (await ethereum.request({ method: "eth_chainId" })) as string;
+    setAccount(accounts[0]);
+    setChainId(currentChainId);
+  }
+
+  async function switchNetwork() {
+    const ethereum = getBrowserEthereum();
+    if (!ethereum) {
+      return;
+    }
+    await ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: expectedChainId }]
+    });
+    setChainId(expectedChainId);
+  }
+
+  if (!account) {
+    return (
+      <Button variant="secondary" size="sm" onClick={connect}>
+        <Wallet className="h-4 w-4" />
+        Connect Wallet
+      </Button>
+    );
+  }
+
+  if (wrongNetwork) {
+    return (
+      <Button variant="destructive" size="sm" onClick={switchNetwork}>
+        <AlertTriangle className="h-4 w-4" />
+        Switch network
+      </Button>
+    );
+  }
+
+  return (
+    <Button variant="outline" size="sm">
+      {account.slice(0, 6)}...{account.slice(-4)}
+    </Button>
+  );
+}
+
+function RainbowKitConnectWalletButton() {
   const { disconnect } = useDisconnect();
 
   return (
@@ -112,5 +178,13 @@ export function ConnectWalletButton() {
         );
       }}
     </ConnectButton.Custom>
+  );
+}
+
+export function ConnectWalletButton() {
+  return process.env.NEXT_PUBLIC_E2E_MOCK_WALLET === "true" ? (
+    <E2eMockConnectWalletButton />
+  ) : (
+    <RainbowKitConnectWalletButton />
   );
 }

@@ -65,7 +65,6 @@ test("connect wallet works with a browser wallet provider", async ({ page }) => 
   await installMockWallet(page, "0xa4b1");
   await page.goto("/");
   await page.getByRole("button", { name: /connect wallet/i }).click();
-  await page.getByRole("button", { name: /continue/i }).click();
 
   await expect(page.getByRole("button", { name: /0x1234/i })).toBeVisible();
 });
@@ -74,7 +73,6 @@ test("wrong-network wallet shows the switch-network action", async ({ page }) =>
   await installMockWallet(page, "0x1");
   await page.goto("/");
   await page.getByRole("button", { name: /connect wallet/i }).click();
-  await page.getByRole("button", { name: /continue/i }).click();
 
   await expect(page.getByRole("button", { name: /switch network/i })).toBeVisible();
 });

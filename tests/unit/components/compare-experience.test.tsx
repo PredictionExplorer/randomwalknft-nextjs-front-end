@@ -18,7 +18,7 @@ vi.mock("wagmi", () => ({
 }));
 
 vi.mock("@/lib/web3/evm-chain", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/web3/evm-chain")>("@/lib/web3/evm-chain");
+  const actual = await vi.importActual("@/lib/web3/evm-chain");
   return {
     ...actual,
     getConfiguredEvmChain: () => ({ id: 31337 })

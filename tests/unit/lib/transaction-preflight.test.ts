@@ -113,6 +113,9 @@ describe("transaction preflight", () => {
     });
 
     expect(result.gas).toBe(60n);
+    if (result.maxFeePerGas === undefined || result.maxPriorityFeePerGas === undefined) {
+      throw new Error("Expected EIP-1559 fee fields.");
+    }
     expect(result.maxFeePerGas).toBeGreaterThanOrEqual(20_004_000n + result.maxPriorityFeePerGas);
     expect(result.maxFeePerGas).toBeGreaterThan(20_002_000n);
   });
