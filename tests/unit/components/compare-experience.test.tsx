@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -99,7 +99,7 @@ describe("CompareExperience", () => {
     );
 
     const { container } = render(<CompareExperience />, { wrapper: Wrapper });
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(container.querySelector("[class*='space-y-8']")).not.toBeInTheDocument();
     });
   });
@@ -120,7 +120,7 @@ describe("CompareExperience", () => {
     const pickButton = await screen.findByText("Pick 5");
     await user.click(pickButton);
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(pickButton).not.toBeDisabled();
     });
   });

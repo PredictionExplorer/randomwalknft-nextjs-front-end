@@ -1,10 +1,20 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+const expectedCanonicalOrigin = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://randomwalknft.com").replace(/\/+$/, "");
+
 test("home page renders primary CTA", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: /mint the next work/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /random walk nft/i })).toBeVisible();
+});
+
+test("home page emits the configured canonical URL", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    expectedCanonicalOrigin
+  );
 });
 
 test("home hero sits near the top fold without a dead spacer", async ({ page }) => {

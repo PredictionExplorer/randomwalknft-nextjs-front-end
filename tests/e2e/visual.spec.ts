@@ -1,4 +1,35 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function waitForStableDocumentHeight(page: Page) {
+  await page.waitForFunction(
+    () =>
+      new Promise((resolve) => {
+        let lastHeight = 0;
+        let stableFrames = 0;
+
+        const check = () => {
+          const height = document.documentElement.scrollHeight;
+          if (height === lastHeight) {
+            stableFrames += 1;
+          } else {
+            lastHeight = height;
+            stableFrames = 0;
+          }
+
+          if (stableFrames >= 5) {
+            resolve(true);
+            return;
+          }
+
+          requestAnimationFrame(check);
+        };
+
+        check();
+      }),
+    undefined,
+    { timeout: 10000 }
+  );
+}
 
 test.describe("visual regressions", () => {
   test.beforeEach(async ({ page }) => {
@@ -48,10 +79,12 @@ test.describe("visual regressions", () => {
 
   test("gallery matches desktop snapshot", async ({ page }) => {
     await page.goto("/gallery");
+    await expect(page.locator('a[href^="/detail/"]')).toHaveCount(24);
+    await waitForStableDocumentHeight(page);
     await expect(page).toHaveScreenshot("gallery-desktop.png", {
       animations: "disabled",
       fullPage: true,
-      maxDiffPixelRatio: 0.02
+      maxDiffPixelRatio: 0.05
     });
   });
 

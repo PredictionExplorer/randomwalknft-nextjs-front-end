@@ -23,18 +23,9 @@ function normalizeOrigin(url: string): string {
 
 /**
  * Canonical public URL for the Next.js app (metadata, JSON-LD, sitemap).
- * Override with NEXT_PUBLIC_SITE_URL when the dev port or host differs.
  */
-function resolveSiteUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) {
-    return explicit;
-  }
-  const vercel = process.env.VERCEL_URL?.trim();
-  if (vercel) {
-    return `https://${vercel}`;
-  }
-  return "http://localhost:3000";
+function resolveSiteUrl(snap: Record<RequiredEnvKey, string | undefined>): string {
+  return normalizeOrigin(req(snap, "NEXT_PUBLIC_SITE_URL"));
 }
 
 /** Site + API URLs. Backend origin is env; RandomWalk API + asset bases are derived. */
@@ -71,7 +62,7 @@ export function getBaseConfig(): BaseEnvConfig {
   }
   const origin = normalizeOrigin(req(snap, "NEXT_PUBLIC_API_BASE_URL"));
   baseCached = {
-    SITE_URL: resolveSiteUrl(),
+    SITE_URL: resolveSiteUrl(snap),
     SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME?.trim() || DEFAULT_SITE_NAME,
     SITE_DESCRIPTION: process.env.NEXT_PUBLIC_SITE_DESCRIPTION?.trim() || DEFAULT_SITE_DESCRIPTION,
     API_BASE_URL: origin,

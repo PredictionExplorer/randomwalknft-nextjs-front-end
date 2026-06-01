@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +22,9 @@ export function NftCard({
   label?: string;
   compact?: boolean;
 }) {
-  const [imageFailed, setImageFailed] = useState(false);
-
-  useEffect(() => {
-    setImageFailed(false);
-  }, [image, id]);
+  const previewKey = `${id}:${image}`;
+  const [failedPreviewKey, setFailedPreviewKey] = useState<string | null>(null);
+  const imageFailed = failedPreviewKey === previewKey;
 
   const content = (
     <Card className="group overflow-hidden">
@@ -52,7 +50,7 @@ export function NftCard({
                   : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               }
               unoptimized
-              onError={() => setImageFailed(true)}
+              onError={() => setFailedPreviewKey(previewKey)}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />

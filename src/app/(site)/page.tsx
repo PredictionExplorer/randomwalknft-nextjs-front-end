@@ -18,11 +18,11 @@ import { getAppConfig } from "@/lib/server/app-config";
 import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { SITE_DESCRIPTION } = getBaseConfig();
+  const { SITE_DESCRIPTION, SITE_URL } = getBaseConfig();
   return {
     title: "Home",
     description: SITE_DESCRIPTION,
-    alternates: { canonical: "/" }
+    alternates: { canonical: `${SITE_URL}/` }
   };
 }
 

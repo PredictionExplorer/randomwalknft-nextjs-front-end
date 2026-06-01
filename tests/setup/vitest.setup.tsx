@@ -16,8 +16,11 @@ Object.assign(process.env, {
 vi.mock("next/image", () => ({
   default: ({
     fill: _fill,
+    unoptimized: _unoptimized,
     ...props
-  }: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean }) => <img {...props} alt={props.alt ?? ""} />
+  }: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; unoptimized?: boolean }) => (
+    <img {...props} alt={props.alt ?? ""} />
+  )
 }));
 
 vi.mock("next/link", () => ({

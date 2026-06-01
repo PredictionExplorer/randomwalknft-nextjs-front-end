@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { http, HttpResponse } from "msw";
 
@@ -36,7 +36,12 @@ describe("HeroVideo", () => {
     Object.defineProperty(video, "play", { value: playSpy });
     Object.defineProperty(video, "load", { value: loadSpy });
 
-    fireEvent.ended(video);
+    await act(async () => {
+      fireEvent.ended(video);
+      await vi.waitFor(() => {
+        expect(loadSpy).toHaveBeenCalled();
+      });
+    });
 
     await vi.waitFor(() => {
       expect(loadSpy).toHaveBeenCalled();

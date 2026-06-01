@@ -2,12 +2,16 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 3100;
 
+if (process.env.FORCE_COLOR && process.env.NO_COLOR) {
+  delete process.env.NO_COLOR;
+}
+
 /** Required for `next build` / `next start` (NEXT_PUBLIC_* are inlined at build time). */
 const webServerEnv = {
   NEXT_PUBLIC_NETWORK: process.env.NEXT_PUBLIC_NETWORK ?? "mainnet",
   NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://randomwalknft-api.com",
   NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URL ?? "https://arb1.arbitrum.io/rpc",
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? `http://127.0.0.1:${PORT}`,
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "https://randomwalknft.com",
   NEXT_PUBLIC_NFT_ADDRESS:
     process.env.NEXT_PUBLIC_NFT_ADDRESS ?? "0x895a6F444BE4ba9d124F61DF736605792B35D66b",
   NEXT_PUBLIC_MARKET_ADDRESS:

@@ -1,6 +1,6 @@
 /**
  * Required public env: set in the **process environment** before `next dev` / `next build`
- * (e.g. `export …` in the shell, or your host’s env UI). All three must be non-empty.
+ * (e.g. `export …` in the shell, or your host’s env UI). All four must be non-empty.
  *
  * Beauty contest votes use wallet signatures on `POST /api/randomwalk/add_game` (no admin key). `RANKING_ADMIN_KEY` still
  * applies to `POST /api/randomwalk/token-ranking/match` when set.
@@ -13,7 +13,8 @@
 export const REQUIRED_ENV_KEYS = [
   "NEXT_PUBLIC_NETWORK",
   "NEXT_PUBLIC_API_BASE_URL",
-  "NEXT_PUBLIC_RPC_URL"
+  "NEXT_PUBLIC_RPC_URL",
+  "NEXT_PUBLIC_SITE_URL"
 ] as const;
 
 export type RequiredEnvKey = (typeof REQUIRED_ENV_KEYS)[number];
@@ -27,7 +28,8 @@ export function getPublicEnvSnapshot(): Record<RequiredEnvKey, string | undefine
   return {
     NEXT_PUBLIC_NETWORK: process.env.NEXT_PUBLIC_NETWORK,
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
-    NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URL
+    NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URL,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL
   };
 }
 

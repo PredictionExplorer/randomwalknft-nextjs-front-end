@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { CardDescription, CardFooter } from "@/components/ui/card";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 describe("Card subcomponents", () => {
   it("renders CardDescription", () => {
@@ -31,6 +31,7 @@ describe("SheetContent", () => {
         <SheetTrigger>Open</SheetTrigger>
         <SheetContent side="left">
           <SheetTitle>Left panel</SheetTitle>
+          <SheetDescription>Panel actions and navigation</SheetDescription>
           Left panel content
         </SheetContent>
       </Sheet>

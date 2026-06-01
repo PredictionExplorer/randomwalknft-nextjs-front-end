@@ -50,7 +50,7 @@ export async function buildRootMetadata(): Promise<Metadata> {
       apple: [{ url: "/images/logo2.png" }]
     },
     alternates: {
-      canonical: "/"
+      canonical: `${SITE_URL}/`
     },
     openGraph: {
       title: SITE_NAME,
