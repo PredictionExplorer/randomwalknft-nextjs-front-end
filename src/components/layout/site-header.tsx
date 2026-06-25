@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { Route } from "next";
 import { ChevronDown, Menu, Wallet } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -18,6 +19,38 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { navItems } from "@/lib/content/nav";
 import { cn } from "@/lib/utils";
+
+function isExternalHref(href: string) {
+  return /^https?:\/\//.test(href);
+}
+
+function HeaderNavLink({
+  children,
+  className,
+  href,
+  prefetch
+}: {
+  children: React.ReactNode;
+  className?: string | undefined;
+  href: string;
+  prefetch?: false | undefined;
+}) {
+  if (isExternalHref(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {children}
+      </a>
+    );
+  }
+
+  const linkProps = prefetch === false ? { prefetch: false as const } : {};
+
+  return (
+    <Link href={href as Route} className={className} {...linkProps}>
+      {children}
+    </Link>
+  );
+}
 
 function WalletButtonPlaceholder() {
   return (
@@ -44,9 +77,10 @@ export function SiteHeader() {
 
         <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex">
           {navItems.map((item) => {
+            const itemIsExternal = isExternalHref(item.href);
             const isActive =
-              pathname === item.href ||
-              (item.href.startsWith("/#") && pathname === "/") ||
+              (!itemIsExternal && pathname === item.href) ||
+              (!itemIsExternal && item.href.startsWith("/#") && pathname === "/") ||
               ("children" in item && item.children ? item.children.some((child) => pathname === child.href) : false);
 
             if ("children" in item && item.children) {
@@ -83,7 +117,7 @@ export function SiteHeader() {
             }
 
             return (
-              <Link
+              <HeaderNavLink
                 key={item.title}
                 href={item.href}
                 className={cn(
@@ -92,7 +126,7 @@ export function SiteHeader() {
                 )}
               >
                 {item.title}
-              </Link>
+              </HeaderNavLink>
             );
           })}
         </nav>
@@ -112,29 +146,27 @@ export function SiteHeader() {
             <div className="space-y-4 pt-10">
               {navItems.map((item) => (
                 <div key={item.title} className="space-y-2">
-                  <Link
+                  <HeaderNavLink
                     href={item.href}
-                    {...(item.href === "/random" ? { prefetch: false as const } : {})}
+                    prefetch={item.href === "/random" ? false : undefined}
                     className={cn(
                       "block text-lg font-medium tracking-[0.14em]",
                       pathname === item.href ? "text-secondary" : "text-foreground"
                     )}
                   >
                     {item.title}
-                  </Link>
+                  </HeaderNavLink>
                   {"children" in item && item.children ? (
                     <div className="space-y-1 pl-4">
                       {item.children.map((child: (typeof item.children)[number]) => (
-                        <Link
+                        <HeaderNavLink
                           key={child.href}
                           href={child.href}
-                          {...(child.href === "/random" || child.href === "/random-video"
-                            ? { prefetch: false as const }
-                            : {})}
+                          prefetch={child.href === "/random" || child.href === "/random-video" ? false : undefined}
                           className="block text-sm text-muted-foreground"
                         >
                           {child.title}
-                        </Link>
+                        </HeaderNavLink>
                       ))}
                     </div>
                   ) : null}
@@ -144,9 +176,6 @@ export function SiteHeader() {
             <div className="mt-auto space-y-3">
               <div className={cn(buttonVariants({ variant: "ghost" }), "justify-start px-0")}>
                 <Link href="/my-nfts">My NFTs</Link>
-              </div>
-              <div className={cn(buttonVariants({ variant: "ghost" }), "justify-start px-0")}>
-                <Link href="/my-offers">My Offers</Link>
               </div>
               {mounted ? <ConnectWalletButton /> : <WalletButtonPlaceholder />}
             </div>

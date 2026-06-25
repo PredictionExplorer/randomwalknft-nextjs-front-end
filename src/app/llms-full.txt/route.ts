@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 
 import { faqItems } from "@/lib/content/faq";
 import { homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
+import { AXIOM_ZERO_MARKETPLACE_URL } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 
 export async function GET() {
-  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
+  const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const faqSection = faqItems
     .map((item) => `### ${item.summary}\n\n${item.detail}`)
     .join("\n\n");
@@ -32,9 +33,8 @@ All artwork is released under CC0 (public domain), meaning anyone can use, remix
 
 - Blockchain: Arbitrum (Ethereum L2)
 - NFT contract: ${NFT_ADDRESS} (verified on Arbiscan)
-- Marketplace contract: ${MARKET_ADDRESS} (verified on Arbiscan)
 - License: CC0 Public Domain
-- Marketplace fee: 0% — the full amount goes directly between buyer and seller
+- Secondary marketplace: ${AXIOM_ZERO_MARKETPLACE_URL}
 - Art generation: Python-based random walk algorithm from on-chain seeds
 - Gas cost: Under $0.10 on Arbitrum
 - Smart contracts: No admin keys or special access — the creator follows the same rules as every participant
@@ -47,9 +47,9 @@ ${howItWorksSection}
 
 ETH from every mint goes into a shared pool inside the smart contract. If 30 days pass without a new mint, the most recent minter becomes eligible to withdraw half the pool. The remaining half stays in the contract, preserving the incentive for future collectors. This mechanism aligns economic incentives between the project and its collectors.
 
-## Marketplace
+## Secondary Marketplace
 
-The built-in marketplace charges zero fees. When you buy or sell, the full amount goes directly between buyer and seller with no platform cut. Sellers can list their NFTs at a set price, and buyers can make offers on any token — even unlisted ones. All trading is handled by the verified on-chain marketplace contract.
+Secondary sales happen on Axiom Zero at ${AXIOM_ZERO_MARKETPLACE_URL}. Fees, listings, offers, and checkout are handled there. Random Walk's website remains the canonical place to mint, browse the collection, view media, inspect provenance, and read the source code.
 
 ## Beauty Contest
 
@@ -67,10 +67,9 @@ ${trustSection}
 
 - Home: ${SITE_URL}/
 - Gallery (browse full collection, sort by newest or beauty score): ${SITE_URL}/gallery
-- Marketplace (buy/sell with zero fees): ${SITE_URL}/marketplace
+- Marketplace (Axiom Zero): ${AXIOM_ZERO_MARKETPLACE_URL}
 - Mint (create a new NFT): ${SITE_URL}/mint
-- NFT Detail (view artwork, trade, see history): ${SITE_URL}/detail/[id]
-- Trading History (all sales): ${SITE_URL}/trading
+- NFT Detail (view artwork, provenance, and media): ${SITE_URL}/detail/[id]
 - Beauty Contest (vote on pairs): ${SITE_URL}/compare
 - Random Image Viewer: ${SITE_URL}/random
 - Random Video Viewer: ${SITE_URL}/random-video

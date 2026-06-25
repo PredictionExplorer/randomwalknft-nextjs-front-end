@@ -5,13 +5,14 @@ import type { Route } from "next";
 import { Film, Image as ImageIcon, Play } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { isAddress, parseEther } from "viem";
+import { isAddress } from "viem";
 import { usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { toast } from "sonner";
 
 import { trackEvent } from "@/lib/analytics";
 import { useContracts } from "@/components/providers/contracts-context";
-import type { AssetTheme, AssetVariant, Nft, Offer } from "@/lib/types";
+import type { AssetTheme, AssetVariant, Nft } from "@/lib/types";
+import { AXIOM_ZERO_MARKETPLACE_URL } from "@/lib/config";
 import {
   formatDateTimeFromUnix,
   formatEth,
@@ -26,6 +27,7 @@ import { getErrorMessage } from "@/lib/web3/errors";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+import { ExternalLink } from "@/components/common/external-link";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Button } from "@/components/ui/button";
@@ -36,13 +38,11 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
-import { marketAbi, nftAbi } from "@/generated/wagmi";
+import { nftAbi } from "@/generated/wagmi";
 import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 
 type NftDetailExperienceProps = {
   nft: Nft;
-  buyOffers: Offer[];
-  sellOffers: Offer[];
   message?: string | undefined;
   initialTheme: AssetTheme;
   initialMedia: AssetVariant;
@@ -80,13 +80,11 @@ async function probeAssetReady(url: string) {
 
 export function NftDetailExperience({
   nft,
-  buyOffers,
-  sellOffers,
   message,
   initialTheme,
   initialMedia
 }: NftDetailExperienceProps) {
-  const { MARKET_ADDRESS, NFT_ADDRESS } = useContracts();
+  const { NFT_ADDRESS } = useContracts();
   const pathname = usePathname();
   const router = useRouter();
   const publicClient = usePublicClient();
@@ -94,7 +92,6 @@ export function NftDetailExperience({
   const [theme, setTheme] = useState<AssetTheme>(initialTheme);
   const [activeMedia, setActiveMedia] = useState<AssetVariant>(initialMedia);
   const [modal, setModal] = useState<AssetVariant | null>(initialMedia);
-  const [price, setPrice] = useState("");
   const [tokenName, setTokenName] = useState(nft.name);
   const [transferAddress, setTransferAddress] = useState("");
   const [isMutating, setIsMutating] = useState(false);
@@ -118,14 +115,6 @@ export function NftDetailExperience({
     args: address ? [address] : undefined,
     query: { enabled: Boolean(address) }
   });
-  const { data: approvedForAll } = useReadContract({
-    address: NFT_ADDRESS,
-    abi: nftAbi,
-    functionName: "isApprovedForAll",
-    args: address ? [address, MARKET_ADDRESS] : undefined,
-    query: { enabled: Boolean(address) }
-  });
-
   const { writeContractAsync } = useWriteContract();
 
   const owner = ownerOf ?? nft.owner;
@@ -133,12 +122,8 @@ export function NftDetailExperience({
   const shouldProbeMedia = isPendingMetadata || message === "success";
   const isOwner = address?.toLowerCase() === owner.toLowerCase();
   const wrongNetwork = isWrongNetwork;
-  const activeSellOffer = sellOffers[0];
-  const highestOffer = buyOffers.reduce((max, offer) => Math.max(max, offer.price), 0);
   const walletTokenIds = (accountTokenIds ?? []).map((id) => Number(id));
   const currentWalletIndex = walletTokenIds.indexOf(nft.id);
-  const userSellOffer = sellOffers.find((offer) => offer.seller.toLowerCase() === address?.toLowerCase());
-  const userBuyOffer = buyOffers.find((offer) => offer.buyer.toLowerCase() === address?.toLowerCase());
   const [mediaAvailability, setMediaAvailability] = useState<Record<AssetVariant, boolean>>(
     shouldProbeMedia ? noMediaReady : allMediaReady
   );
@@ -284,84 +269,6 @@ export function NftDetailExperience({
     }
   }
 
-  async function createSellOffer() {
-    if (!price || Number(price) <= 0) {
-      throw new Error("Enter a valid ETH price.");
-    }
-
-    if (!publicClient || !address) {
-      throw new Error("Connect your wallet to continue.");
-    }
-
-    const priceValue = parseEther(price);
-
-    if (!approvedForAll) {
-      const approvalPrepared = await prepareContractWrite({
-        publicClient,
-        account: address,
-        address: NFT_ADDRESS,
-        abi: nftAbi,
-        functionName: "setApprovalForAll",
-        args: [MARKET_ADDRESS, true]
-      });
-      const approvalHash = await writeContractAsync({
-        address: NFT_ADDRESS,
-        abi: nftAbi,
-        functionName: "setApprovalForAll",
-        args: [MARKET_ADDRESS, true],
-        ...approvalPrepared
-      });
-      await publicClient.waitForTransactionReceipt({ hash: approvalHash });
-    }
-
-    const sellPrepared = await prepareContractWrite({
-      publicClient,
-      account: address,
-      address: MARKET_ADDRESS,
-      abi: marketAbi,
-      functionName: "makeSellOffer",
-      args: [NFT_ADDRESS, BigInt(nft.id), priceValue]
-    });
-    const hash = await writeContractAsync({
-      address: MARKET_ADDRESS,
-      abi: marketAbi,
-      functionName: "makeSellOffer",
-      args: [NFT_ADDRESS, BigInt(nft.id), priceValue],
-      ...sellPrepared
-    });
-    await publicClient.waitForTransactionReceipt({ hash });
-  }
-
-  async function createBuyOffer() {
-    if (!price || Number(price) <= 0) {
-      throw new Error("Enter a valid ETH price.");
-    }
-
-    if (!publicClient || !address) {
-      throw new Error("Connect your wallet to continue.");
-    }
-
-    const bidValue = parseEther(price);
-    const buyPrepared = await prepareContractWrite({
-      publicClient,
-      account: address,
-      address: MARKET_ADDRESS,
-      abi: marketAbi,
-      functionName: "makeBuyOffer",
-      args: [NFT_ADDRESS, BigInt(nft.id)],
-      value: bidValue
-    });
-    const hash = await writeContractAsync({
-      address: MARKET_ADDRESS,
-      abi: marketAbi,
-      functionName: "makeBuyOffer",
-      args: [NFT_ADDRESS, BigInt(nft.id)],
-      value: bidValue,
-      ...buyPrepared
-    });
-    await publicClient.waitForTransactionReceipt({ hash });
-  }
-
   async function renameToken() {
     if (!tokenName.trim()) {
       throw new Error("Name cannot be empty.");
@@ -416,42 +323,6 @@ export function NftDetailExperience({
     await publicClient.waitForTransactionReceipt({ hash });
   }
 
-  async function acceptCurrentSellOffer() {
-    if (!activeSellOffer) {
-      throw new Error("There is no active sell offer to accept.");
-    }
-
-    if (!publicClient || !address) {
-      throw new Error("Connect your wallet to continue.");
-    }
-
-    const offer = await publicClient.readContract({
-      abi: marketAbi,
-      address: MARKET_ADDRESS,
-      functionName: "offers",
-      args: [BigInt(activeSellOffer.offerId)]
-    });
-    const priceValue = Array.isArray(offer) ? offer[2] : BigInt(0);
-    const acceptPrepared = await prepareContractWrite({
-      publicClient,
-      account: address,
-      address: MARKET_ADDRESS,
-      abi: marketAbi,
-      functionName: "acceptSellOffer",
-      args: [BigInt(activeSellOffer.offerId)],
-      value: priceValue as bigint
-    });
-    const hash = await writeContractAsync({
-      address: MARKET_ADDRESS,
-      abi: marketAbi,
-      functionName: "acceptSellOffer",
-      args: [BigInt(activeSellOffer.offerId)],
-      value: priceValue as bigint,
-      ...acceptPrepared
-    });
-    await publicClient.waitForTransactionReceipt({ hash });
-  }
-
   return (
     <PageShell className="space-y-8 py-16">
       <Breadcrumbs
@@ -465,7 +336,7 @@ export function NftDetailExperience({
       <PageHeading
         eyebrow="NFT detail"
         title={[{ text: nft.name || formatId(nft.id), tone: "secondary" }]}
-        description="View artwork, check the order book, and buy, bid, list, or transfer this token."
+        description="View artwork, provenance, ownership details, and collector utilities for this token."
       />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
@@ -509,11 +380,6 @@ export function NftDetailExperience({
                   <span className="rounded-full border border-border bg-background/70 px-4 py-2 text-sm tracking-[0.18em] text-secondary backdrop-blur">
                     {formatId(nft.id)}
                   </span>
-                  {activeSellOffer ? (
-                    <span className="rounded-full border border-primary/30 bg-primary px-4 py-2 text-sm font-medium text-[#140a1f]">
-                      {formatEth(activeSellOffer.price)}
-                    </span>
-                  ) : null}
                 </div>
               </button>
             </CardContent>
@@ -612,7 +478,7 @@ export function NftDetailExperience({
           {!isConnected || wrongNetwork ? (
             <WalletStatusCard
               disconnectedTitle="Wallet required"
-              disconnectedBody="Connect your wallet to buy, bid, list, rename, or transfer this NFT."
+              disconnectedBody="Connect your wallet to rename or transfer this NFT if you own it."
               wrongNetworkBody={`Switch to ${getChainDisplayName()} to interact with this token.`}
             />
           ) : null}
@@ -648,19 +514,17 @@ export function NftDetailExperience({
                 <span>{nft.tokenHistory[0] ? formatDateTimeFromUnix(nft.tokenHistory[0].timestamp) : isPendingMetadata ? "Just minted" : "Pending"}</span>
               </div>
               <div>
-                <span className="block text-xs uppercase tracking-[0.24em]">Highest bid</span>
-                <span>{highestOffer > 0 ? formatEth(highestOffer) : "No bids yet"}</span>
-              </div>
-              <div>
-                <span className="block text-xs uppercase tracking-[0.24em]">Current listing</span>
-                <span>{activeSellOffer ? formatEth(activeSellOffer.price) : "Unlisted"}</span>
+                <span className="block text-xs uppercase tracking-[0.24em]">Secondary market</span>
+                <ExternalLink href={AXIOM_ZERO_MARKETPLACE_URL} className="text-secondary transition hover:text-primary">
+                  Axiom Zero
+                </ExternalLink>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-card/65">
             <CardHeader>
-              <CardTitle>{isOwner ? "Owner actions" : "Market actions"}</CardTitle>
+              <CardTitle>{isOwner ? "Owner actions" : "Collect on Axiom Zero"}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {isOwner ? (
@@ -681,24 +545,6 @@ export function NftDetailExperience({
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="sell-price" className="text-sm text-muted-foreground">
-                      Put on sale
-                    </label>
-                    <div className="flex gap-3">
-                      <Input
-                        id="sell-price"
-                        type="number"
-                        min={0}
-                        step="0.001"
-                        placeholder="Enter ETH price"
-                        value={price}
-                        onChange={(event) => setPrice(event.target.value)}
-                      />
-                      <Button onClick={() => void runMutation(createSellOffer)}>List</Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
                     <label htmlFor="token-name" className="text-sm text-muted-foreground">
                       Rename
                     </label>
@@ -712,101 +558,21 @@ export function NftDetailExperience({
                       <Button onClick={() => void runMutation(renameToken)}>Update</Button>
                     </div>
                   </div>
+
+                  <p className="text-sm leading-7 text-muted-foreground">
+                    To list this NFT for secondary sale, open the Random Walk marketplace on{" "}
+                    <ExternalLink href={AXIOM_ZERO_MARKETPLACE_URL} className="text-secondary">
+                      Axiom Zero
+                    </ExternalLink>
+                    .
+                  </p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {!userSellOffer && !userBuyOffer ? (
-                    <div className="space-y-2">
-                      <label htmlFor="bid-price" className="text-sm text-muted-foreground">
-                        Make an offer
-                      </label>
-                      <div className="flex gap-3">
-                        <Input
-                          id="bid-price"
-                          type="number"
-                          min={0}
-                          step="0.001"
-                          placeholder="Enter ETH price"
-                          value={price}
-                          onChange={(event) => setPrice(event.target.value)}
-                        />
-                        <Button onClick={() => void runMutation(createBuyOffer)}>Bid</Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Your bid amount becomes the exact on-chain offer. Keep a little extra ETH in your wallet for gas.
-                      </p>
-                    </div>
-                  ) : null}
-
-                  {userSellOffer ? (
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        void runMutation(async () => {
-                          if (!publicClient || !address) {
-                            throw new Error("Connect your wallet to continue.");
-                          }
-
-                          const cancelSellPrepared = await prepareContractWrite({
-                            publicClient,
-                            account: address,
-                            address: MARKET_ADDRESS,
-                            abi: marketAbi,
-                            functionName: "cancelSellOffer",
-                            args: [BigInt(userSellOffer.offerId)]
-                          });
-                          const hash = await writeContractAsync({
-                            address: MARKET_ADDRESS,
-                            abi: marketAbi,
-                            functionName: "cancelSellOffer",
-                            args: [BigInt(userSellOffer.offerId)],
-                            ...cancelSellPrepared
-                          });
-                          await publicClient.waitForTransactionReceipt({ hash });
-                        })
-                      }
-                    >
-                      Cancel sell offer
-                    </Button>
-                  ) : null}
-
-                  {userBuyOffer ? (
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        void runMutation(async () => {
-                          if (!publicClient || !address) {
-                            throw new Error("Connect your wallet to continue.");
-                          }
-
-                          const cancelBuyPrepared = await prepareContractWrite({
-                            publicClient,
-                            account: address,
-                            address: MARKET_ADDRESS,
-                            abi: marketAbi,
-                            functionName: "cancelBuyOffer",
-                            args: [BigInt(userBuyOffer.offerId)]
-                          });
-                          const hash = await writeContractAsync({
-                            address: MARKET_ADDRESS,
-                            abi: marketAbi,
-                            functionName: "cancelBuyOffer",
-                            args: [BigInt(userBuyOffer.offerId)],
-                            ...cancelBuyPrepared
-                          });
-                          await publicClient.waitForTransactionReceipt({ hash });
-                        })
-                      }
-                    >
-                      Cancel buy offer
-                    </Button>
-                  ) : null}
-
-                  {!userSellOffer && !userBuyOffer && activeSellOffer && owner.toLowerCase() === MARKET_ADDRESS.toLowerCase() ? (
-                    <Button onClick={() => void runMutation(acceptCurrentSellOffer)}>
-                      Buy now for {formatEth(activeSellOffer.price)}
-                    </Button>
-                  ) : null}
+                <div className="space-y-3 text-sm leading-7 text-muted-foreground">
+                  <p>Secondary listings and offers for Random Walk NFTs now live on Axiom Zero.</p>
+                  <Button asChild>
+                    <ExternalLink href={AXIOM_ZERO_MARKETPLACE_URL}>Open Axiom Zero</ExternalLink>
+                  </Button>
                 </div>
               )}
               {isMutating ? <p className="text-sm text-muted-foreground">Waiting for confirmation...</p> : null}
@@ -855,47 +621,11 @@ export function NftDetailExperience({
 
       <Separator />
 
-      <Tabs defaultValue="market">
+      <Tabs defaultValue="history">
         <TabsList>
-          <TabsTrigger value="market">Market</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="collector-notes">Collector notes</TabsTrigger>
         </TabsList>
-        <TabsContent value="market">
-          <Card className="bg-card/70">
-            <CardHeader>
-              <CardTitle>Order book</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Buyer</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {buyOffers.length ? (
-                    buyOffers.map((offer) => (
-                      <TableRow key={offer.offerId}>
-                        <TableCell>{shortenAddress(offer.buyer)}</TableCell>
-                        <TableCell>{formatEth(offer.price)}</TableCell>
-                        <TableCell>{formatDateTimeFromUnix(offer.createdAtTimestamp)}</TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center text-muted-foreground">
-                        No active bids yet.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
         <TabsContent value="history">
           <Card className="bg-card/70">
             <CardHeader>
@@ -915,7 +645,7 @@ export function NftDetailExperience({
                   {nft.tokenHistory.length ? (
                     nft.tokenHistory.map((record, index) => (
                       <TableRow key={`${record.recordType}-${record.timestamp}-${index}`}>
-                        <TableCell>{record.recordType === 1 ? "Mint" : "Transfer / Market"}</TableCell>
+                        <TableCell>{record.recordType === 1 ? "Mint" : "Transfer"}</TableCell>
                         <TableCell>{shortenAddress(record.owner ?? record.buyer ?? record.seller ?? owner)}</TableCell>
                         <TableCell>{record.price ? formatEth(record.price) : "N/A"}</TableCell>
                         <TableCell>{formatDateTimeFromUnix(record.timestamp)}</TableCell>
@@ -948,7 +678,7 @@ export function NftDetailExperience({
               <div className="space-y-2">
                 <p className="text-xs uppercase tracking-[0.22em] text-secondary">Verified contracts</p>
                 <p className="text-sm leading-7 text-muted-foreground">
-                  Both the NFT and marketplace contracts are verified on Arbiscan for straightforward due diligence.
+                  The NFT contract is verified on Arbiscan for straightforward due diligence.
                 </p>
               </div>
               <div className="space-y-2">

@@ -1,8 +1,6 @@
 export type AssetTheme = "black" | "white";
 export type AssetVariant = "image" | "singleVideo" | "tripleVideo";
-export type OfferKind = "buy" | "sell";
 export type CollectionViewMode = "gallery" | "compact";
-export type MarketplaceSort = "price-asc" | "price-desc" | "recent";
 
 export type NftAssetUrls = {
   blackImage: string;
@@ -39,31 +37,6 @@ export type Nft = {
   isPendingMetadata?: boolean | undefined;
 };
 
-export type Offer = {
-  id: number;
-  offerId: number;
-  tokenId: number;
-  seller: string;
-  buyer: string;
-  price: number;
-  active: boolean;
-  createdAt: string;
-  createdAtTimestamp: number;
-  kind: OfferKind;
-};
-
-export type TradingRecord = {
-  id: number;
-  offerId: number;
-  tokenId: number;
-  seller: string;
-  buyer: string;
-  price: number;
-  timestamp: number;
-  createdAt: string;
-  txHash: string;
-};
-
 export type WalletActionState = {
   status: "idle" | "pending" | "success" | "error";
   message?: string | undefined;
@@ -78,22 +51,9 @@ export type CollectionQueryState = {
   view: CollectionViewMode;
 };
 
-export type MarketplaceQueryState = {
-  filter: OfferKind;
-  sort: MarketplaceSort;
-  min?: number | undefined;
-  max?: number | undefined;
-  query?: number | undefined;
-};
-
-
 export type HomepageStats = {
   mintedCount: number;
   mintPrice?: number | undefined;
-  activeListings: number;
-  activeBids: number;
-  recentSales: TradingRecord[];
-  latestSalePrice?: number | undefined;
   featuredTokenIds: number[];
 };
 

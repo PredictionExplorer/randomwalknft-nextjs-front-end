@@ -32,7 +32,7 @@ function normalizeAndValidateEthAddress(label: string, raw: string): `0x${string
 }
 
 /**
- * RandomWalk + marketplace addresses loaded from the Go API, kept for the lifetime of this Node
+ * RandomWalk contract addresses loaded from the Go API, kept for the lifetime of this Node
  * process (one `next dev` / `next start` / serverless instance). First successful response is cached;
  * failures are not cached.
  */

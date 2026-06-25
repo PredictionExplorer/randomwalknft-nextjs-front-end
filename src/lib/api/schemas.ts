@@ -9,31 +9,6 @@ export const tokenDetailSchema = z.object({
   status: z.number()
 });
 
-export const offerSchema = z.object({
-  Id: z.number(),
-  OfferId: z.number(),
-  TokenId: z.number(),
-  SellerAddr: z.string(),
-  BuyerAddr: z.string(),
-  Active: z.boolean(),
-  Price: z.number(),
-  TimeStamp: z.number(),
-  DateTime: z.string(),
-  OfferType: z.number()
-});
-
-export const tradingRecordSchema = z.object({
-  Id: z.number(),
-  OfferId: z.number(),
-  TokenId: z.number(),
-  SellerAddr: z.string(),
-  BuyerAddr: z.string(),
-  Price: z.number(),
-  TimeStamp: z.number(),
-  DateTime: z.string(),
-  TxHash: z.string()
-});
-
 export const tokenHistorySchema = z.object({
   TokenHistory: z.array(
     z.object({

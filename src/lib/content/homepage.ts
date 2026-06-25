@@ -5,7 +5,7 @@ export const homepageTrustCards: TrustSectionContent[] = [
     eyebrow: "Verified contracts",
     title: "Fully transparent on-chain",
     body:
-      "Both the NFT and marketplace contracts are verified on Arbiscan. Anyone can inspect the exact logic behind minting, trading, and withdrawals before committing a single transaction.",
+      "The NFT contract is verified on Arbiscan. Anyone can inspect the exact logic behind minting, ownership, naming, and withdrawals before committing a single transaction.",
     href: "https://arbiscan.io",
     linkLabel: "View on Arbiscan"
   },
@@ -32,9 +32,9 @@ export const homepageHowItWorks = [
   },
   {
     step: "02",
-    title: "Collect and trade",
+    title: "Browse and collect",
     body:
-      "Browse the collection ranked by community beauty scores. Buy and sell on the built-in zero-fee marketplace — no platform cuts, ever."
+      "Browse the collection ranked by community beauty scores. When you want the secondary market, continue to the Random Walk marketplace on Axiom Zero."
   },
   {
     step: "03",

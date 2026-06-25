@@ -88,15 +88,6 @@ test.describe("visual regressions", () => {
     });
   });
 
-  test("marketplace matches desktop snapshot", async ({ page }) => {
-    await page.goto("/marketplace");
-    await expect(page).toHaveScreenshot("marketplace-desktop.png", {
-      animations: "disabled",
-      fullPage: true,
-      maxDiffPixelRatio: 0.02
-    });
-  });
-
   test("mint matches desktop snapshot", async ({ page }) => {
     await page.goto("/mint");
     await expect(page).toHaveScreenshot("mint-desktop.png", {

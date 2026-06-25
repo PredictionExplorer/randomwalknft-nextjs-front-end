@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/my-nfts", "/my-offers"]
+        disallow: ["/api/", "/my-nfts"]
       },
       {
         userAgent: [

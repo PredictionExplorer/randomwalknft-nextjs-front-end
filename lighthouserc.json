@@ -5,10 +5,10 @@
       "url": [
         "http://127.0.0.1:3001/",
         "http://127.0.0.1:3001/mint",
-        "http://127.0.0.1:3001/marketplace",
+        "http://127.0.0.1:3001/gallery",
         "http://127.0.0.1:3001/detail/1"
       ],
-      "startServerCommand": "pnpm build && pnpm exec next start --hostname 127.0.0.1 --port 3001",
+      "startServerCommand": "corepack pnpm build && corepack pnpm exec next start --hostname 127.0.0.1 --port 3001",
       "startServerReadyPattern": "Ready",
       "startServerReadyTimeout": 120000
     },

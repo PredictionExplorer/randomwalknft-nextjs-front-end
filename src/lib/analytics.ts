@@ -4,7 +4,6 @@ export type AnalyticsEvent =
   | "wallet_connect_success"
   | "wallet_connect_error"
   | "wallet_switch_network"
-  | "marketplace_filter_changed"
   | "gallery_filter_changed"
   | "transaction_submitted"
   | "transaction_confirmed"

@@ -14,8 +14,6 @@ const webServerEnv = {
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "https://randomwalknft.com",
   NEXT_PUBLIC_NFT_ADDRESS:
     process.env.NEXT_PUBLIC_NFT_ADDRESS ?? "0x895a6F444BE4ba9d124F61DF736605792B35D66b",
-  NEXT_PUBLIC_MARKET_ADDRESS:
-    process.env.NEXT_PUBLIC_MARKET_ADDRESS ?? "0x47eF85Dfb775aCE0934fBa9EEd09D22e6eC0Cc08",
   NEXT_PUBLIC_E2E_MOCK_WALLET: process.env.NEXT_PUBLIC_E2E_MOCK_WALLET ?? "true"
 };
 
@@ -32,7 +30,7 @@ export default defineConfig({
     video: "retain-on-failure"
   },
   webServer: {
-    command: "pnpm build && pnpm exec next start --hostname 127.0.0.1 --port 3100",
+    command: "corepack pnpm build && corepack pnpm exec next start --hostname 127.0.0.1 --port 3100",
     port: PORT,
     reuseExistingServer: !process.env.CI,
     timeout: 180000,

@@ -66,7 +66,7 @@ export function MyNftsView() {
           ids={ids}
           disableAnimation
           emptyMessage="No NFTs found."
-          emptyDescription="You don't own any Random Walk NFTs yet. Mint one or buy from the marketplace."
+          emptyDescription="You don't own any Random Walk NFTs yet. Mint one here or collect one on Axiom Zero."
         />
       )}
     </PageShell>

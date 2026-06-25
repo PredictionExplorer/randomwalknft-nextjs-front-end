@@ -39,7 +39,7 @@ const MINT_VALUE_BUFFER_BPS = 10_025n;
 const LOCAL_HARDHAT_DEFAULT_RW_NFT = "0x5FbDB2315678afecb367f032d93F642f64180aa3" as const;
 
 export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
-  const { MARKET_ADDRESS, NFT_ADDRESS } = useContracts();
+  const { NFT_ADDRESS } = useContracts();
   const router = useRouter();
   const publicClient = usePublicClient();
   const configuredChain = getConfiguredEvmChain();
@@ -249,13 +249,6 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
                     {NFT_ADDRESS}
                   </ExternalLink>
                 </div>
-                <div>
-                  Market:
-                  {" "}
-                  <ExternalLink href={arbiscanContractUrl(MARKET_ADDRESS)} className="text-secondary">
-                    {MARKET_ADDRESS}
-                  </ExternalLink>
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -323,7 +316,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.24em] text-secondary">Verified and transparent</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Both the NFT and marketplace contracts are verified on Arbiscan — inspect every rule before you transact.
+              The NFT contract is verified on Arbiscan — inspect every minting, ownership, naming, and withdrawal rule before you transact.
             </p>
           </div>
         </CardContent>

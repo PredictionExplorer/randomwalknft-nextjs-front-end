@@ -70,7 +70,7 @@ export async function buildRootMetadata(): Promise<Metadata> {
 export async function RootLayoutShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const cookie = (await headers()).get("cookie");
   const initialState = cookieToInitialState(getWagmiConfig(), cookie);
-  const { MARKET_ADDRESS, NFT_ADDRESS } = await getAppConfig();
+  const { NFT_ADDRESS } = await getAppConfig();
 
   return (
     <html lang="en" className={kelson.variable}>
@@ -83,7 +83,7 @@ export async function RootLayoutShell({ children }: Readonly<{ children: React.R
         </a>
         <AppProviders
           initialState={initialState}
-          contracts={{ NFT_ADDRESS, MARKET_ADDRESS }}
+          contracts={{ NFT_ADDRESS }}
         >
           <div className="flex min-h-screen flex-col">
             <SiteHeader />

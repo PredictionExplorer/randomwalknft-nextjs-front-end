@@ -156,9 +156,6 @@ function RainbowKitConnectWalletButton() {
                   <Link href="/my-nfts">My NFTs</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/my-offers">My Offers</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
                   <ExternalLink href={arbiscanAddressUrl(currentAccount.address)}>
                     View on block explorer
                     <ExternalLinkIcon className="ml-auto h-4 w-4" />

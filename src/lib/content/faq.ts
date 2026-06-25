@@ -22,7 +22,7 @@ export const faqItems = [
   {
     summary: "Why is this on Arbitrum instead of Ethereum?",
     detail:
-      "Arbitrum is an Ethereum Layer 2 that offers the same security guarantees as Ethereum mainnet but with significantly lower gas fees and faster transactions. This makes minting, trading, and bidding practical and affordable."
+      "Arbitrum is an Ethereum Layer 2 that offers the same security guarantees as Ethereum mainnet but with significantly lower gas fees and faster transactions. This keeps minting and collecting practical and affordable."
   },
   {
     summary: "How does the mint pool incentive work?",
@@ -30,14 +30,14 @@ export const faqItems = [
       "ETH from every mint goes into a shared pool inside the smart contract. If 30 days pass without a new mint, the most recent minter becomes eligible to withdraw half the pool. The remaining half stays in the contract, preserving the incentive for future collectors."
   },
   {
-    summary: "Is there a marketplace fee?",
+    summary: "Where can I buy or sell Random Walk NFTs?",
     detail:
-      "No. The built-in marketplace charges zero fees. When you buy or sell, the full amount goes directly between buyer and seller with no platform cut."
+      "Secondary sales now happen on Axiom Zero at https://www.axiomzero.market/random-walk. Fees, listings, offers, and checkout are handled there, while this site remains the canonical place to mint, browse the collection, and view token media."
   },
   {
     summary: "How do I sell my NFT?",
     detail:
-      "Go to your token's detail page, enter a price in ETH, and click List. Your NFT will appear on the marketplace immediately. You can cancel the listing at any time. Buyers can also make offers on any token, even if it is not listed."
+      "Open the Random Walk marketplace on Axiom Zero, connect the wallet that owns the NFT, and follow Axiom Zero's listing flow. Keep a little ETH on Arbitrum for gas and review the marketplace terms before confirming."
   },
   {
     summary: "What is the beauty score?",
@@ -47,7 +47,7 @@ export const faqItems = [
   {
     summary: "Are the smart contracts verified?",
     detail:
-      "Yes. Both the NFT contract and the marketplace contract are verified and publicly readable on Arbiscan. You can review every function, rule, and economic mechanism before interacting with the collection."
+      "Yes. The NFT contract is verified and publicly readable on Arbiscan. You can review every function, rule, and economic mechanism behind minting, ownership, naming, and redemption before interacting with the collection."
   },
   {
     summary: "What does CC0 mean for my NFT?",
@@ -67,6 +67,6 @@ export const faqItems = [
   {
     summary: "Does the creator have special privileges?",
     detail:
-      "No. The smart contracts have no admin keys or special access. Once deployed, the creator follows the same rules as every other participant — minting, trading, and redemption work identically for everyone."
+      "No. The smart contracts have no admin keys or special access. Once deployed, the creator follows the same rules as every other participant — minting, ownership, and redemption work identically for everyone."
   }
 ] as const;

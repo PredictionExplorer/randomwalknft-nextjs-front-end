@@ -16,6 +16,8 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true"
 });
 
+const AXIOM_ZERO_MARKETPLACE_URL = "https://www.axiomzero.market/random-walk";
+
 function assetBaseRemotePattern(): {
   protocol: "http" | "https";
   hostname: string;
@@ -71,6 +73,15 @@ const nextConfig: NextConfig = {
   },
   typedRoutes: true,
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/marketplace",
+        destination: AXIOM_ZERO_MARKETPLACE_URL,
+        permanent: true
+      }
+    ];
+  },
   allowedDevOrigins: ["http://127.0.0.1:3000", "http://localhost:3000"],
   images: {
     remotePatterns: [

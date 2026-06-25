@@ -166,7 +166,7 @@ describe("ConnectWalletButton", () => {
     await userEvent.click(screen.getByRole("button", { name: /0x1234/i }));
     expect(screen.getByText(/wallet details/i)).toBeInTheDocument();
     expect(screen.getByText(/my nfts/i)).toBeInTheDocument();
-    expect(screen.getByText(/my offers/i)).toBeInTheDocument();
+    expect(screen.queryByText(/my offers/i)).not.toBeInTheDocument();
     expect(screen.getByText(/view on block explorer/i)).toBeInTheDocument();
     expect(screen.getByText(/disconnect/i)).toBeInTheDocument();
   });

@@ -12,12 +12,12 @@ import { faqItems } from "@/lib/content/faq";
 export const metadata: Metadata = {
   title: "FAQ",
   description:
-    "Frequently asked questions about Random Walk NFT — minting, trading, the zero-fee marketplace, beauty scores, CC0 licensing, and the mint pool incentive on Arbitrum.",
+    "Frequently asked questions about Random Walk NFT — minting, collecting on Axiom Zero, beauty scores, CC0 licensing, and the mint pool incentive on Arbitrum.",
   alternates: { canonical: "/faq" },
   openGraph: {
     title: "FAQ | Random Walk NFT",
     description:
-      "Frequently asked questions about Random Walk NFT — minting, trading, the zero-fee marketplace, beauty scores, CC0 licensing, and the mint pool incentive on Arbitrum."
+      "Frequently asked questions about Random Walk NFT — minting, collecting on Axiom Zero, beauty scores, CC0 licensing, and the mint pool incentive on Arbitrum."
   }
 };
 
@@ -44,7 +44,7 @@ export default function FaqPage() {
       <PageHeading
         eyebrow="Frequently asked questions"
         title={[{ text: "FAQ", tone: "secondary" }]}
-        description="Everything you need to know about minting, collecting, trading, and the economics behind Random Walk NFT."
+        description="Everything you need to know about minting, collecting, Axiom Zero, and the economics behind Random Walk NFT."
       />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">

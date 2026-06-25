@@ -4,7 +4,6 @@ import { createContext, useContext } from "react";
 
 export type ContractsContextValue = {
   NFT_ADDRESS: `0x${string}`;
-  MARKET_ADDRESS: `0x${string}`;
 };
 
 const ContractsContext = createContext<ContractsContextValue | null>(null);

@@ -9,43 +9,17 @@ import { getAppConfig } from "@/lib/server/app-config";
 import { fetchApi, fetchRwalk, postApi } from "@/lib/api/client";
 import {
   actionResponseSchema,
-  offerSchema,
   tokenHistorySchema,
   tokenInfoSchema,
-  tradingRecordSchema,
   voteCountSchema
 } from "@/lib/api/schemas";
 import type { tokenDetailSchema } from "@/lib/api/schemas";
 
-/** Go GET /api/randomwalk/current_offers/:order_by returns { Offers, status, error }. */
-const rwCurrentOffersResponseSchema = z
-  .object({
-    Offers: offerSchema.array()
-  })
-  .passthrough();
 import { nftAbi } from "@/generated/wagmi";
-import type { HomepageStats, Nft, Offer, TradingRecord } from "@/lib/types";
+import type { HomepageStats, Nft } from "@/lib/types";
 import { createAssetUrls } from "@/lib/utils";
 import { getCurrentNetworkName } from "@/lib/web3/evm-chain";
 import { publicClient } from "@/lib/web3/public-client";
-
-function normalizeOffer(
-  input: z.infer<typeof offerSchema>,
-  kind: "buy" | "sell"
-): Offer {
-  return {
-    id: input.Id,
-    offerId: input.OfferId,
-    tokenId: input.TokenId,
-    seller: input.SellerAddr,
-    buyer: input.BuyerAddr,
-    price: input.Price,
-    active: input.Active,
-    createdAt: input.DateTime,
-    createdAtTimestamp: input.TimeStamp,
-    kind
-  };
-}
 
 function normalizeTokenDetail(
   token: z.infer<typeof tokenDetailSchema>,
@@ -211,26 +185,16 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     return {
       mintedCount: Number(totalSupply),
       mintPrice,
-      activeListings: 0,
-      activeBids: 0,
-      recentSales: [],
-      latestSalePrice: undefined,
       featuredTokenIds: []
     };
   }
 
   const [
     featuredResult,
-    sellResult,
-    buyResult,
-    historyResult,
     supplyResult,
     mintPriceResult
   ] = await Promise.allSettled([
     getRandomTokenIds(),
-    getOffers("sell"),
-    getOffers("buy"),
-    getTradingHistory(1),
     publicClient.readContract({
       address: NFT_ADDRESS,
       abi: nftAbi,
@@ -244,13 +208,6 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
   ]);
 
   const featuredTokenIds = featuredResult.status === "fulfilled" ? featuredResult.value : [];
-  const activeListings =
-    sellResult.status === "fulfilled" ? sellResult.value.length : 0;
-  const activeBids = buyResult.status === "fulfilled" ? buyResult.value.length : 0;
-  const recentSalesPage =
-    historyResult.status === "fulfilled"
-      ? historyResult.value
-      : { tradingHistory: [] as TradingRecord[], totalCount: 0 };
   const totalSupply = supplyResult.status === "fulfilled" ? supplyResult.value : 0n;
   const mintPrice =
     mintPriceResult.status === "fulfilled" ? Number(formatEther(mintPriceResult.value)) : undefined;
@@ -258,10 +215,6 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
   return {
     mintedCount: Number(totalSupply),
     mintPrice,
-    activeListings,
-    activeBids,
-    recentSales: recentSalesPage.tradingHistory.slice(0, 4),
-    latestSalePrice: recentSalesPage.tradingHistory[0]?.price,
     featuredTokenIds
   };
 });
@@ -304,76 +257,6 @@ export const getVoteCount = cache(async () => {
 
 export const getRatingOrder = cache(async () => {
   return fetchApi<number[]>("api/randomwalk/rating_order", { revalidate: REVALIDATE_LONG });
-});
-
-const getAllActiveOffersRaw = cache(async () => {
-  const res = await fetchRwalk(
-    `current_offers/2`,
-    { revalidate: REVALIDATE_SHORT },
-    rwCurrentOffersResponseSchema
-  );
-  return res.Offers;
-});
-
-/** otype 0 = buy, 1 = sell (matches rwcg notibot / DB conventions). */
-export const getOffers = cache(async (kind: "buy" | "sell") => {
-  const wantType = kind === "buy" ? 0 : 1;
-  const response = (await getAllActiveOffersRaw()).filter((item) => item.OfferType === wantType);
-
-  return response
-    .map((item) => normalizeOffer(item, kind))
-    .sort((left, right) => left.price - right.price);
-});
-
-export const getOffersForToken = cache(async (tokenId: number) => {
-  const [buyOffers, sellOffers] = await Promise.all([getOffers("buy"), getOffers("sell")]);
-
-  return {
-    buyOffers: buyOffers.filter((offer) => offer.tokenId === tokenId),
-    sellOffers: sellOffers.filter((offer) => offer.tokenId === tokenId)
-  };
-});
-
-export const getTradingHistory = cache(async (page: number) => {
-  const perPage = 20;
-  const all = await fetchRwalk(
-    `trading/sales/0/1000000`,
-    { revalidate: REVALIDATE_SHORT },
-    z.object({ Trading: tradingRecordSchema.array() })
-  );
-  const totalCount = all.Trading.length;
-  let start = totalCount - perPage * page;
-  let count = perPage;
-
-  if (start < 0) {
-    count += start;
-    start = 0;
-  }
-
-  const response = await fetchRwalk(
-    `trading/sales/${start}/${count}`,
-    { revalidate: REVALIDATE_SHORT },
-    z.object({ Trading: tradingRecordSchema.array() })
-  );
-
-  const tradingHistory: TradingRecord[] = response.Trading.sort(
-    (left, right) => right.TimeStamp - left.TimeStamp
-  ).map((item) => ({
-    id: item.Id,
-    offerId: item.OfferId,
-    tokenId: item.TokenId,
-    seller: item.SellerAddr,
-    buyer: item.BuyerAddr,
-    price: item.Price,
-    timestamp: item.TimeStamp,
-    createdAt: item.DateTime,
-    txHash: item.TxHash
-  }));
-
-  return {
-    tradingHistory,
-    totalCount
-  };
 });
 
 const rankingSignChallengeSchema = z.object({

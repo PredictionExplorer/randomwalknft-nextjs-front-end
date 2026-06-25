@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/common/json-ld";
 import { NftDetailExperience } from "@/components/feature/nft-detail-experience";
-import { getOffersForToken, getTokenDetailOrFallback } from "@/lib/api/public";
+import { getTokenDetailOrFallback } from "@/lib/api/public";
 import { getBaseConfig } from "@/lib/config";
-import type { AssetTheme, AssetVariant, Offer } from "@/lib/types";
+import type { AssetTheme, AssetVariant } from "@/lib/types";
 import { formatId } from "@/lib/utils";
 
 type Params = Promise<{ id: string }>;
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       title: `NFT ${formatId(nft.id)}`,
       description: nft.isPendingMetadata
         ? `Random Walk NFT ${formatId(nft.id)} was just minted on Arbitrum. Metadata and media are still processing.`
-        : `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed. View, trade, and explore its history.`,
+        : `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed. View media, provenance, and ownership history.`,
       alternates: { canonical: `/detail/${nft.id}` },
       openGraph: {
         title: `NFT ${formatId(nft.id)} | ${SITE_NAME}`,
@@ -71,11 +71,6 @@ export default async function DetailPage({
   if (!nft) {
     notFound();
   }
-  const offers = await getOffersForToken(tokenId).catch(() => ({
-    buyOffers: [] as Offer[],
-    sellOffers: [] as Offer[]
-  }));
-
   const initialTheme: AssetTheme =
     resolvedSearchParams.theme === "white" ? "white" : "black";
   const initialMedia: AssetVariant =
@@ -102,8 +97,6 @@ export default async function DetailPage({
       />
       <NftDetailExperience
         nft={nft}
-        buyOffers={offers.buyOffers}
-        sellOffers={offers.sellOffers}
         message={message}
         initialTheme={initialTheme}
         initialMedia={initialMedia}

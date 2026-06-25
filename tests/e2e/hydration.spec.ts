@@ -12,18 +12,15 @@ const HYDRATION_PATTERNS = [
 const pages = [
   "/",
   "/gallery",
-  "/marketplace",
   "/mint",
   "/redeem",
   "/compare",
-  "/trading",
   "/random",
   "/random-video",
   "/code",
   "/faq",
   "/detail/1",
-  "/my-nfts",
-  "/my-offers"
+  "/my-nfts"
 ];
 
 for (const route of pages) {

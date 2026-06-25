@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getHomepageStats } from "@/lib/api/public";
 import { homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
-import { getBaseConfig } from "@/lib/config";
+import { AXIOM_ZERO_MARKETPLACE_URL, getBaseConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const { MARKET_ADDRESS, NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
+  const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const stats = await getHomepageStats();
   const [featuredId] = stats.featuredTokenIds;
   const featuredCards = stats.featuredTokenIds.slice(0, 3);
@@ -80,7 +80,7 @@ export default async function HomePage() {
                 Random Walk NFT is a generative collection where each token produces unique still images and video variants from a single on-chain seed — all released under CC0 public domain.
               </p>
               <p>
-                Mint on Arbitrum for under $0.10 in gas, browse works ranked by community beauty scores, and trade on a zero-fee marketplace with no platform cuts.
+                Mint on Arbitrum for under $0.10 in gas, browse works ranked by community beauty scores, and collect on Axiom Zero when you are ready for the secondary market.
               </p>
             </div>
 
@@ -95,20 +95,18 @@ export default async function HomePage() {
                 <Link href="/gallery">Browse collection</Link>
               </Button>
               <Button asChild variant="ghost" size="lg">
-                <Link href="/marketplace">Explore marketplace</Link>
+                <ExternalLink href={AXIOM_ZERO_MARKETPLACE_URL}>Collect on Axiom Zero</ExternalLink>
               </Button>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="grid gap-4 sm:grid-cols-3">
               {[
                 {
                   label: "Current mint price",
                   value: stats.mintPrice != null ? formatEth(stats.mintPrice) : "Unavailable"
                 },
                 { label: "Minted", value: formatCompactNumber(stats.mintedCount) },
-                { label: "Active listings", value: formatCompactNumber(stats.activeListings) },
-                { label: "Buy offers", value: formatCompactNumber(stats.activeBids) },
-                { label: "Latest sale", value: stats.latestSalePrice ? formatEth(stats.latestSalePrice) : "Pending" }
+                { label: "Featured works", value: formatCompactNumber(stats.featuredTokenIds.length) }
               ].map((item) => (
                 <Card key={item.label} className="bg-background/60">
                   <CardContent className="space-y-2 p-5">
@@ -171,39 +169,16 @@ export default async function HomePage() {
         </section>
 
         <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="space-y-8">
-            <PageHeading
-              as="h2"
-              eyebrow="Recent activity"
-              title={[
-                { text: "RECENT" },
-                { text: "MARKETPLACE", tone: "primary" },
-                { text: "ACTIVITY", tone: "secondary" }
-              ]}
-              description="The latest sales across the collection — see what collectors are buying and at what price."
-            />
-            <div className="grid gap-4 md:grid-cols-2">
-              {stats.recentSales.map((sale) => (
-                <Card key={sale.id} className="bg-card/70">
-                  <CardContent className="space-y-4 p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Recent sale</p>
-                        <Link href={`/detail/${sale.tokenId}` as Route} className="mt-2 inline-block text-xl font-semibold text-secondary">
-                          {formatId(sale.tokenId)}
-                        </Link>
-                      </div>
-                      <Badge variant="default">{formatEth(sale.price)}</Badge>
-                    </div>
-                    <p className="text-sm leading-7 text-muted-foreground">
-                      Seller {sale.seller.slice(0, 8)}… → Buyer {sale.buyer.slice(0, 8)}…
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
+          <PageHeading
+            as="h2"
+            eyebrow="Collector trust"
+            title={[
+              { text: "ON-CHAIN" },
+              { text: "PROVENANCE", tone: "primary" },
+              { text: "CLEARLY", tone: "secondary" }
+            ]}
+            description="Random Walk keeps the primary experience on this site: minting, browsing, media, provenance, and source code. Secondary collecting opens on Axiom Zero."
+          />
           <Card className="bg-card/70">
             <CardContent className="space-y-4 p-6">
               <p className="text-xs uppercase tracking-[0.26em] text-muted-foreground">Collector trust</p>
@@ -213,13 +188,6 @@ export default async function HomePage() {
                   {" "}
                   <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="text-secondary">
                     {NFT_ADDRESS}
-                  </ExternalLink>
-                </p>
-                <p>
-                  Marketplace contract:
-                  {" "}
-                  <ExternalLink href={arbiscanContractUrl(MARKET_ADDRESS)} className="text-secondary">
-                    {MARKET_ADDRESS}
                   </ExternalLink>
                 </p>
               </div>

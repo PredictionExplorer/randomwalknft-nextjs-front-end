@@ -1,8 +1,6 @@
 import type {
   CollectionQueryState,
-  CollectionViewMode,
-  MarketplaceQueryState,
-  MarketplaceSort
+  CollectionViewMode
 } from "@/lib/types";
 
 function parsePositiveInteger(value: string | string[] | undefined) {
@@ -12,19 +10,6 @@ function parsePositiveInteger(value: string | string[] | undefined) {
 
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < 0) {
-    return undefined;
-  }
-
-  return parsed;
-}
-
-function parsePositiveNumber(value: string | string[] | undefined) {
-  if (typeof value !== "string" || value.trim() === "") {
-    return undefined;
-  }
-
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed < 0) {
     return undefined;
   }
 
@@ -66,45 +51,6 @@ export function buildCollectionSearchParams(state: CollectionQueryState) {
   }
   if (state.view !== "gallery") {
     params.set("view", state.view);
-  }
-
-  return params;
-}
-
-export function parseMarketplaceQueryState(
-  searchParams: Record<string, string | string[] | undefined>
-): MarketplaceQueryState {
-  const filter = searchParams.filter === "buy" ? "buy" : "sell";
-  const sort = ["price-asc", "price-desc", "recent"].includes(String(searchParams.sort))
-    ? (searchParams.sort as MarketplaceSort)
-    : "price-asc";
-
-  return {
-    filter,
-    sort,
-    min: parsePositiveNumber(searchParams.min),
-    max: parsePositiveNumber(searchParams.max),
-    query: parsePositiveInteger(searchParams.query)
-  };
-}
-
-export function buildMarketplaceSearchParams(state: MarketplaceQueryState) {
-  const params = new URLSearchParams();
-
-  if (state.filter !== "sell") {
-    params.set("filter", state.filter);
-  }
-  if (state.sort !== "price-asc") {
-    params.set("sort", state.sort);
-  }
-  if (state.min !== undefined) {
-    params.set("min", String(state.min));
-  }
-  if (state.max !== undefined) {
-    params.set("max", String(state.max));
-  }
-  if (state.query !== undefined) {
-    params.set("query", String(state.query));
   }
 
   return params;
