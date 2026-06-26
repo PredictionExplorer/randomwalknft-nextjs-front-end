@@ -73,6 +73,7 @@ test.describe("visual regressions", () => {
     await expect(page).toHaveScreenshot("homepage-desktop.png", {
       animations: "disabled",
       fullPage: true,
+      mask: [page.getByTestId("homepage-featured-panel")],
       maxDiffPixelRatio: 0.02
     });
   });

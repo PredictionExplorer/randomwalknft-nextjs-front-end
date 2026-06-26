@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 
 import { RandomImageExperience } from "@/components/feature/random-image-experience";
 import { getRandomTokenIdsFresh } from "@/lib/api/public";
+import { selectFeaturedTokens } from "@/lib/featured-tokens";
 
 /** Client navigations must not reuse a cached RSC payload with a stale random token. */
 export const dynamic = "force-dynamic";
@@ -20,18 +21,10 @@ export const metadata: Metadata = {
   }
 };
 
-function pickStartingTokenFromExplorePool(ids: number[]): number {
-  if (ids.length === 0) return 1;
-  // Backend explore/random orders by fewest ranking matches, then rating, then token_id ASC
-  // — so ids[0] is almost always 0. Shuffle pick for a "random image" first paint.
-  const i = Math.floor(Math.random() * ids.length);
-  return ids[i]!;
-}
-
 export default async function RandomImagePage() {
   noStore();
   const ids = await getRandomTokenIdsFresh();
-  const initialTokenId = pickStartingTokenFromExplorePool(ids);
+  const { featuredId: initialTokenId } = selectFeaturedTokens(ids);
   // New key every server render so the client tree remounts on each visit (avoids stale hook state).
   const visitKey = randomUUID();
 

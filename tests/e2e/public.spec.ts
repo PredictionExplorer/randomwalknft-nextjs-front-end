@@ -37,6 +37,15 @@ test("home page explains how the collection works", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /on-chain provenance clearly/i })).toBeVisible();
 });
 
+test("home page renders a featured NFT panel", async ({ page }) => {
+  await page.goto("/");
+  const featuredPanel = page.getByTestId("homepage-featured-panel");
+
+  await expect(featuredPanel.getByText(/featured now/i)).toBeVisible();
+  await expect(featuredPanel.locator('a[href^="/detail/"]')).toHaveCount(4);
+  await expect(featuredPanel.getByRole("img", { name: /preview image for nft #\d{6}/i })).toHaveCount(3);
+});
+
 test("home page links Random Walk NFT to Cosmic Signature", async ({ page }) => {
   await page.goto("/");
 

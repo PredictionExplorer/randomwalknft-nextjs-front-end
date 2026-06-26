@@ -137,15 +137,26 @@ export const getTokenInfo = cache(async (tokenId: number) => {
   return fetchRwalk(`tokens/info/${tokenId}`, { revalidate: REVALIDATE_SHORT }, tokenInfoSchema);
 });
 
-export const getRandomTokenIds = cache(async (): Promise<number[]> => {
-  const raw = await fetchApi<number[] | null>("api/randomwalk/explore/random?limit=12", {
-    revalidate: REVALIDATE_SHORT
-  });
-  // Go encodes a nil slice as JSON `null`; treat as empty.
+function normalizeTokenIds(raw: unknown): number[] {
   if (!Array.isArray(raw)) {
     return [];
   }
-  return raw.map((id) => Number(id)).filter((n) => Number.isFinite(n) && n >= 0);
+
+  return raw
+    .map((id) => {
+      if (typeof id === "number") return id;
+      if (typeof id === "string" && id.trim() !== "") return Number(id);
+      return Number.NaN;
+    })
+    .filter((n) => Number.isSafeInteger(n) && n >= 0);
+}
+
+export const getRandomTokenIds = cache(async (): Promise<number[]> => {
+  const raw = await fetchApi<unknown>("api/randomwalk/explore/random?limit=12", {
+    revalidate: REVALIDATE_SHORT
+  });
+  // Go encodes a nil slice as JSON `null`; treat as empty.
+  return normalizeTokenIds(raw);
 });
 
 /**
@@ -153,13 +164,10 @@ export const getRandomTokenIds = cache(async (): Promise<number[]> => {
  * (including client <Link>) refetches the explore pool and re-runs server-side random choice.
  */
 export async function getRandomTokenIdsFresh(): Promise<number[]> {
-  const raw = await fetchApi<number[] | null>("api/randomwalk/explore/random?limit=12", {
+  const raw = await fetchApi<unknown>("api/randomwalk/explore/random?limit=12", {
     cache: "no-store"
   });
-  if (!Array.isArray(raw)) {
-    return [];
-  }
-  return raw.map((id) => Number(id)).filter((n) => Number.isFinite(n) && n >= 0);
+  return normalizeTokenIds(raw);
 }
 
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {

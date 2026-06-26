@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { Route } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 
 import { ExternalLink } from "@/components/common/external-link";
 import { HeroVideo } from "@/components/feature/hero-video";
@@ -15,8 +16,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getHomepageStats } from "@/lib/api/public";
 import { homepageCosmicSignature, homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
 import { AXIOM_ZERO_MARKETPLACE_URL, getBaseConfig } from "@/lib/config";
+import { selectFeaturedTokens } from "@/lib/featured-tokens";
 import { getAppConfig } from "@/lib/server/app-config";
 import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
+
+/** Client navigations should get a fresh random featured selection. */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { SITE_DESCRIPTION, SITE_URL } = getBaseConfig();
@@ -28,10 +33,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
+  noStore();
   const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const stats = await getHomepageStats();
-  const [featuredId] = stats.featuredTokenIds;
-  const featuredCards = stats.featuredTokenIds.slice(0, 3);
+  const { featuredId, featuredCards } = selectFeaturedTokens(stats.featuredTokenIds);
 
   return (
     <div className="relative overflow-hidden">
@@ -119,13 +124,13 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <Card className="overflow-hidden bg-background/55">
+          <Card className="overflow-hidden bg-background/55" data-testid="homepage-featured-panel">
             <CardContent className="space-y-6 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.26em] text-muted-foreground">Featured now</p>
-                  <Link href={`/detail/${featuredId ?? 1}` as Route} className="mt-2 inline-block text-2xl font-semibold text-secondary transition hover:text-primary">
-                    {formatId(featuredId ?? 1)}
+                  <Link href={`/detail/${featuredId}` as Route} className="mt-2 inline-block text-2xl font-semibold text-secondary transition hover:text-primary">
+                    {formatId(featuredId)}
                   </Link>
                 </div>
                 <Badge>Live media</Badge>
