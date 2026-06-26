@@ -8,11 +8,12 @@ import { JsonLd } from "@/components/common/json-ld";
 import { NftCard } from "@/components/nft/nft-card";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
+import { TermTooltip } from "@/components/common/term-tooltip";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getHomepageStats } from "@/lib/api/public";
-import { homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
+import { homepageCosmicSignature, homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
 import { AXIOM_ZERO_MARKETPLACE_URL, getBaseConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
@@ -166,6 +167,81 @@ export default async function HomePage() {
               </Card>
             ))}
           </div>
+        </section>
+
+        <section id="cosmic-signature" className="scroll-mt-32">
+          <Card className="overflow-hidden bg-card/70">
+            <CardContent className="grid gap-8 p-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)] lg:p-8">
+              <div className="space-y-6">
+                <PageHeading
+                  as="h2"
+                  eyebrow={homepageCosmicSignature.eyebrow}
+                  title={[
+                    { text: "RANDOM WALK" },
+                    { text: "MEETS", tone: "primary" },
+                    { text: "COSMIC SIGNATURE", tone: "secondary" }
+                  ]}
+                  description={homepageCosmicSignature.description}
+                />
+                <div className="space-y-4 text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8">
+                  <p>
+                    Random Walk NFTs can be{" "}
+                    <TermTooltip
+                      id="cosmic-anchored"
+                      term="anchored"
+                      definition={homepageCosmicSignature.definitions.anchored}
+                    />{" "}
+                    on Cosmic Signature for{" "}
+                    <TermTooltip
+                      id="cosmic-anchored-selection"
+                      term="Anchored-NFT Stellar Selection"
+                      definition={homepageCosmicSignature.definitions.anchoredSelection}
+                    />{" "}
+                    eligibility.
+                  </p>
+                  <p>
+                    An unused Random Walk NFT can also be attached to one ETH{" "}
+                    <TermTooltip
+                      id="cosmic-gesture"
+                      term="gesture"
+                      definition={homepageCosmicSignature.definitions.gesture}
+                    />{" "}
+                    to receive a 50%{" "}
+                    <TermTooltip
+                      id="cosmic-gesture-cost"
+                      term="Gesture Cost"
+                      definition={homepageCosmicSignature.definitions.gestureCost}
+                    />{" "}
+                    reduction when participating on that site.
+                  </p>
+                </div>
+                <Button asChild variant="secondary" size="lg">
+                  <ExternalLink href={homepageCosmicSignature.href} showIcon>
+                    {homepageCosmicSignature.linkLabel}
+                  </ExternalLink>
+                </Button>
+              </div>
+
+              <div className="grid gap-4">
+                {homepageCosmicSignature.utilityCards.map((item) => (
+                  <div key={item.title} className="rounded-[1.25rem] border border-border/70 bg-background/45 p-5">
+                    <p className="text-xs uppercase tracking-[0.24em] text-secondary">{item.eyebrow}</p>
+                    <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.body}</p>
+                  </div>
+                ))}
+                <div className="rounded-[1.25rem] border border-secondary/25 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground">
+                  Selected Random Walk anchor-holders receive 1,000{" "}
+                  <TermTooltip
+                    id="cosmic-cst"
+                    term="CST"
+                    definition={homepageCosmicSignature.definitions.cst}
+                  />{" "}
+                  and one Cosmic Signature NFT each cycle.
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">

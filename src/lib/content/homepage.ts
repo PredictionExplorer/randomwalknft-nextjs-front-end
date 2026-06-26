@@ -43,3 +43,37 @@ export const homepageHowItWorks = [
       "When minting pauses for 30 days, the last minter can claim half the ETH in the mint pool. The other half stays in the contract for future collectors."
   }
 ] as const;
+
+export const homepageCosmicSignature = {
+  eyebrow: "Cosmic Signature",
+  description:
+    "Random Walk NFTs are connected to Cosmic Signature, a procedural on-chain art protocol on Arbitrum where participants make gestures during Performance Cycles.",
+  href: "https://cosmicsignature.com/",
+  linkLabel: "Explore Cosmic Signature",
+  definitions: {
+    gesture:
+      "A protocol action on Cosmic Signature made with ETH or CST. Each gesture shapes the current Performance Cycle and records an entry for Stellar Selection.",
+    gestureCost:
+      "The live ETH or CST amount required to make a gesture. An unused Random Walk NFT can be attached once to an ETH gesture for a 50% cost reduction.",
+    anchored:
+      "Anchoring connects an NFT to the Cosmic Signature protocol without selling it, making Random Walk NFTs eligible for Anchored-NFT Stellar Selection.",
+    anchoredSelection:
+      "A cycle-end selection for anchored Random Walk NFT holders. Selected holders receive 1,000 CST and one Cosmic Signature NFT.",
+    cst:
+      "Cosmic Signature Token, the ERC-20 token used by the Cosmic Signature protocol."
+  },
+  utilityCards: [
+    {
+      eyebrow: "Anchor utility",
+      title: "Enter Anchored-NFT Stellar Selection",
+      body:
+        "Anchor a Random Walk NFT on Cosmic Signature to become eligible for a cycle-end selection where chosen holders receive 1,000 CST and a Cosmic Signature NFT."
+    },
+    {
+      eyebrow: "Gesture utility",
+      title: "Receive a one-time 50% discount",
+      body:
+        "Attach an unused Random Walk NFT to one ETH gesture to receive a 50% ETH Gesture Cost reduction. Once used for the discount, that token cannot be used for the same reduction again."
+    }
+  ]
+} as const;

@@ -37,6 +37,18 @@ test("home page explains how the collection works", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /on-chain provenance clearly/i })).toBeVisible();
 });
 
+test("home page links Random Walk NFT to Cosmic Signature", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByRole("heading", { name: /random walk meets cosmic signature/i })).toBeVisible();
+  await expect(page.getByText(/50% ETH Gesture Cost reduction/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Anchored-NFT Stellar Selection/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /explore cosmic signature/i })).toHaveAttribute(
+    "href",
+    "https://cosmicsignature.com/"
+  );
+});
+
 test("detail page for token 1 loads core metadata", async ({ page }) => {
   await page.goto("/detail/1");
   await expect(page.getByRole("heading", { name: /#000001/i })).toBeVisible();
