@@ -16,11 +16,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getHomepageStats } from "@/lib/api/public";
 import { homepageCosmicSignature, homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
 import { AXIOM_ZERO_MARKETPLACE_URL, getBaseConfig } from "@/lib/config";
-import { selectFeaturedTokens } from "@/lib/featured-tokens";
+import { selectFeaturedTokensForDisplay } from "@/lib/featured-tokens";
 import { getAppConfig } from "@/lib/server/app-config";
 import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
 
-/** Client navigations should get a fresh random featured selection. */
+/** Keep collection stats fresh while the featured pool itself stays stable for each UTC day. */
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,7 +36,7 @@ export default async function HomePage() {
   noStore();
   const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const stats = await getHomepageStats();
-  const { featuredId, featuredCards } = selectFeaturedTokens(stats.featuredTokenIds);
+  const { featuredId, featuredCards } = selectFeaturedTokensForDisplay(stats.featuredTokenIds);
 
   return (
     <div className="relative overflow-hidden">
@@ -64,7 +64,7 @@ export default async function HomePage() {
       />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_0%,rgba(244,191,255,0.18),transparent_32%),radial-gradient(circle_at_85%_15%,rgba(198,118,215,0.18),transparent_24%),linear-gradient(180deg,rgba(5,5,5,0.4),rgba(5,5,5,0.96))]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(84vh,56rem)] overflow-hidden opacity-70">
-        <HeroVideo initialTokenId={featuredId ?? 1} />
+        <HeroVideo initialTokenId={featuredId} />
       </div>
 
       <PageShell className="space-y-20 pt-2 pb-20 sm:pt-3 sm:pb-24">

@@ -40,7 +40,9 @@ test("home page explains how the collection works", async ({ page }) => {
 test("home page renders a featured NFT panel", async ({ page }) => {
   await page.goto("/");
   const featuredPanel = page.getByTestId("homepage-featured-panel");
+  const featuredWorksCard = page.getByText("Featured works", { exact: true }).locator("..");
 
+  await expect(featuredWorksCard.getByText(/^15$/)).toBeVisible();
   await expect(featuredPanel.getByText(/featured now/i)).toBeVisible();
   await expect(featuredPanel.locator('a[href^="/detail/"]')).toHaveCount(4);
   await expect(featuredPanel.getByRole("img", { name: /preview image for nft #\d{6}/i })).toHaveCount(3);

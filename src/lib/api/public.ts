@@ -17,8 +17,8 @@ import type { tokenDetailSchema } from "@/lib/api/schemas";
 
 import { nftAbi } from "@/generated/wagmi";
 import type { HomepageStats, Nft } from "@/lib/types";
+import { dailyFeaturedTokenIds, getUtcDayKey } from "@/lib/featured-tokens";
 import { createAssetUrls } from "@/lib/utils";
-import { getCurrentNetworkName } from "@/lib/web3/evm-chain";
 import { publicClient } from "@/lib/web3/public-client";
 
 function normalizeTokenDetail(
@@ -170,39 +170,29 @@ export async function getRandomTokenIdsFresh(): Promise<number[]> {
   return normalizeTokenIds(raw);
 }
 
+let homepageFeaturedCache: { dayKey: string; tokenIds: number[] } | null = null;
+
+function getHomepageFeaturedTokenIds(totalSupply: number, dayKey = getUtcDayKey()): number[] {
+  if (homepageFeaturedCache?.dayKey === dayKey) {
+    return [...homepageFeaturedCache.tokenIds];
+  }
+
+  const tokenIds = dailyFeaturedTokenIds(totalSupply, { dayKey });
+
+  if (totalSupply > 0) {
+    homepageFeaturedCache = { dayKey, tokenIds };
+  }
+
+  return [...tokenIds];
+}
+
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
   const { NFT_ADDRESS } = await getAppConfig();
 
-  if (getCurrentNetworkName() === "local") {
-    const [supplyResult, mintPriceResult] = await Promise.allSettled([
-      publicClient.readContract({
-        address: NFT_ADDRESS,
-        abi: nftAbi,
-        functionName: "totalSupply"
-      }) as Promise<bigint>,
-      publicClient.readContract({
-        address: NFT_ADDRESS,
-        abi: nftAbi,
-        functionName: "getMintPrice"
-      }) as Promise<bigint>
-    ]);
-    const totalSupply = supplyResult.status === "fulfilled" ? supplyResult.value : 0n;
-    const mintPrice =
-      mintPriceResult.status === "fulfilled" ? Number(formatEther(mintPriceResult.value)) : undefined;
-
-    return {
-      mintedCount: Number(totalSupply),
-      mintPrice,
-      featuredTokenIds: []
-    };
-  }
-
   const [
-    featuredResult,
     supplyResult,
     mintPriceResult
   ] = await Promise.allSettled([
-    getRandomTokenIds(),
     publicClient.readContract({
       address: NFT_ADDRESS,
       abi: nftAbi,
@@ -215,13 +205,14 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     }) as Promise<bigint>
   ]);
 
-  const featuredTokenIds = featuredResult.status === "fulfilled" ? featuredResult.value : [];
   const totalSupply = supplyResult.status === "fulfilled" ? supplyResult.value : 0n;
+  const mintedCount = Number(totalSupply);
+  const featuredTokenIds = getHomepageFeaturedTokenIds(mintedCount);
   const mintPrice =
     mintPriceResult.status === "fulfilled" ? Number(formatEther(mintPriceResult.value)) : undefined;
 
   return {
-    mintedCount: Number(totalSupply),
+    mintedCount,
     mintPrice,
     featuredTokenIds
   };
