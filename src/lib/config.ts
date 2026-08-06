@@ -1,4 +1,5 @@
-import { getPublicEnvSnapshot, REQUIRED_ENV_KEYS, type RequiredEnvKey } from "@/lib/env";
+import { getMissingEnvKeys, getPublicEnvSnapshot, type RequiredEnvKey } from "@/lib/env";
+import { getApiBase } from "@/lib/server-rotation";
 
 /** Path segments on the Go webserv origin (see websrv static / API routes). */
 /** JSON API prefix on the Go webserv (RandomWalk NFT data). */
@@ -45,25 +46,20 @@ export type AppConfig = BaseEnvConfig & {
   MARKET_ADDRESS: `0x${string}`;
 };
 
-let baseCached: BaseEnvConfig | null = null;
-
 /**
  * Env-based config (no chain addresses). Use on client and anywhere contracts are not needed.
+ *
+ * Not cached across calls: `API_BASE_URL` (and the URLs derived from it) comes from the hourly
+ * server rotation (`server-rotation.ts`), so it can change between calls — per clock hour, or
+ * immediately after a failover.
  */
 export function getBaseConfig(): BaseEnvConfig {
-  if (baseCached) {
-    return baseCached;
-  }
   const snap = getPublicEnvSnapshot();
-  const missing = REQUIRED_ENV_KEYS.filter((key) => {
-    const v = snap[key];
-    return typeof v !== "string" || v.trim() === "";
-  });
-  if (missing.length > 0) {
+  if (getMissingEnvKeys().length > 0) {
     throw new Error("ENV_NOT_CONFIGURED");
   }
-  const origin = normalizeOrigin(req(snap, "NEXT_PUBLIC_API_BASE_URL"));
-  baseCached = {
+  const origin = normalizeOrigin(getApiBase());
+  return {
     SITE_URL: resolveSiteUrl(snap),
     SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME?.trim() || DEFAULT_SITE_NAME,
     SITE_DESCRIPTION: process.env.NEXT_PUBLIC_SITE_DESCRIPTION?.trim() || DEFAULT_SITE_DESCRIPTION,
@@ -71,7 +67,6 @@ export function getBaseConfig(): BaseEnvConfig {
     RWALK_BASE_URL: `${origin}${BACKEND_RANDOMWALK_API_PREFIX}`,
     ASSET_BASE_URL: `${origin}${BACKEND_ASSET_PATH}`
   };
-  return baseCached;
 }
 
 export const SUPPORTED_ASSET_EXTENSIONS = [".png", ".jpg", ".jpeg", ".mp4", ".webp"] as const;

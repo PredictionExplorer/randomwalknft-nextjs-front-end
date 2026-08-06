@@ -1,5 +1,7 @@
 import { type Chain, defineChain } from "viem";
 
+import { getRotatedRpcUrl, getRpcUrlsInRotationOrder } from "@/lib/server-rotation";
+
 /**
  * Network preset (CosmicGame-style). Chain IDs are fixed in code — set `NEXT_PUBLIC_NETWORK` only.
  *
@@ -52,13 +54,29 @@ export function getCurrentNetworkName(): NetworkName {
   return "local";
 }
 
-/** JSON-RPC URL for viem/wagmi reads: env override, else preset default for `NEXT_PUBLIC_NETWORK`. */
+/**
+ * JSON-RPC URL for viem/wagmi reads: hourly rotation pick over `NEXT_PUBLIC_RPC_URLS`
+ * (or the singular `NEXT_PUBLIC_RPC_URL`), else preset default for `NEXT_PUBLIC_NETWORK`.
+ */
 export function getRpcHttpUrl(): string {
-  const custom = process.env.NEXT_PUBLIC_RPC_URL?.trim();
-  if (custom) {
-    return custom;
+  const picked = getRotatedRpcUrl();
+  if (picked) {
+    return picked;
   }
   return NETWORK_PRESETS[getCurrentNetworkName()].defaultRpcUrl;
+}
+
+/**
+ * All configured JSON-RPC URLs with the current hourly pick first — feed this to a viem
+ * `fallback()` transport so requests prefer the rotation pick and automatically fail over
+ * to the remaining servers.
+ */
+export function getRpcHttpUrls(): string[] {
+  const ordered = getRpcUrlsInRotationOrder();
+  if (ordered.length > 0) {
+    return ordered;
+  }
+  return [NETWORK_PRESETS[getCurrentNetworkName()].defaultRpcUrl];
 }
 
 /** Base URL for block explorer links (no trailing slash). Override with `NEXT_PUBLIC_BLOCK_EXPLORER_URL`. */
@@ -79,7 +97,7 @@ export function getConfiguredEvmChain(): Chain {
   }
   const net = getCurrentNetworkName();
   const preset = NETWORK_PRESETS[net];
-  const rpc = getRpcHttpUrl();
+  const rpcs = getRpcHttpUrls();
   const explorer = getExplorerBaseUrl();
 
   cachedChain = defineChain({
@@ -87,7 +105,7 @@ export function getConfiguredEvmChain(): Chain {
     name: preset.name,
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     rpcUrls: {
-      default: { http: [rpc] }
+      default: { http: rpcs }
     },
     blockExplorers: {
       default: { name: "Explorer", url: explorer }

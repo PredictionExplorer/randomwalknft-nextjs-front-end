@@ -1,10 +1,11 @@
-import { createPublicClient, http } from "viem";
+import { createPublicClient } from "viem";
 
-import { getConfiguredEvmChain, getRpcHttpUrl } from "@/lib/web3/evm-chain";
+import { getConfiguredEvmChain } from "@/lib/web3/evm-chain";
+import { getRpcTransport } from "@/lib/web3/rpc-transport";
 
 const chain = getConfiguredEvmChain();
 
 export const publicClient = createPublicClient({
   chain,
-  transport: http(getRpcHttpUrl())
+  transport: getRpcTransport()
 });

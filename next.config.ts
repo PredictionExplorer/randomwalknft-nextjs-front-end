@@ -18,31 +18,43 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const AXIOM_ZERO_MARKETPLACE_URL = "https://www.axiomzero.market/random-walk";
 
-function assetBaseRemotePattern(): {
+type AssetRemotePattern = {
   protocol: "http" | "https";
   hostname: string;
   port?: string;
   pathname: string;
-} | null {
-  const api = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
-  if (!api) {
-    return null;
+};
+
+/**
+ * One remote pattern per configured API origin. `NEXT_PUBLIC_API_URLS` is the
+ * comma-separated rotation list (see `src/lib/server-rotation.ts`); the singular
+ * `NEXT_PUBLIC_API_BASE_URL` is the one-server fallback. Assets may be served from
+ * any of them depending on the hourly rotation.
+ */
+function assetBaseRemotePatterns(): AssetRemotePattern[] {
+  const raw = process.env.NEXT_PUBLIC_API_URLS?.trim() || process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "";
+  const origins = raw
+    .split(",")
+    .map((u) => u.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+  const patterns: AssetRemotePattern[] = [];
+  for (const origin of origins) {
+    try {
+      const u = new URL(`${origin}/images/randomwalk`);
+      patterns.push({
+        protocol: u.protocol === "https:" ? "https" : "http",
+        hostname: u.hostname,
+        ...(u.port ? { port: u.port } : {}),
+        pathname: "/**"
+      });
+    } catch {
+      // Skip malformed origins; the app-level env validation reports them.
+    }
   }
-  try {
-    const origin = api.replace(/\/+$/, "");
-    const u = new URL(`${origin}/images/randomwalk`);
-    return {
-      protocol: u.protocol === "https:" ? "https" : "http",
-      hostname: u.hostname,
-      ...(u.port ? { port: u.port } : {}),
-      pathname: "/**"
-    };
-  } catch {
-    return null;
-  }
+  return patterns;
 }
 
-const assetRemote = assetBaseRemotePattern();
+const assetRemotes = assetBaseRemotePatterns();
 
 /** Pin bare `tailwindcss` imports (e.g. from tooling) to this app’s install when parent lockfiles confuse the resolver. */
 const tailwindPkgDir = path.join(projectRoot, "node_modules", "tailwindcss");
@@ -93,7 +105,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "randomwalknft-api.com",
       },
-      ...(assetRemote ? [assetRemote] : []),
+      ...assetRemotes,
     ],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60

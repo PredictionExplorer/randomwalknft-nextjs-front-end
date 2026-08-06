@@ -19,6 +19,18 @@ export const REQUIRED_ENV_KEYS = [
 
 export type RequiredEnvKey = (typeof REQUIRED_ENV_KEYS)[number];
 
+/**
+ * Plural list vars (comma-separated, see `server-rotation.ts`) that satisfy a
+ * singular requirement when the singular var is unset. Static reads, kept in a
+ * function so tests can stub the env.
+ */
+function getPluralAlternatives(): Partial<Record<RequiredEnvKey, string | undefined>> {
+  return {
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_URLS,
+    NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URLS
+  };
+}
+
 const VALID_NETWORKS = new Set(["local", "sepolia", "mainnet"]);
 
 /**
@@ -35,8 +47,9 @@ export function getPublicEnvSnapshot(): Record<RequiredEnvKey, string | undefine
 
 export function getMissingEnvKeys(): RequiredEnvKey[] {
   const snap = getPublicEnvSnapshot();
+  const plural = getPluralAlternatives();
   const empty = REQUIRED_ENV_KEYS.filter((key) => {
-    const v = snap[key];
+    const v = snap[key]?.trim() ? snap[key] : plural[key];
     return typeof v !== "string" || v.trim() === "";
   });
   if (empty.length > 0) {

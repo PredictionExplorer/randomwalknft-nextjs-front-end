@@ -13,6 +13,11 @@ Object.assign(process.env, {
   NEXT_PUBLIC_RPC_URL: "https://arb1.arbitrum.io/rpc"
 });
 
+// Hermeticity: the rotation lists (server-rotation.ts) must not leak in from the shell,
+// or tests would fetch against whatever servers the developer has exported.
+delete process.env.NEXT_PUBLIC_API_URLS;
+delete process.env.NEXT_PUBLIC_RPC_URLS;
+
 vi.mock("next/image", () => ({
   default: ({
     fill: _fill,

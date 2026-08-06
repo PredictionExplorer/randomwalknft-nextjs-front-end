@@ -6,6 +6,7 @@ import {
   isFetchConnectionError,
   rethrowAsBackendUnavailableIfConnectionFailed
 } from "@/lib/api/backend-errors";
+import { getApiBase, markServerDown } from "@/lib/server-rotation";
 import { getCurrentNetworkName } from "@/lib/web3/evm-chain";
 
 const apiResponseSchema = z.object({
@@ -47,12 +48,6 @@ export async function fetchRwalkContractsFromApi(): Promise<RwalkContractAddress
     return rwalkContractsProcessCache;
   }
 
-  const api = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
-  if (!api) {
-    throw new Error("NEXT_PUBLIC_API_BASE_URL is required to load contract addresses from the API");
-  }
-
-  const url = `${api.replace(/\/+$/, "")}/api/randomwalk/contracts`; // must match BACKEND_RANDOMWALK_API_PREFIX in config
   const isLocal = getCurrentNetworkName() === "local";
   const init: RequestInit = isLocal
     ? { cache: "no-store" }
@@ -61,12 +56,24 @@ export async function fetchRwalkContractsFromApi(): Promise<RwalkContractAddress
   let res: Response | undefined;
   const maxAttempts = 3;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Re-picked per attempt: after markServerDown the rotation serves the next server.
+    const api = getApiBase();
+    if (!api) {
+      throw new Error(
+        "NEXT_PUBLIC_API_BASE_URL (or NEXT_PUBLIC_API_URLS) is required to load contract addresses from the API"
+      );
+    }
+    const url = `${api}/api/randomwalk/contracts`; // must match BACKEND_RANDOMWALK_API_PREFIX in config
     try {
       res = await fetch(url, init);
       break;
     } catch (e) {
+      const connectionError = isFetchConnectionError(e);
+      if (connectionError) {
+        markServerDown(api);
+      }
       const last = attempt === maxAttempts - 1;
-      if (last || !isFetchConnectionError(e)) {
+      if (last || !connectionError) {
         rethrowAsBackendUnavailableIfConnectionFailed(e);
       }
       await new Promise((r) => setTimeout(r, 150 * (attempt + 1)));
