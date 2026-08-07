@@ -13,8 +13,7 @@ const webServerEnv = {
   NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URL ?? "https://arb1.arbitrum.io/rpc",
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "https://randomwalknft.com",
   NEXT_PUBLIC_NFT_ADDRESS:
-    process.env.NEXT_PUBLIC_NFT_ADDRESS ?? "0x895a6F444BE4ba9d124F61DF736605792B35D66b",
-  NEXT_PUBLIC_E2E_MOCK_WALLET: process.env.NEXT_PUBLIC_E2E_MOCK_WALLET ?? "true"
+    process.env.NEXT_PUBLIC_NFT_ADDRESS ?? "0x895a6F444BE4ba9d124F61DF736605792B35D66b"
 };
 
 export default defineConfig({
@@ -39,15 +38,28 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
+      testIgnore: /wallet-mobile\.spec\.ts/,
       use: { ...devices["Desktop Chrome"] }
     },
     {
       name: "firefox",
+      testIgnore: /wallet-mobile\.spec\.ts/,
       use: { ...devices["Desktop Firefox"] }
     },
     {
       name: "webkit",
+      testIgnore: /wallet-mobile\.spec\.ts/,
       use: { ...devices["Desktop Safari"] }
+    },
+    {
+      name: "mobile-chromium",
+      testMatch: /wallet-mobile\.spec\.ts/,
+      use: { ...devices["Pixel 7"] }
+    },
+    {
+      name: "mobile-webkit",
+      testMatch: /wallet-mobile\.spec\.ts/,
+      use: { ...devices["iPhone 13"] }
     }
   ]
 });

@@ -36,4 +36,22 @@ describe("env helpers", () => {
 
     expect(getMissingEnvKeys()).toEqual(["NEXT_PUBLIC_NETWORK"]);
   });
+
+  it("requires a canonical HTTPS site origin outside local development", () => {
+    process.env.NEXT_PUBLIC_NETWORK = "mainnet";
+    process.env.NEXT_PUBLIC_API_BASE_URL = "https://api.example.com";
+    process.env.NEXT_PUBLIC_RPC_URL = "https://rpc.example.com";
+    process.env.NEXT_PUBLIC_SITE_URL = "http://example.com/path";
+
+    expect(getMissingEnvKeys()).toEqual(["NEXT_PUBLIC_SITE_URL"]);
+  });
+
+  it("allows an HTTP site origin for the local chain", () => {
+    process.env.NEXT_PUBLIC_NETWORK = "local";
+    process.env.NEXT_PUBLIC_API_BASE_URL = "http://192.168.1.20:8080";
+    process.env.NEXT_PUBLIC_RPC_URL = "http://192.168.1.20:8545";
+    process.env.NEXT_PUBLIC_SITE_URL = "http://192.168.1.20:3000";
+
+    expect(getMissingEnvKeys()).toEqual([]);
+  });
 });

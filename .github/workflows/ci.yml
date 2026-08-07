@@ -115,6 +115,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_NETWORK: mainnet
+      NEXT_PUBLIC_API_BASE_URL: http://randomwalknft-api.com
+      NEXT_PUBLIC_RPC_URL: https://arb1.arbitrum.io/rpc
+      NEXT_PUBLIC_SITE_URL: https://randomwalknft.com
     needs:
       - static
       - unit

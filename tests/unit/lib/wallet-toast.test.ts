@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("sonner", () => ({
   toast: {
@@ -12,6 +12,10 @@ import { toast } from "sonner";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 
 describe("showWalletError", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("shows info toast for user rejection", () => {
     showWalletError({ shortMessage: "User rejected the request." });
     expect(toast.info).toHaveBeenCalledWith("Transaction cancelled. No changes were made.");
@@ -24,7 +28,9 @@ describe("showWalletError", () => {
 
   it("shows warning toast for network errors", () => {
     showWalletError(new Error("Underlying network changed"));
-    expect(toast.warning).toHaveBeenCalledWith("Network changed. Please switch back to Arbitrum and try again.");
+    expect(toast.warning).toHaveBeenCalledWith(
+      "Network changed. Please switch back to Arbitrum One and try again."
+    );
   });
 
   it("shows error toast for unknown errors", () => {

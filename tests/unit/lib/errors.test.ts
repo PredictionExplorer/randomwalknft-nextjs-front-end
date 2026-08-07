@@ -99,12 +99,41 @@ describe("classifyWalletError", () => {
     it("classifies 'network changed' as warning", () => {
       const result = classifyWalletError(new Error("Underlying network changed"));
       expect(result.severity).toBe("warning");
-      expect(result.message).toBe("Network changed. Please switch back to Arbitrum and try again.");
+      expect(result.message).toBe(
+        "Network changed. Please switch back to Arbitrum One and try again."
+      );
     });
 
     it("classifies 'chain mismatch' as warning", () => {
       const result = classifyWalletError({ shortMessage: "Chain mismatch detected" });
       expect(result.severity).toBe("warning");
+    });
+  });
+
+  describe("EIP-1193 error codes", () => {
+    it("finds a nested user rejection code", () => {
+      const result = classifyWalletError({
+        cause: { data: { originalError: { code: 4001 } } }
+      });
+
+      expect(result).toEqual({
+        message: "Transaction cancelled. No changes were made.",
+        severity: "info"
+      });
+    });
+
+    it("explains an already-pending wallet request", () => {
+      const result = classifyWalletError({ code: -32002 });
+
+      expect(result.severity).toBe("warning");
+      expect(result.message).toMatch(/already pending/i);
+    });
+
+    it("explains disconnected and missing-chain errors", () => {
+      expect(classifyWalletError({ code: 4900 }).message).toMatch(/disconnected/i);
+      expect(classifyWalletError({ code: 4902 }).message).toMatch(
+        /Arbitrum One is not available/i
+      );
     });
   });
 

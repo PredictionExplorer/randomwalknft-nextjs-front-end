@@ -1,78 +1,119 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
-const ACCOUNT = "0x1234567890abcdef1234567890abcdef12345678";
+import { installMockWallet } from "./fixtures/mock-wallet";
 
-async function installMockWallet(page: Page, chainId: string) {
-  await page.addInitScript(
-    ({ account, initialChainId }: { account: string; initialChainId: string }) => {
-      const listeners = {
-        accountsChanged: new Set<(accounts: string[]) => void>(),
-        chainChanged: new Set<(chainId: string) => void>(),
-        connect: new Set<(payload: { chainId: string }) => void>(),
-        disconnect: new Set<() => void>()
-      };
-      let connectedAccounts: string[] = [];
-      let currentChainId = initialChainId;
+async function gotoWalletPage(page: Page) {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+}
 
-      const provider = {
-        isMetaMask: true,
-        on(event: keyof typeof listeners, listener: (...args: never[]) => void) {
-          listeners[event]?.add(listener as never);
-        },
-        removeListener(event: keyof typeof listeners, listener: (...args: never[]) => void) {
-          listeners[event]?.delete(listener as never);
-        },
-        async request({ method, params }: { method: string; params?: Array<Record<string, string>> }) {
-          if (method === "eth_requestAccounts") {
-            connectedAccounts = [account];
-            listeners.accountsChanged.forEach((listener) => listener(connectedAccounts));
-            listeners.connect.forEach((listener) => listener({ chainId: currentChainId }));
-            return connectedAccounts;
-          }
+async function openWalletModal(page: Page) {
+  await page.getByRole("button", { name: /connect wallet/i }).click();
+  await expect(page.getByText("MetaMask", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText(/walletconnect/i)).toHaveCount(0);
+}
 
-          if (method === "eth_accounts") {
-            return connectedAccounts;
-          }
-
-          if (method === "eth_chainId") {
-            return currentChainId;
-          }
-
-          if (method === "wallet_switchEthereumChain") {
-            currentChainId = (params?.[0]?.chainId ?? currentChainId).toLowerCase();
-            listeners.chainChanged.forEach((listener) => listener(currentChainId));
-            return null;
-          }
-
-          return null;
-        }
-      };
-
-      Object.defineProperty(window, "ethereum", {
-        configurable: true,
-        value: provider
-      });
-    },
-    {
-      account: ACCOUNT,
-      initialChainId: chainId
-    }
-  );
+async function connectBrowserWallet(page: Page) {
+  await openWalletModal(page);
+  await page.getByText("Browser Wallet", { exact: true }).click();
 }
 
 test("connect wallet works with a browser wallet provider", async ({ page }) => {
-  await installMockWallet(page, "0xa4b1");
-  await page.goto("/");
-  await page.getByRole("button", { name: /connect wallet/i }).click();
+  await installMockWallet(page, { chainId: "0xa4b1" });
+  await gotoWalletPage(page);
+  await connectBrowserWallet(page);
 
-  await expect(page.getByRole("button", { name: /0x1234/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /0x12/i })).toBeVisible();
+});
+
+test("MetaMask SDK connects an installed extension provider", async ({ page }) => {
+  await installMockWallet(page, {
+    announceEip6963: true,
+    chainId: "0xa4b1"
+  });
+  await gotoWalletPage(page);
+  await openWalletModal(page);
+  await page.getByText("MetaMask", { exact: true }).first().click();
+
+  await expect(page.getByRole("button", { name: /0x12/i })).toBeVisible();
+});
+
+test("an installed EIP-6963 wallet is discovered without WalletConnect", async ({
+  page
+}) => {
+  await installMockWallet(page, {
+    announceEip6963: true,
+    chainId: "0xa4b1",
+    isMetaMask: false,
+    walletName: "Example Wallet",
+    walletRdns: "com.example.wallet"
+  });
+  await gotoWalletPage(page);
+  await openWalletModal(page);
+
+  await expect(page.getByText("Example Wallet", { exact: true })).toBeVisible();
 });
 
 test("wrong-network wallet shows the switch-network action", async ({ page }) => {
-  await installMockWallet(page, "0x1");
-  await page.goto("/");
-  await page.getByRole("button", { name: /connect wallet/i }).click();
+  await installMockWallet(page, { chainId: "0x1" });
+  await gotoWalletPage(page);
+  await connectBrowserWallet(page);
+  await page.evaluate(() => {
+    window.__mockWallet.setChainId("0x1");
+  });
 
   await expect(page.getByRole("button", { name: /switch network/i })).toBeVisible();
+});
+
+test("a first-time wallet can add and switch to the configured chain", async ({
+  page
+}) => {
+  await installMockWallet(page, {
+    chainId: "0x1",
+    missingChainUntilAdded: true
+  });
+  await gotoWalletPage(page);
+  await connectBrowserWallet(page);
+
+  await expect(page.getByRole("button", { name: /0x12/i })).toBeVisible();
+  const requestedMethods = await page.evaluate(() =>
+    window.__mockWallet.requests.map((request) => request.method)
+  );
+  expect(requestedMethods).toEqual(
+    expect.arrayContaining([
+      "wallet_switchEthereumChain",
+      "wallet_addEthereumChain"
+    ])
+  );
+});
+
+test("wallet state reconnects across SSR hydration and refresh", async ({ page }) => {
+  await installMockWallet(page, {
+    announceEip6963: true,
+    chainId: "0xa4b1"
+  });
+  await gotoWalletPage(page);
+  await openWalletModal(page);
+  await page.getByText("MetaMask", { exact: true }).first().click();
+  await expect(page.getByRole("button", { name: /0x12/i })).toBeVisible();
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+
+  await expect(page.getByRole("button", { name: /0x12/i })).toBeVisible();
+});
+
+test("wallet UI reacts to account and chain events without a reload", async ({ page }) => {
+  await installMockWallet(page, { chainId: "0xa4b1" });
+  await gotoWalletPage(page);
+  await connectBrowserWallet(page);
+
+  await page.evaluate(() => {
+    window.__mockWallet.setChainId("0x1");
+  });
+  await expect(page.getByRole("button", { name: /switch network/i })).toBeVisible();
+
+  await page.evaluate(() => {
+    window.__mockWallet.setAccounts([]);
+  });
+  await expect(page.getByRole("button", { name: /connect wallet/i })).toBeVisible();
 });

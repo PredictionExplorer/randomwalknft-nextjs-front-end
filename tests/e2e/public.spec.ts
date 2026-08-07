@@ -1,11 +1,16 @@
 import AxeBuilder from "@axe-core/playwright";
+import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
 const axiomZeroMarketplaceUrl = "https://www.axiomzero.market/random-walk";
 const expectedCanonicalOrigin = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://randomwalknft.com").replace(/\/+$/, "");
 
+async function goto(page: Page, path: string) {
+  await page.goto(path, { waitUntil: "domcontentloaded" });
+}
+
 test("home page renders primary CTA", async ({ page }) => {
-  await page.goto("/");
+  await goto(page, "/");
   await expect(page.getByRole("link", { name: /mint the next work/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /collect on axiom zero/i })).toHaveAttribute(
     "href",
@@ -15,7 +20,7 @@ test("home page renders primary CTA", async ({ page }) => {
 });
 
 test("home page emits the configured canonical URL", async ({ page }) => {
-  await page.goto("/");
+  await goto(page, "/");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     expectedCanonicalOrigin
@@ -23,7 +28,7 @@ test("home page emits the configured canonical URL", async ({ page }) => {
 });
 
 test("home hero sits near the top fold without a dead spacer", async ({ page }) => {
-  await page.goto("/");
+  await goto(page, "/");
   const heroHeading = page.getByRole("heading", { name: /random walk nft/i });
   await expect(heroHeading).toBeVisible();
 
@@ -32,13 +37,13 @@ test("home hero sits near the top fold without a dead spacer", async ({ page }) 
 });
 
 test("home page explains how the collection works", async ({ page }) => {
-  await page.goto("/");
+  await goto(page, "/");
   await expect(page.getByText(/Mint your NFT/i)).toBeVisible();
   await expect(page.getByRole("heading", { name: /on-chain provenance clearly/i })).toBeVisible();
 });
 
 test("home page renders a featured NFT panel", async ({ page }) => {
-  await page.goto("/");
+  await goto(page, "/");
   const featuredPanel = page.getByTestId("homepage-featured-panel");
   const featuredWorksCard = page.getByText("Featured works", { exact: true }).locator("..");
 
@@ -49,7 +54,7 @@ test("home page renders a featured NFT panel", async ({ page }) => {
 });
 
 test("home page links Random Walk NFT to Cosmic Signature", async ({ page }) => {
-  await page.goto("/");
+  await goto(page, "/");
 
   await expect(page.getByRole("heading", { name: /random walk meets cosmic signature/i })).toBeVisible();
   await expect(page.getByText(/50% ETH Gesture Cost reduction/i)).toBeVisible();
@@ -61,7 +66,7 @@ test("home page links Random Walk NFT to Cosmic Signature", async ({ page }) => 
 });
 
 test("detail page for token 1 loads core metadata", async ({ page }) => {
-  await page.goto("/detail/1");
+  await goto(page, "/detail/1");
   await expect(page.getByRole("heading", { name: /#000001/i })).toBeVisible();
   await expect(page.getByText(/^Owner$/)).toBeVisible();
   await expect(page.getByText(/order book/i)).toHaveCount(0);
@@ -70,13 +75,14 @@ test("detail page for token 1 loads core metadata", async ({ page }) => {
 });
 
 test("home page passes an axe smoke check", async ({ page }) => {
-  await page.goto("/");
+  await goto(page, "/");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
 
 test("gallery renders a single page of NFTs and supports page navigation", async ({ page }) => {
-  await page.goto("/gallery");
+  await goto(page, "/gallery");
   await expect(page.getByText(/Page 1 of/i)).toBeVisible();
   await expect(page.locator('a[href^="/detail/"]')).toHaveCount(24);
 
@@ -87,7 +93,7 @@ test("gallery renders a single page of NFTs and supports page navigation", async
 });
 
 test("gallery beauty filter persists in the URL", async ({ page }) => {
-  await page.goto("/gallery");
+  await goto(page, "/gallery");
   await page.getByLabel(/sort/i).selectOption("beauty");
   await page.getByRole("button", { name: /apply/i }).click();
   await expect(page).toHaveURL(/sortBy=beauty/);
@@ -95,7 +101,7 @@ test("gallery beauty filter persists in the URL", async ({ page }) => {
 });
 
 test("gallery token search applies a query filter", async ({ page }) => {
-  await page.goto("/gallery");
+  await goto(page, "/gallery");
   await page.getByLabel(/search token id/i).fill("1");
   await page.getByRole("button", { name: /apply/i }).click();
   await expect(page).toHaveURL(/query=1/);
@@ -110,12 +116,12 @@ test("marketplace route redirects to Axiom Zero", async ({ request }) => {
 });
 
 test("random image page links to an NFT detail page", async ({ page }) => {
-  await page.goto("/random");
+  await goto(page, "/random");
   await expect(page.locator('a[href^="/detail/"]')).toBeVisible();
 });
 
 test("open source page includes the full reproduction guide", async ({ page }) => {
-  await page.goto("/code");
+  await goto(page, "/code");
   await expect(page.getByText(/python3 randomWalkGen\.py 3456/i)).toBeVisible();
 
   await page.getByRole("tab", { name: /dependencies/i }).click();
@@ -126,11 +132,11 @@ test("open source page includes the full reproduction guide", async ({ page }) =
 });
 
 test("invalid NFT detail route returns not found", async ({ page }) => {
-  await page.goto("/detail/not-a-number");
+  await goto(page, "/detail/not-a-number");
   await expect(page.getByText(/does not exist|not found|could not be found/i)).toBeVisible();
 });
 
 test("mint page renders heading", async ({ page }) => {
-  await page.goto("/mint");
+  await goto(page, "/mint");
   await expect(page.getByRole("heading", { name: /random walk|sale opens/i })).toBeVisible();
 });

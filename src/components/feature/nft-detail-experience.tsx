@@ -88,7 +88,7 @@ export function NftDetailExperience({
   const pathname = usePathname();
   const router = useRouter();
   const publicClient = usePublicClient();
-  const { address, isConnected, isWrongNetwork } = useWalletStatus();
+  const { address, canTransact, isConnected, isWrongNetwork } = useWalletStatus();
   const [theme, setTheme] = useState<AssetTheme>(initialTheme);
   const [activeMedia, setActiveMedia] = useState<AssetVariant>(initialMedia);
   const [modal, setModal] = useState<AssetVariant | null>(initialMedia);
@@ -274,8 +274,8 @@ export function NftDetailExperience({
       throw new Error("Name cannot be empty.");
     }
 
-    if (!publicClient || !address) {
-      throw new Error("Connect your wallet to continue.");
+    if (!publicClient || !address || !canTransact) {
+      throw new Error(`Connect your wallet on ${getChainDisplayName()} to continue.`);
     }
 
     const renamePrepared = await prepareContractWrite({
@@ -301,8 +301,8 @@ export function NftDetailExperience({
       throw new Error("Enter a valid wallet address.");
     }
 
-    if (!publicClient || !address) {
-      throw new Error("Connect your wallet to continue.");
+    if (!publicClient || !address || !canTransact) {
+      throw new Error(`Connect your wallet on ${getChainDisplayName()} to continue.`);
     }
 
     const transferPrepared = await prepareContractWrite({
@@ -540,7 +540,12 @@ export function NftDetailExperience({
                         value={transferAddress}
                         onChange={(event) => setTransferAddress(event.target.value)}
                       />
-                      <Button onClick={() => void runMutation(transferToken)}>Send</Button>
+                      <Button
+                        disabled={isMutating || !canTransact}
+                        onClick={() => void runMutation(transferToken)}
+                      >
+                        Send
+                      </Button>
                     </div>
                   </div>
 
@@ -555,7 +560,12 @@ export function NftDetailExperience({
                         value={tokenName}
                         onChange={(event) => setTokenName(event.target.value)}
                       />
-                      <Button onClick={() => void runMutation(renameToken)}>Update</Button>
+                      <Button
+                        disabled={isMutating || !canTransact}
+                        onClick={() => void runMutation(renameToken)}
+                      >
+                        Update
+                      </Button>
                     </div>
                   </div>
 

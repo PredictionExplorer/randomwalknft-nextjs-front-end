@@ -33,6 +33,30 @@ function getPluralAlternatives(): Partial<Record<RequiredEnvKey, string | undefi
 
 const VALID_NETWORKS = new Set(["local", "sepolia", "mainnet"]);
 
+function isValidSiteOrigin(value: string | undefined, network: string): boolean {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    const normalizedValue = value.trim().replace(/\/+$/, "");
+    const validProtocol =
+      url.protocol === "https:" || (network === "local" && url.protocol === "http:");
+
+    return (
+      validProtocol &&
+      !url.username &&
+      !url.password &&
+      !url.search &&
+      !url.hash &&
+      url.origin === normalizedValue
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Static `process.env.NEXT_PUBLIC_*` reads — required for client bundle inlining.
  */
@@ -58,6 +82,9 @@ export function getMissingEnvKeys(): RequiredEnvKey[] {
   const net = snap.NEXT_PUBLIC_NETWORK?.trim().toLowerCase();
   if (!net || !VALID_NETWORKS.has(net)) {
     return ["NEXT_PUBLIC_NETWORK"];
+  }
+  if (!isValidSiteOrigin(snap.NEXT_PUBLIC_SITE_URL, net)) {
+    return ["NEXT_PUBLIC_SITE_URL"];
   }
   return [];
 }

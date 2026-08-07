@@ -17,7 +17,7 @@
     "test:unit": "vitest run --coverage",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:functional": "playwright test tests/e2e/public.spec.ts tests/e2e/wallet.spec.ts",
+    "test:e2e:functional": "playwright test tests/e2e/public.spec.ts tests/e2e/wallet.spec.ts tests/e2e/wallet-mobile.spec.ts --workers=4 && playwright test tests/e2e/hydration.spec.ts --project=chromium --workers=2",
     "test:e2e:visual": "playwright test tests/e2e/visual.spec.ts",
     "test:e2e:visual:update": "playwright test tests/e2e/visual.spec.ts --update-snapshots",
     "test:e2e:headed": "playwright test --headed",

@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 import { encodeFunctionData, formatEther, getAddress } from "viem";
-import { usePublicClient, useReadContract, useWaitForTransactionReceipt, useWalletClient } from "wagmi";
+import { usePublicClient, useReadContract, useWaitForTransactionReceipt } from "wagmi";
 import { toast } from "sonner";
 
 import { trackEvent } from "@/lib/analytics";
@@ -44,8 +44,17 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
   const publicClient = usePublicClient();
   const configuredChain = getConfiguredEvmChain();
   const configuredChainId = configuredChain.id;
-  const { data: walletClient } = useWalletClient({ chainId: configuredChainId });
-  const { address, isConnected, isReady, chain, isWrongNetwork } = useWalletStatus();
+  const {
+    address,
+    canTransact,
+    isConnected,
+    isReady,
+    isWalletClientFetching,
+    chain,
+    isWrongNetwork,
+    refetchWalletClient,
+    walletClient
+  } = useWalletStatus();
   const { data: mintPrice, isLoading: isMintPriceLoading } = useReadContract({
     address: NFT_ADDRESS,
     abi: nftAbi,
@@ -114,7 +123,12 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         toast.error(`Switch your wallet to ${getChainDisplayName()} (chain id ${configuredChainId}) before minting.`);
         return;
       }
-      if (!walletClient) {
+      let activeWalletClient = walletClient;
+      if (!activeWalletClient) {
+        const refreshedWalletClient = await refetchWalletClient();
+        activeWalletClient = refreshedWalletClient.data;
+      }
+      if (!activeWalletClient) {
         toast.error("Wallet client not ready. Reconnect your wallet and try again.");
         return;
       }
@@ -161,7 +175,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
       });
       const feeFields = await estimateBufferedTransactionFees(publicClient);
       // Explicit to + data: some wallets mishandle writeContract(request) serialization.
-      const submittedHash = await walletClient.sendTransaction({
+      const submittedHash = await activeWalletClient.sendTransaction({
         account: address,
         chain: configuredChain,
         to: nftTarget,
@@ -257,11 +271,19 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
             type="button"
             onClick={handleMint}
             disabled={
-              isMinting || !isSaleOpen || isMintPriceLoading || mintPrice == null || !isReady
+              isMinting ||
+              !isSaleOpen ||
+              isMintPriceLoading ||
+              mintPrice == null ||
+              !canTransact
             }
             className="inline-flex h-12 items-center justify-center rounded-full border border-[#9b4aaf] bg-[#9b4aaf] px-7 text-sm font-bold tracking-wide text-white shadow-[0_0_24px_rgba(155,74,175,0.5)] transition hover:bg-[#8a3f9d] hover:shadow-[0_0_32px_rgba(155,74,175,0.65)] disabled:pointer-events-none disabled:opacity-50"
           >
-            {isMinting ? "Minting..." : "Mint now"}
+            {isMinting
+              ? "Minting..."
+              : isReady && isWalletClientFetching
+                ? "Preparing wallet..."
+                : "Mint now"}
           </button>
           <p className="text-sm text-muted-foreground">
             The app sends a small refundable buffer on mint so price changes while you sign are less likely to cause a failure.

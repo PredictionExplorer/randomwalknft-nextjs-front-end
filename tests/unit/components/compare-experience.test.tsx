@@ -8,13 +8,28 @@ import { CompareExperience } from "@/components/feature/compare-experience";
 import { server } from "../../setup/msw/server";
 
 const signMessageAsync = vi.fn();
+const walletClient = {
+  account: {
+    address: "0x0000000000000000000000000000000000000001"
+  }
+};
 
 vi.mock("wagmi", () => ({
   useAccount: () => ({
     address: "0x0000000000000000000000000000000000000001",
-    isConnected: true
+    chain: { id: 31337 },
+    isConnected: true,
+    isConnecting: false,
+    isReconnecting: false,
+    status: "connected"
   }),
-  useSignMessage: () => ({ signMessageAsync })
+  useSignMessage: () => ({ signMessageAsync }),
+  useWalletClient: () => ({
+    data: walletClient,
+    error: null,
+    isFetching: false,
+    refetch: vi.fn().mockResolvedValue({ data: walletClient })
+  })
 }));
 
 vi.mock("@/lib/web3/evm-chain", async () => {

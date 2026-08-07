@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useAccount, useSignMessage } from "wagmi";
+import { useSignMessage } from "wagmi";
 import { z } from "zod";
 
 import { PageHeading } from "@/components/common/page-heading";
@@ -13,8 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageShell } from "@/components/common/page-shell";
+import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { buildBeautyVoteMessage } from "@/lib/web3/beauty-vote-message";
-import { getConfiguredEvmChain } from "@/lib/web3/evm-chain";
+import { getChainDisplayName, getConfiguredEvmChain } from "@/lib/web3/evm-chain";
+import { showWalletError } from "@/lib/web3/wallet-toast";
+import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { createAssetUrls } from "@/lib/utils";
 
 const compareResponseSchema = z.object({
@@ -81,7 +84,7 @@ async function submitVote(payload: {
 
 export function CompareExperience() {
   const queryClient = useQueryClient();
-  const { address, isConnected } = useAccount();
+  const { address, canTransact, isConnected, isReady } = useWalletStatus();
   const { signMessageAsync } = useSignMessage();
   const [relaxedVoter, setRelaxedVoter] = useState<string | null>(null);
   const voter = isConnected && address ? address : undefined;
@@ -108,6 +111,10 @@ export function CompareExperience() {
       winner: number;
       signNonce: string;
     }) => {
+      if (!canTransact) {
+        throw new Error(`Connect your wallet on ${getChainDisplayName()} to vote.`);
+      }
+
       const chainId = getConfiguredEvmChain().id;
       const message = buildBeautyVoteMessage({
         chainId,
@@ -137,7 +144,7 @@ export function CompareExperience() {
         await queryClient.invalidateQueries({ queryKey: ["compare-pair"] });
         return;
       }
-      toast.error(e.message || "Could not submit the vote.");
+      showWalletError(e);
     }
   });
 
@@ -191,6 +198,14 @@ export function CompareExperience() {
         </p>
       ) : null}
 
+      {!isReady ? (
+        <WalletStatusCard
+          disconnectedTitle="Wallet required"
+          disconnectedBody={`Connect a wallet on ${getChainDisplayName()} to vote.`}
+          wrongNetworkBody={`Switch to ${getChainDisplayName()} before signing your vote.`}
+        />
+      ) : null}
+
       {votingBlocked ? (
         <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4 text-sm">
           <p className="text-muted-foreground">
@@ -216,7 +231,7 @@ export function CompareExperience() {
             <NftCard id={id} image={createAssetUrls(id).blackThumb} href={`/detail/${id}`} />
             <Button
               className="w-full"
-              disabled={voteMutation.isPending || !isConnected || votingBlocked}
+              disabled={voteMutation.isPending || !canTransact || votingBlocked}
               onClick={() =>
                 voteMutation.mutate({
                   firstId,

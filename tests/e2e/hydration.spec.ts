@@ -40,7 +40,11 @@ for (const route of pages) {
       }
     });
 
-    await page.goto(route, { waitUntil: "networkidle" });
+    await page.goto(route, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("body")).toBeVisible();
+    // Hydration completes after DOMContentLoaded; do not wait for media and
+    // wallet transports that can intentionally keep the network active.
+    await page.waitForTimeout(750);
 
     expect(
       hydrationErrors,

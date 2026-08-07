@@ -9,7 +9,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getBaseConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
-import { getWagmiConfig } from "@/lib/web3/wagmi";
+import { getServerWagmiConfig } from "@/lib/web3/wagmi";
 
 import "@/app/globals.css";
 
@@ -69,7 +69,7 @@ export async function buildRootMetadata(): Promise<Metadata> {
 
 export async function RootLayoutShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const cookie = (await headers()).get("cookie");
-  const initialState = cookieToInitialState(getWagmiConfig(), cookie);
+  const initialState = cookieToInitialState(getServerWagmiConfig(), cookie);
   const { NFT_ADDRESS } = await getAppConfig();
 
   return (

@@ -9,8 +9,9 @@ import { Toaster } from "sonner";
 
 import type { ContractsContextValue } from "@/components/providers/contracts-context";
 import { ContractsProvider } from "@/components/providers/contracts-context";
-import { getWagmiConfig } from "@/lib/web3/wagmi";
+import { WalletLifecycleBridge } from "@/components/wallet/wallet-lifecycle-bridge";
 import { getRainbowKitAppInfo, rainbowKitTheme } from "@/lib/web3/rainbowkit";
+import { getWagmiConfig } from "@/lib/web3/wagmi-client";
 
 type AppProvidersProps = {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ export function AppProviders({ children, initialState, contracts }: AppProviders
       <WagmiProvider config={getWagmiConfig()} initialState={initialState}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider appInfo={getRainbowKitAppInfo()} modalSize="compact" theme={rainbowKitTheme}>
+            <WalletLifecycleBridge />
             {children}
           </RainbowKitProvider>
         <Toaster position="top-right" richColors />

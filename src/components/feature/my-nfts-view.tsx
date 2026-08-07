@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
 
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
@@ -8,20 +8,23 @@ import { NftGrid } from "@/components/nft/nft-grid";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useContracts } from "@/components/providers/contracts-context";
+import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { nftAbi } from "@/generated/wagmi";
 import { useMounted } from "@/lib/use-mounted";
+import { getChainDisplayName } from "@/lib/web3/evm-chain";
+import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 
 export function MyNftsView() {
   const { NFT_ADDRESS } = useContracts();
   const mounted = useMounted();
-  const { address, isConnected } = useAccount();
+  const { address, isReady } = useWalletStatus();
   const { data, error: readError, isError: readFailed } = useReadContract({
     address: NFT_ADDRESS,
     abi: nftAbi,
     functionName: "walletOfOwner",
     args: address ? [address] : undefined,
     query: {
-      enabled: Boolean(address)
+      enabled: Boolean(address && isReady)
     }
   });
 
@@ -46,10 +49,12 @@ export function MyNftsView() {
 
       {!mounted ? (
         <Skeleton className="h-48 w-full" />
-      ) : !isConnected ? (
-        <Card>
-          <CardContent className="p-6 text-muted-foreground">Connect your wallet to view your NFTs.</CardContent>
-        </Card>
+      ) : !isReady ? (
+        <WalletStatusCard
+          disconnectedTitle="Wallet required"
+          disconnectedBody="Connect your wallet to view your NFTs."
+          wrongNetworkBody={`Switch to ${getChainDisplayName()} to load your NFTs.`}
+        />
       ) : awaitingWalletOfOwner ? (
         <Skeleton className="min-h-[24rem] w-full" />
       ) : readFailed ? (

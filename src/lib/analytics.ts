@@ -3,6 +3,7 @@ export type AnalyticsEvent =
   | "wallet_connect_attempt"
   | "wallet_connect_success"
   | "wallet_connect_error"
+  | "wallet_session_recovered"
   | "wallet_switch_network"
   | "gallery_filter_changed"
   | "transaction_submitted"

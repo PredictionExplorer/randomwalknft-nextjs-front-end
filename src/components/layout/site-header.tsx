@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { ChevronDown, Menu, Wallet } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { PageShell } from "@/components/common/page-shell";
 import { ConnectWalletButton } from "@/components/layout/connect-wallet-button";
@@ -64,6 +65,7 @@ function WalletButtonPlaceholder() {
 export function SiteHeader() {
   const pathname = usePathname();
   const mounted = useMounted();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/84 backdrop-blur-xl">
@@ -135,7 +137,7 @@ export function SiteHeader() {
           {mounted ? <ConnectWalletButton /> : <WalletButtonPlaceholder />}
         </div>
 
-        <Sheet>
+        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="ml-auto lg:hidden" aria-label="Open navigation">
               <Menu className="h-4 w-4" />
@@ -177,7 +179,11 @@ export function SiteHeader() {
               <div className={cn(buttonVariants({ variant: "ghost" }), "justify-start px-0")}>
                 <Link href="/my-nfts">My NFTs</Link>
               </div>
-              {mounted ? <ConnectWalletButton /> : <WalletButtonPlaceholder />}
+              {mounted ? (
+                <ConnectWalletButton onBeforeOpen={() => setMobileNavOpen(false)} />
+              ) : (
+                <WalletButtonPlaceholder />
+              )}
             </div>
           </SheetContent>
         </Sheet>

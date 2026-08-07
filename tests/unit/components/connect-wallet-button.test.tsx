@@ -81,6 +81,19 @@ describe("ConnectWalletButton", () => {
     expect(openConnectModal).toHaveBeenCalledTimes(1);
   });
 
+  it("closes a parent mobile menu before opening the wallet modal", async () => {
+    const onBeforeOpen = vi.fn();
+    const ConnectWalletButton = await loadComponent({});
+    render(<ConnectWalletButton onBeforeOpen={onBeforeOpen} />);
+
+    await userEvent.click(screen.getByRole("button", { name: /connect wallet/i }));
+
+    expect(onBeforeOpen).toHaveBeenCalledTimes(1);
+    expect(onBeforeOpen.mock.invocationCallOrder[0]).toBeLessThan(
+      openConnectModal.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY
+    );
+  });
+
   it("renders a switch-network action when the connected chain is unsupported", async () => {
     const ConnectWalletButton = await loadComponent({
       account: {

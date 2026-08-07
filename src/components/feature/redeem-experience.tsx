@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { zeroAddress } from "viem";
 import { usePublicClient, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { toast } from "sonner";
@@ -24,7 +25,7 @@ import { getChainDisplayName } from "@/lib/web3/evm-chain";
 export function RedeemExperience() {
   const { NFT_ADDRESS } = useContracts();
   const publicClient = usePublicClient();
-  const { address, isReady } = useWalletStatus();
+  const { address, canTransact, isReady } = useWalletStatus();
   const { data: withdrawalSeconds } = useReadContract({
     address: NFT_ADDRESS,
     abi: nftAbi,
@@ -45,14 +46,17 @@ export function RedeemExperience() {
     functionName: "withdrawalAmount"
   });
   const { writeContractAsync, data: hash, isPending } = useWriteContract();
-  const { isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const seconds = Number(withdrawalSeconds ?? 0n);
   const amount = Number(withdrawalAmount ?? 0n) / 1e18;
 
-  if (isSuccess) {
-    toast.success("Withdrawal completed.");
-  }
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Withdrawal completed.");
+      trackEvent("transaction_confirmed", { flow: "redeem" });
+    }
+  }, [isSuccess]);
 
   return (
     <PageShell className="space-y-10 py-16">
@@ -133,8 +137,8 @@ export function RedeemExperience() {
           <Button
             onClick={async () => {
               try {
-                if (!publicClient || !address) {
-                  throw new Error("Connect your wallet to continue.");
+                if (!publicClient || !address || !canTransact) {
+                  throw new Error(`Connect your wallet on ${getChainDisplayName()} to continue.`);
                 }
 
                 const prepared = await prepareContractWrite({
@@ -162,9 +166,9 @@ export function RedeemExperience() {
                 showWalletError(error);
               }
             }}
-            disabled={isPending}
+            disabled={isPending || isConfirming || !canTransact}
           >
-            {isPending ? "Submitting..." : "Withdraw now"}
+            {isPending ? "Submitting..." : isConfirming ? "Confirming..." : "Withdraw now"}
           </Button>
         </CardContent>
       </Card>
