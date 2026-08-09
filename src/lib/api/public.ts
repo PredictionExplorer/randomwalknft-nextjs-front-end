@@ -17,7 +17,7 @@ import type { tokenDetailSchema } from "@/lib/api/schemas";
 
 import { nftAbi } from "@/generated/wagmi";
 import type { HomepageStats, Nft } from "@/lib/types";
-import { dailyFeaturedTokenIds, getUtcDayKey } from "@/lib/featured-tokens";
+import { dailyFeaturedTokenIds, getUtcDayKey, sampleFeaturedTokenIds } from "@/lib/featured-tokens";
 import { createAssetUrls } from "@/lib/utils";
 import { publicClient } from "@/lib/web3/public-client";
 
@@ -137,37 +137,27 @@ export const getTokenInfo = cache(async (tokenId: number) => {
   return fetchRwalk(`tokens/info/${tokenId}`, { revalidate: REVALIDATE_SHORT }, tokenInfoSchema);
 });
 
-function normalizeTokenIds(raw: unknown): number[] {
-  if (!Array.isArray(raw)) {
+/**
+ * Unique random token ids sampled from the minted supply, fresh on every call. Reads totalSupply
+ * from the chain (like /api/random-token) because the backend explore/random endpoint returns a
+ * constant list. Returns an empty array when the supply read fails so callers degrade gracefully.
+ */
+export async function getRandomMintedTokenIds(count: number): Promise<number[]> {
+  try {
+    const { NFT_ADDRESS } = await getAppConfig();
+    const totalSupply = Number(
+      (await publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "totalSupply"
+      })) as bigint
+    );
+
+    const pool = Array.from({ length: Math.max(0, totalSupply) }, (_, tokenId) => tokenId);
+    return sampleFeaturedTokenIds(pool, count);
+  } catch {
     return [];
   }
-
-  return raw
-    .map((id) => {
-      if (typeof id === "number") return id;
-      if (typeof id === "string" && id.trim() !== "") return Number(id);
-      return Number.NaN;
-    })
-    .filter((n) => Number.isSafeInteger(n) && n >= 0);
-}
-
-export const getRandomTokenIds = cache(async (): Promise<number[]> => {
-  const raw = await fetchApi<unknown>("api/randomwalk/explore/random?limit=12", {
-    revalidate: REVALIDATE_SHORT
-  });
-  // Go encodes a nil slice as JSON `null`; treat as empty.
-  return normalizeTokenIds(raw);
-});
-
-/**
- * Same as getRandomTokenIds but bypasses Next.js Data Cache. Use on /random so each navigation
- * (including client <Link>) refetches the explore pool and re-runs server-side random choice.
- */
-export async function getRandomTokenIdsFresh(): Promise<number[]> {
-  const raw = await fetchApi<unknown>("api/randomwalk/explore/random?limit=12", {
-    cache: "no-store"
-  });
-  return normalizeTokenIds(raw);
 }
 
 let homepageFeaturedCache: { dayKey: string; tokenIds: number[] } | null = null;

@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 
 import { MintExperience } from "@/components/feature/mint-experience";
-import { getRandomTokenIds } from "@/lib/api/public";
+import { getRandomMintedTokenIds } from "@/lib/api/public";
+
+/** The featured rail must be resampled on every visit, including client navigations. */
+export const dynamic = "force-dynamic";
+
+const FEATURED_RAIL_COUNT = 12;
 
 export const metadata: Metadata = {
   title: "Mint",
@@ -16,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MintPage() {
-  const featuredIds = await getRandomTokenIds();
+  noStore();
+  const featuredIds = await getRandomMintedTokenIds(FEATURED_RAIL_COUNT);
   return <MintExperience featuredIds={featuredIds} />;
 }

@@ -314,7 +314,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1" data-testid="mint-featured-rail">
           {featuredIds.map((id) => (
             <NftCard key={id} id={id} image={createAssetUrls(id).blackThumb} href={`/detail/${id}`} />
           ))}

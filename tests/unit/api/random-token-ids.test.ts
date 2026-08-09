@@ -1,51 +1,68 @@
 // @vitest-environment node
 
-import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { server } from "../../setup/msw/server";
+const { readContract } = vi.hoisted(() => ({
+  readContract: vi.fn()
+}));
 
-const API_BASE_URL = "https://api.test.example.com";
+vi.mock("@/lib/web3/public-client", () => ({
+  publicClient: { readContract }
+}));
 
-describe("random token id API helpers", () => {
+function mockTotalSupply(totalSupply: bigint) {
+  readContract.mockImplementation(({ functionName }: { functionName: string }) => {
+    if (functionName === "totalSupply") {
+      return Promise.resolve(totalSupply);
+    }
+    return Promise.reject(new Error(`Unexpected contract read: ${functionName}`));
+  });
+}
+
+describe("getRandomMintedTokenIds", () => {
   beforeEach(() => {
     vi.resetModules();
+    readContract.mockReset();
   });
 
-  it("fetches the explore pool and normalizes token IDs", async () => {
-    let capturedUrl: string | undefined;
-    server.use(
-      http.get(`${API_BASE_URL}/api/randomwalk/explore/random`, ({ request }) => {
-        capturedUrl = request.url;
-        return HttpResponse.json([7, "8", -1, "not-a-token", "", null, 2.5, "Infinity", 0]);
-      })
-    );
+  it("samples unique token ids within the minted range", async () => {
+    mockTotalSupply(5_000n);
 
-    const { getRandomTokenIds } = await import("@/lib/api/public");
+    const { getRandomMintedTokenIds } = await import("@/lib/api/public");
 
-    await expect(getRandomTokenIds()).resolves.toEqual([7, 8, 0]);
-    expect(new URL(capturedUrl!).searchParams.get("limit")).toBe("12");
+    const ids = await getRandomMintedTokenIds(12);
+
+    expect(ids).toHaveLength(12);
+    expect(new Set(ids).size).toBe(12);
+    for (const id of ids) {
+      expect(id).toBeGreaterThanOrEqual(0);
+      expect(id).toBeLessThan(5_000);
+    }
   });
 
-  it("treats a backend null pool as empty", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/api/randomwalk/explore/random`, () => HttpResponse.json(null))
-    );
+  it("clamps the sample when fewer tokens are minted than requested", async () => {
+    mockTotalSupply(3n);
 
-    const { getRandomTokenIds } = await import("@/lib/api/public");
+    const { getRandomMintedTokenIds } = await import("@/lib/api/public");
 
-    await expect(getRandomTokenIds()).resolves.toEqual([]);
+    const ids = await getRandomMintedTokenIds(12);
+
+    expect([...ids].sort((a, b) => a - b)).toEqual([0, 1, 2]);
   });
 
-  it("applies the same normalization when bypassing the data cache", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/api/randomwalk/explore/random`, () =>
-        HttpResponse.json(["3", 4, -2, "bad"])
-      )
-    );
+  it("returns an empty pool when no tokens are minted", async () => {
+    mockTotalSupply(0n);
 
-    const { getRandomTokenIdsFresh } = await import("@/lib/api/public");
+    const { getRandomMintedTokenIds } = await import("@/lib/api/public");
 
-    await expect(getRandomTokenIdsFresh()).resolves.toEqual([3, 4]);
+    await expect(getRandomMintedTokenIds(12)).resolves.toEqual([]);
+  });
+
+  it("returns an empty pool when the supply read fails", async () => {
+    readContract.mockRejectedValue(new Error("RPC unavailable"));
+
+    const { getRandomMintedTokenIds } = await import("@/lib/api/public");
+
+    await expect(getRandomMintedTokenIds(12)).resolves.toEqual([]);
   });
 });

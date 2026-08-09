@@ -16,11 +16,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getHomepageStats } from "@/lib/api/public";
 import { homepageCosmicSignature, homepageHowItWorks, homepageTrustCards } from "@/lib/content/homepage";
 import { AXIOM_ZERO_MARKETPLACE_URL, getBaseConfig } from "@/lib/config";
-import { selectFeaturedTokensForDisplay } from "@/lib/featured-tokens";
+import { selectFeaturedTokens } from "@/lib/featured-tokens";
 import { getAppConfig } from "@/lib/server/app-config";
 import { arbiscanContractUrl, createAssetUrls, formatCompactNumber, formatEth, formatId } from "@/lib/utils";
 
-/** Keep collection stats fresh while the featured pool itself stays stable for each UTC day. */
+/** The featured pool stays stable for each UTC day; the displayed trio rotates on every visit. */
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,7 +36,7 @@ export default async function HomePage() {
   noStore();
   const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const stats = await getHomepageStats();
-  const { featuredId, featuredCards } = selectFeaturedTokensForDisplay(stats.featuredTokenIds);
+  const { featuredId, featuredCards } = selectFeaturedTokens(stats.featuredTokenIds);
 
   return (
     <div className="relative overflow-hidden">

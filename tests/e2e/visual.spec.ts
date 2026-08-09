@@ -94,6 +94,7 @@ test.describe("visual regressions", () => {
     await expect(page).toHaveScreenshot("mint-desktop.png", {
       animations: "disabled",
       fullPage: true,
+      mask: [page.getByTestId("mint-featured-rail")],
       maxDiffPixelRatio: 0.02
     });
   });
