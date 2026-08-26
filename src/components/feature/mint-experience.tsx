@@ -13,6 +13,7 @@ import { nftAbi } from "@/generated/wagmi";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { Countdown } from "@/components/common/countdown";
 import { ExternalLink } from "@/components/common/external-link";
+import { MintRevealTheater } from "@/components/feature/mint-reveal-theater";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { NftCard } from "@/components/nft/nft-card";
@@ -74,6 +75,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
   const [isMinting, setIsMinting] = useState(false);
   const { isSuccess: mintConfirmed } = useWaitForTransactionReceipt({ hash: mintTxHash });
   const [countdownCompleted, setCountdownCompleted] = useState(false);
+  const [reveal, setReveal] = useState<{ tokenId: number; seed: string } | null>(null);
 
   useEffect(() => {
     if (!mintTxHash || !mintConfirmed || !publicClient) {
@@ -92,7 +94,21 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         tokenId,
         flow: "mint"
       });
-      router.push(`/detail/${tokenId}?message=success` as Route);
+
+      // Reveal theater: draw the new work live from its on-chain seed while the
+      // backend renders the full media. Falls back to a direct redirect if the
+      // seed read fails.
+      try {
+        const seed = (await publicClient.readContract({
+          address: NFT_ADDRESS,
+          abi: nftAbi,
+          functionName: "seeds",
+          args: [BigInt(tokenId)]
+        })) as `0x${string}`;
+        setReveal({ tokenId, seed });
+      } catch {
+        router.push(`/detail/${tokenId}?message=success` as Route);
+      }
     });
   }, [mintTxHash, mintConfirmed, publicClient, router, NFT_ADDRESS]);
 
@@ -208,6 +224,13 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
 
   return (
     <PageShell className="space-y-10 py-16">
+      {reveal ? (
+        <MintRevealTheater
+          tokenId={reveal.tokenId}
+          seed={reveal.seed}
+          onView={() => router.push(`/detail/${reveal.tokenId}?message=success` as Route)}
+        />
+      ) : null}
       <Breadcrumbs
         items={[
           { href: "/", label: "Home" },
@@ -215,7 +238,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         ]}
       />
       <PageHeading
-        eyebrow="Mint a new NFT"
+        eyebrow="Mint a new work — and take the vault key"
         title={
           isSaleOpen
             ? [
@@ -228,6 +251,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
                 { text: "OPENS IN", tone: "primary" }
               ]
         }
+        description="Minting creates a seed nobody has ever seen, hangs six new works in the museum, resets the vault's 30-day clock, and makes you the keyholder."
       />
 
       {!isReady ? (
@@ -247,9 +271,16 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Withdrawal to mint ratio</CardTitle>
+                <CardTitle>Vault prize vs mint price</CardTitle>
               </CardHeader>
-              <CardContent>{mintPriceEth > 0 ? (withdrawalEth / mintPriceEth).toFixed(2) : "0.00"}</CardContent>
+              <CardContent className="space-y-1">
+                <p className="text-2xl font-semibold tabular-nums">
+                  {mintPriceEth > 0 ? `${(withdrawalEth / mintPriceEth).toFixed(0)}x` : "—"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {withdrawalEth > 0 ? `${withdrawalEth.toFixed(2)} ETH waits in the vault for the last minter.` : "The vault grows with every mint."}
+                </p>
+              </CardContent>
             </Card>
             <Card>
               <CardHeader>
@@ -293,15 +324,15 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
             {[
               {
                 title: "1. Mint your token",
-                body: "Your transaction creates a unique on-chain seed that will be used to generate your artwork."
+                body: "Your transaction creates a unique on-chain seed that will be used to generate your artwork — and hands you the vault key."
               },
               {
-                title: "2. Art is generated",
-                body: "Within minutes, the seed produces a high-resolution image and multiple video variants — all unique to your token."
+                title: "2. Watch it being born",
+                body: "Your walk draws itself live from the seed while the museum renders the full-resolution image and films, all unique to your token."
               },
               {
-                title: "3. Earn from the pool",
-                body: "If no one mints for 30 days, the last minter can claim half the ETH in the mint pool."
+                title: "3. Hold the key",
+                body: "You are now the last minter. If nobody mints for 30 days, you can open the vault and claim half the ETH inside."
               }
             ].map((item) => (
               <Card key={item.title}>
@@ -326,13 +357,17 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.24em] text-secondary">Why mint?</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Each mint adds a new unique work to the collection, contributes to the shared pool, and gives you a chance to earn if minting pauses.
+              Each mint adds a new unique work to the collection, feeds the vault, and makes you the keyholder — if minting pauses for 30 days, half the vault is yours.
             </p>
           </div>
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.24em] text-secondary">What you get</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              A CC0 on-chain token with a unique still image and multiple video variants, all generated from one seed.
+              A CC0 on-chain token with six works from one seed — plus utility in{" "}
+              <ExternalLink href="https://cosmicsignature.com/" className="text-secondary">
+                Cosmic Signature
+              </ExternalLink>
+              , where your NFT earns rewards when anchored or halves the cost of an ETH gesture.
             </p>
           </div>
           <div className="space-y-2">

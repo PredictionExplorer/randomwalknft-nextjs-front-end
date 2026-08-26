@@ -14,14 +14,24 @@ describe("SiteFooter", () => {
   it("renders internal navigation links with correct hrefs", () => {
     render(<SiteFooter />);
 
-    const marketplaceLink = screen.getByRole("link", { name: "Marketplace" });
+    const marketplaceLink = screen.getByRole("link", { name: "Marketplace on Axiom Zero" });
 
     expect(screen.getByRole("link", { name: "Collection" })).toHaveAttribute("href", "/gallery");
     expect(marketplaceLink).toHaveAttribute("href", AXIOM_ZERO_MARKETPLACE_URL);
     expect(marketplaceLink).toHaveAttribute("target", "_blank");
     expect(marketplaceLink).toHaveAttribute("rel", "noopener noreferrer");
     expect(screen.getByRole("link", { name: "Mint" })).toHaveAttribute("href", "/mint");
+    expect(screen.getByRole("link", { name: "The Vault" })).toHaveAttribute("href", "/vault");
+    expect(screen.getByRole("link", { name: "How It Works" })).toHaveAttribute("href", "/how-it-works");
     expect(screen.getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/faq");
+  });
+
+  it("links to Cosmic Signature with descriptive anchor text", () => {
+    render(<SiteFooter />);
+
+    const cosmicLink = screen.getByRole("link", { name: "Use your NFT in Cosmic Signature" });
+    expect(cosmicLink).toHaveAttribute("href", "https://cosmicsignature.com/");
+    expect(cosmicLink).toHaveAttribute("target", "_blank");
   });
 
   it("does not advertise a built-in zero-fee marketplace", () => {

@@ -18,6 +18,23 @@ Object.assign(process.env, {
 delete process.env.NEXT_PUBLIC_API_URLS;
 delete process.env.NEXT_PUBLIC_RPC_URLS;
 
+// jsdom does not implement matchMedia (used for prefers-reduced-motion checks).
+if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false
+    })
+  });
+}
+
 vi.mock("next/image", () => ({
   default: ({
     fill: _fill,

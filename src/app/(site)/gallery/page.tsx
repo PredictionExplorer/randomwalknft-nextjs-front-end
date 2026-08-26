@@ -16,19 +16,51 @@ import { buildCollectionSearchParams, parseCollectionQueryState } from "@/lib/qu
 import { createAssetUrls } from "@/lib/utils";
 import { publicClient } from "@/lib/web3/public-client";
 
-export const metadata: Metadata = {
-  title: "Gallery",
-  description:
-    "Browse the full Random Walk NFT collection. Sort by newest or community beauty score and explore generative art on Arbitrum.",
-  alternates: { canonical: "/gallery" },
-  openGraph: {
-    title: "Gallery | Random Walk NFT",
-    description:
-      "Browse the full Random Walk NFT collection. Sort by newest or community beauty score and explore generative art on Arbitrum."
-  }
-};
-
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+const GALLERY_DESCRIPTION =
+  "Browse the full Random Walk NFT collection. Sort by newest or community beauty score and explore generative art on Arbitrum.";
+
+export async function generateMetadata({
+  searchParams
+}: {
+  searchParams: SearchParams;
+}): Promise<Metadata> {
+  const state = parseCollectionQueryState(await searchParams);
+
+  // Wallet-filtered and search-result views: keep them out of the index to
+  // avoid crawl bloat (thousands of owner/query permutations).
+  if (state.address || state.query !== undefined) {
+    return {
+      title: "Gallery",
+      description: GALLERY_DESCRIPTION,
+      robots: { index: false, follow: true },
+      alternates: { canonical: "/gallery" }
+    };
+  }
+
+  // Paginated and sorted views are real, distinct content: self-referencing canonicals.
+  const params = new URLSearchParams();
+  if (state.sortBy !== "tokenId") {
+    params.set("sortBy", state.sortBy);
+  }
+  if (state.page > 1) {
+    params.set("page", String(state.page));
+  }
+  const suffix = params.toString();
+  const canonical = suffix ? `/gallery?${suffix}` : "/gallery";
+  const pageSuffix = state.page > 1 ? ` — page ${state.page}` : "";
+
+  return {
+    title: `Gallery${pageSuffix}`,
+    description: GALLERY_DESCRIPTION,
+    alternates: { canonical },
+    openGraph: {
+      title: `Gallery${pageSuffix} | Random Walk NFT`,
+      description: GALLERY_DESCRIPTION
+    }
+  };
+}
 
 export default async function GalleryPage({ searchParams }: { searchParams: SearchParams }) {
   const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
@@ -142,6 +174,26 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
         description={address ? `Showing NFTs owned by ${address.slice(0, 8)}...${address.slice(-4)}` : "Browse every Random Walk NFT — sort by newest or community beauty score."}
       />
 
+      <div className="flex flex-wrap gap-2" aria-label="Gallery rooms">
+        {[
+          { label: "Newest acquisitions", href: "/gallery", active: state.sortBy === "tokenId" && !state.address },
+          { label: "The most beautiful", href: "/gallery?sortBy=beauty", active: state.sortBy === "beauty" && !state.address },
+          { label: "A random work", href: "/random", active: false }
+        ].map((room) => (
+          <a
+            key={room.label}
+            href={room.href}
+            className={`rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.18em] transition ${
+              room.active
+                ? "border-secondary bg-secondary/15 text-secondary"
+                : "border-border/70 text-muted-foreground hover:border-secondary/50 hover:text-foreground"
+            }`}
+          >
+            {room.label}
+          </a>
+        ))}
+      </div>
+
       <CollectionToolbar state={state} />
 
       <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
@@ -176,7 +228,16 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
         </div>
       ) : null}
 
-      <NftGrid ids={pageData.items} view={view} emptyMessage="No NFTs found for this wallet." />
+      <NftGrid
+        ids={pageData.items}
+        view={view}
+        emptyMessage="No NFTs found for this wallet."
+        rankOffset={
+          sortBy === "beauty" && !address && query === undefined
+            ? (pageData.page - 1) * PAGE_SIZE
+            : undefined
+        }
+      />
       <Pager pathname="/gallery" page={pageData.page} totalPages={pageData.totalPages} searchParams={pagerParams} />
     </PageShell>
   );

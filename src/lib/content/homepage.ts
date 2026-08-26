@@ -1,79 +1,58 @@
 import type { TrustSectionContent } from "@/lib/types";
 
-export const homepageTrustCards: TrustSectionContent[] = [
+/**
+ * The Charter: the museum's standing guarantees, consolidated in one place.
+ * Also rendered on /faq and exported to llms-full.txt.
+ */
+export const homepageCharter: TrustSectionContent[] = [
   {
-    eyebrow: "Verified contracts",
-    title: "Fully transparent on-chain",
+    eyebrow: "Immutable contract",
+    title: "The rules can never change",
     body:
-      "The NFT contract is verified on Arbiscan. Anyone can inspect the exact logic behind minting, ownership, naming, and withdrawals before committing a single transaction.",
-    href: "https://arbiscan.io",
-    linkLabel: "View on Arbiscan"
+      "The smart contract that runs this collection has no admin keys and cannot be upgraded. Nobody — including the creators — can alter the rules, pause the game, or take ETH out of the vault by any path other than the one written into the code in 2021.",
+    href: "https://arbiscan.io/address/0x895a6F444BE4ba9d124F61DF736605792B35D66b#code",
+    linkLabel: "Read the verified contract"
   },
   {
-    eyebrow: "Collector-aligned economics",
-    title: "Mint value flows back to you",
+    eyebrow: "Zero creator fees",
+    title: "Every wei goes into the vault",
     body:
-      "This is not a creator cash-grab. If no one mints for 30 days, the most recent minter can withdraw half of the accumulated mint pool — keeping the economics aligned with collectors."
+      "The creators take nothing from minting. All ETH paid for mints goes into the contract's prize pool, where the last-minter game decides who claims it. The creators minted early like everyone else — that is their only stake."
   },
   {
     eyebrow: "CC0 public domain",
-    title: "Own it, remix it, share it",
+    title: "The art belongs to everyone",
     body:
-      "All artwork is released under CC0 — completely public domain. You own the on-chain token and provenance, while the art itself stays free for anyone to use, remix, or build upon."
+      "Every artwork is released under CC0 — free for anyone to use, remix, or sell. What you own on-chain is the token itself: the seed, the provenance, the naming rights, and the place in the game."
+  },
+  {
+    eyebrow: "Open-source generator",
+    title: "Anyone can rebuild the art",
+    body:
+      "The Python program that turns seeds into images and films is open source and pinned on IPFS. If this website vanished tomorrow, every artwork could be regenerated from the chain by anyone, forever.",
+    href: "/code",
+    linkLabel: "See the generator source"
   }
 ];
 
-export const homepageHowItWorks = [
-  {
-    step: "01",
-    title: "Mint your NFT",
-    body:
-      "Each mint creates a unique on-chain seed. That seed is used to generate a one-of-a-kind still image and multiple motion variants — all tied to your token."
-  },
-  {
-    step: "02",
-    title: "Browse and collect",
-    body:
-      "Browse the collection ranked by community beauty scores. When you want the secondary market, continue to the Random Walk marketplace on Axiom Zero."
-  },
-  {
-    step: "03",
-    title: "Earn from the mint pool",
-    body:
-      "When minting pauses for 30 days, the last minter can claim half the ETH in the mint pool. The other half stays in the contract for future collectors."
-  }
-] as const;
-
-export const homepageCosmicSignature = {
-  eyebrow: "Cosmic Signature",
-  description:
-    "Random Walk NFTs are connected to Cosmic Signature, a procedural on-chain art protocol on Arbitrum where participants make gestures during Performance Cycles.",
-  href: "https://cosmicsignature.com/",
-  linkLabel: "Explore Cosmic Signature",
-  definitions: {
-    gesture:
-      "A protocol action on Cosmic Signature made with ETH or CST. Each gesture shapes the current Performance Cycle and records an entry for Stellar Selection.",
-    gestureCost:
-      "The live ETH or CST amount required to make a gesture. An unused Random Walk NFT can be attached once to an ETH gesture for a 50% cost reduction.",
-    anchored:
-      "Anchoring connects an NFT to the Cosmic Signature protocol without selling it, making Random Walk NFTs eligible for Anchored-NFT Stellar Selection.",
-    anchoredSelection:
-      "A cycle-end selection for anchored Random Walk NFT holders. Selected holders receive 1,000 CST and one Cosmic Signature NFT.",
-    cst:
-      "Cosmic Signature Token, the ERC-20 token used by the Cosmic Signature protocol."
-  },
-  utilityCards: [
+/** The Annex: Cosmic Signature utility, in plain language. */
+export const homepageAnnex = {
+  eyebrow: "The Annex",
+  heading: "What can you do with a Random Walk NFT?",
+  body:
+    "Beyond collecting and the vault game, Random Walk NFTs have live utility in Cosmic Signature, a closely related on-chain art protocol on Arbitrum by the same team. Holders can put their tokens to work there in two ways.",
+  cards: [
     {
-      eyebrow: "Anchor utility",
-      title: "Enter Anchored-NFT Stellar Selection",
+      title: "Anchor it for rewards",
       body:
-        "Anchor a Random Walk NFT on Cosmic Signature to become eligible for a cycle-end selection where chosen holders receive 1,000 CST and a Cosmic Signature NFT."
+        "Anchor a Random Walk NFT on Cosmic Signature — without selling it — to become eligible for Stellar Selection, where chosen holders receive 1,000 CST tokens and a Cosmic Signature NFT at the end of each cycle."
     },
     {
-      eyebrow: "Gesture utility",
-      title: "Receive a one-time 50% discount",
+      title: "Spend it for a 50% discount",
       body:
-        "Attach an unused Random Walk NFT to one ETH gesture to receive a 50% ETH Gesture Cost reduction. Once used for the discount, that token cannot be used for the same reduction again."
+        "Attach an unused Random Walk NFT to one ETH gesture on Cosmic Signature and pay half the usual cost. Each token can grant this discount once."
     }
-  ]
+  ],
+  href: "https://cosmicsignature.com/",
+  linkLabel: "Use your Random Walk NFT in Cosmic Signature"
 } as const;

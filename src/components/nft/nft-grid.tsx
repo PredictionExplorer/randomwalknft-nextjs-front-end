@@ -10,13 +10,16 @@ export function NftGrid({
   emptyDescription = "Try adjusting your filters or search criteria.",
   view = "gallery",
   /** Large lists (e.g. My NFTs): skip `AnimatedList` so cards are not stuck at opacity 0 with huge stagger delays. */
-  disableAnimation = false
+  disableAnimation = false,
+  /** When set, cards show a "Beauty rank #n" badge starting at this offset (0 = rank #1). */
+  rankOffset
 }: {
   ids: number[];
   emptyMessage?: string;
   emptyDescription?: string;
   view?: CollectionViewMode;
   disableAnimation?: boolean;
+  rankOffset?: number | undefined;
 }) {
   if (!ids.length) {
     return <EmptyState title={emptyMessage} description={emptyDescription} />;
@@ -27,8 +30,15 @@ export function NftGrid({
       ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
       : "grid gap-6 md:grid-cols-2 xl:grid-cols-3";
 
-  const cards = ids.map((id) => (
-    <NftCard key={id} id={id} image={createAssetUrls(id).blackThumb} href={`/detail/${id}`} compact={view === "compact"} />
+  const cards = ids.map((id, index) => (
+    <NftCard
+      key={id}
+      id={id}
+      image={createAssetUrls(id).blackThumb}
+      href={`/detail/${id}`}
+      compact={view === "compact"}
+      sublabel={rankOffset !== undefined ? `Beauty rank #${rankOffset + index + 1}` : undefined}
+    />
   ));
 
   if (disableAnimation) {

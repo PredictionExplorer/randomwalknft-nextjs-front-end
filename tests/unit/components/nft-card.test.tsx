@@ -13,7 +13,23 @@ describe("NftCard", () => {
       />
     );
 
-    expect(screen.getByAltText("Preview image for NFT #000042")).toBeInTheDocument();
+    expect(
+      screen.getByAltText(
+        "Random Walk NFT #000042 — generative random walk artwork from an on-chain seed"
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText("#000042")).toBeInTheDocument();
+  });
+
+  it("shows a sublabel badge when provided", () => {
+    render(
+      <NftCard
+        id={7}
+        image="https://assets.test.example.com/randomwalk/000007_black_thumb.jpg"
+        sublabel="Beauty rank #1"
+      />
+    );
+
+    expect(screen.getByText("Beauty rank #1")).toBeInTheDocument();
   });
 });

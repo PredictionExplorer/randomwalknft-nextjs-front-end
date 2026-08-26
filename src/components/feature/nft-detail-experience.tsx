@@ -574,7 +574,12 @@ export function NftDetailExperience({
                     <ExternalLink href={AXIOM_ZERO_MARKETPLACE_URL} className="text-secondary">
                       Axiom Zero
                     </ExternalLink>
-                    .
+                    . You can also{" "}
+                    <ExternalLink href="https://cosmicsignature.com/" className="text-secondary">
+                      use this Random Walk NFT in Cosmic Signature
+                    </ExternalLink>{" "}
+                    — anchor it for Stellar Selection rewards or attach it once for a 50% ETH
+                    gesture discount.
                   </p>
                 </div>
               ) : (
@@ -583,6 +588,13 @@ export function NftDetailExperience({
                   <Button asChild>
                     <ExternalLink href={AXIOM_ZERO_MARKETPLACE_URL}>Open Axiom Zero</ExternalLink>
                   </Button>
+                  <p>
+                    Holders can also{" "}
+                    <ExternalLink href="https://cosmicsignature.com/" className="text-secondary">
+                      use Random Walk NFTs in Cosmic Signature
+                    </ExternalLink>{" "}
+                    for rewards and gesture discounts.
+                  </p>
                 </div>
               )}
               {isMutating ? <p className="text-sm text-muted-foreground">Waiting for confirmation...</p> : null}

@@ -8,9 +8,11 @@ export const BACKEND_ASSET_PATH = "/images/randomwalk";
 
 const DEFAULT_SITE_NAME = "Random Walk NFT";
 const DEFAULT_SITE_DESCRIPTION =
-  "On-chain generative art: each NFT is a unique random walk, minted on Arbitrum.";
+  "A living museum of generative art on Arbitrum: every mint since 2021 draws a unique random-walk artwork from an on-chain seed, releases it CC0, and feeds an ETH vault that pays the last minter.";
 
 export const AXIOM_ZERO_MARKETPLACE_URL = "https://www.axiomzero.market/random-walk";
+export const COSMIC_SIGNATURE_URL = "https://cosmicsignature.com/";
+export const CONTRACTS_GITHUB_URL = "https://github.com/PredictionExplorer/RandomWalkNftContracts";
 
 function req(snap: Record<RequiredEnvKey, string | undefined>, name: RequiredEnvKey): string {
   const v = snap[name]?.trim();

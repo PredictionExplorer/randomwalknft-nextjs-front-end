@@ -9,6 +9,7 @@ import { useState } from "react";
 
 import { PageShell } from "@/components/common/page-shell";
 import { ConnectWalletButton } from "@/components/layout/connect-wallet-button";
+import { VaultTicker } from "@/components/layout/vault-ticker";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useMounted } from "@/lib/use-mounted";
 import {
@@ -133,60 +134,63 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="ml-auto hidden lg:block">
+        <div className="ml-auto hidden items-center gap-3 lg:flex">
+          <VaultTicker />
           {mounted ? <ConnectWalletButton /> : <WalletButtonPlaceholder />}
         </div>
 
-        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="ml-auto lg:hidden" aria-label="Open navigation">
-              <Menu className="h-4 w-4" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="flex flex-col gap-6">
-            <SheetTitle className="sr-only">Navigation menu</SheetTitle>
-            <div className="space-y-4 pt-10">
-              {navItems.map((item) => (
-                <div key={item.title} className="space-y-2">
-                  <HeaderNavLink
-                    href={item.href}
-                    prefetch={item.href === "/random" ? false : undefined}
-                    className={cn(
-                      "block text-lg font-medium tracking-[0.14em]",
-                      pathname === item.href ? "text-secondary" : "text-foreground"
-                    )}
-                  >
-                    {item.title}
-                  </HeaderNavLink>
-                  {"children" in item && item.children ? (
-                    <div className="space-y-1 pl-4">
-                      {item.children.map((child: (typeof item.children)[number]) => (
-                        <HeaderNavLink
-                          key={child.href}
-                          href={child.href}
-                          prefetch={child.href === "/random" || child.href === "/random-video" ? false : undefined}
-                          className="block text-sm text-muted-foreground"
-                        >
-                          {child.title}
-                        </HeaderNavLink>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-            <div className="mt-auto space-y-3">
-              <div className={cn(buttonVariants({ variant: "ghost" }), "justify-start px-0")}>
-                <Link href="/my-nfts">My NFTs</Link>
+        <div className="ml-auto flex items-center gap-3 lg:hidden">
+          <VaultTicker />
+          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Open navigation">
+                <Menu className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="flex flex-col gap-6">
+              <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+              <div className="space-y-4 pt-10">
+                {navItems.map((item) => (
+                  <div key={item.title} className="space-y-2">
+                    <HeaderNavLink
+                      href={item.href}
+                      className={cn(
+                        "block text-lg font-medium tracking-[0.14em]",
+                        pathname === item.href ? "text-secondary" : "text-foreground"
+                      )}
+                    >
+                      {item.title}
+                    </HeaderNavLink>
+                    {"children" in item && item.children ? (
+                      <div className="space-y-1 pl-4">
+                        {item.children.map((child: (typeof item.children)[number]) => (
+                          <HeaderNavLink
+                            key={child.href}
+                            href={child.href}
+                            prefetch={child.href === "/random" || child.href === "/random-video" ? false : undefined}
+                            className="block text-sm text-muted-foreground"
+                          >
+                            {child.title}
+                          </HeaderNavLink>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
               </div>
-              {mounted ? (
-                <ConnectWalletButton onBeforeOpen={() => setMobileNavOpen(false)} />
-              ) : (
-                <WalletButtonPlaceholder />
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+              <div className="mt-auto space-y-3">
+                <div className={cn(buttonVariants({ variant: "ghost" }), "justify-start px-0")}>
+                  <Link href="/my-nfts">My NFTs</Link>
+                </div>
+                {mounted ? (
+                  <ConnectWalletButton onBeforeOpen={() => setMobileNavOpen(false)} />
+                ) : (
+                  <WalletButtonPlaceholder />
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </PageShell>
     </header>
   );

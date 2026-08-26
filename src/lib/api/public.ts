@@ -16,10 +16,12 @@ import {
 import type { tokenDetailSchema } from "@/lib/api/schemas";
 
 import { nftAbi } from "@/generated/wagmi";
-import type { HomepageStats, Nft } from "@/lib/types";
+import type { HomepageStats, Nft, VaultState } from "@/lib/types";
 import { dailyFeaturedTokenIds, getUtcDayKey, sampleFeaturedTokenIds } from "@/lib/featured-tokens";
 import { createAssetUrls } from "@/lib/utils";
 import { publicClient } from "@/lib/web3/public-client";
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 function normalizeTokenDetail(
   token: z.infer<typeof tokenDetailSchema>,
@@ -176,35 +178,95 @@ function getHomepageFeaturedTokenIds(totalSupply: number, dayKey = getUtcDayKey(
   return [...tokenIds];
 }
 
-export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
-  const { NFT_ADDRESS } = await getAppConfig();
+/**
+ * Every page view reads vault state (header ticker seed, homepage, vault page,
+ * llms.txt, OG image). A short process-level memo keeps traffic bursts from
+ * hammering the RPC while staying fresh enough for a 30-day game clock; the
+ * client re-derives the ticking countdown from `readAtMs`, so a memoized
+ * snapshot stays accurate.
+ */
+const VAULT_STATE_TTL_MS = 15_000;
+let vaultStateMemo: { state: VaultState; expiresAtMs: number } | null = null;
 
-  const [
-    supplyResult,
-    mintPriceResult
-  ] = await Promise.allSettled([
-    publicClient.readContract({
-      address: NFT_ADDRESS,
-      abi: nftAbi,
-      functionName: "totalSupply"
-    }) as Promise<bigint>,
-    publicClient.readContract({
-      address: NFT_ADDRESS,
-      abi: nftAbi,
-      functionName: "getMintPrice"
-    }) as Promise<bigint>
+/**
+ * Live Vault game state from the NFT contract (prize pool, countdown, leader).
+ * Reads settle independently so a single failing call degrades gracefully;
+ * returns null only when the core supply read fails (e.g. RPC down).
+ */
+export const getVaultState = cache(async (): Promise<VaultState | null> => {
+  if (vaultStateMemo && vaultStateMemo.expiresAtMs > Date.now()) {
+    return vaultStateMemo.state;
+  }
+
+  try {
+    const { NFT_ADDRESS } = await getAppConfig();
+    const read = <T,>(functionName: string) =>
+      publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: functionName as never
+      }) as Promise<T>;
+
+    const [supply, prize, untilWithdrawal, lastMinter, mintPrice, numWithdrawals] =
+      await Promise.allSettled([
+        read<bigint>("totalSupply"),
+        read<bigint>("withdrawalAmount"),
+        read<bigint>("timeUntilWithdrawal"),
+        read<`0x${string}`>("lastMinter"),
+        read<bigint>("getMintPrice"),
+        read<bigint>("numWithdrawals")
+      ]);
+
+    if (supply.status !== "fulfilled") {
+      return null;
+    }
+
+    const leader = lastMinter.status === "fulfilled" ? lastMinter.value : undefined;
+
+    const state: VaultState = {
+      prizeEth: prize.status === "fulfilled" ? Number(formatEther(prize.value)) : 0,
+      secondsUntilWithdrawal:
+        untilWithdrawal.status === "fulfilled" ? Number(untilWithdrawal.value) : 0,
+      lastMinter: leader && leader.toLowerCase() !== ZERO_ADDRESS ? leader : undefined,
+      mintPriceEth:
+        mintPrice.status === "fulfilled" ? Number(formatEther(mintPrice.value)) : undefined,
+      mintedCount: Number(supply.value),
+      numWithdrawals: numWithdrawals.status === "fulfilled" ? Number(numWithdrawals.value) : 0,
+      readAtMs: Date.now()
+    };
+
+    vaultStateMemo = { state, expiresAtMs: state.readAtMs + VAULT_STATE_TTL_MS };
+    return state;
+  } catch {
+    return null;
+  }
+});
+
+const WALL_ROW_COUNT = 8;
+
+export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
+  const [vault, ratingOrderResult] = await Promise.all([
+    getVaultState(),
+    getRatingOrder().catch(() => [] as number[])
   ]);
 
-  const totalSupply = supplyResult.status === "fulfilled" ? supplyResult.value : 0n;
-  const mintedCount = Number(totalSupply);
+  const mintedCount = vault?.mintedCount ?? 0;
   const featuredTokenIds = getHomepageFeaturedTokenIds(mintedCount);
-  const mintPrice =
-    mintPriceResult.status === "fulfilled" ? Number(formatEther(mintPriceResult.value)) : undefined;
+
+  // rating_order returns worst-first (gallery reverses it for display), so the best sit at the end.
+  const beautyTopIds = ratingOrderResult.slice(-WALL_ROW_COUNT).reverse();
+  const newestIds = Array.from(
+    { length: Math.min(WALL_ROW_COUNT, mintedCount) },
+    (_, index) => mintedCount - 1 - index
+  );
 
   return {
     mintedCount,
-    mintPrice,
-    featuredTokenIds
+    mintPrice: vault?.mintPriceEth,
+    featuredTokenIds,
+    beautyTopIds,
+    newestIds,
+    vault
   };
 });
 

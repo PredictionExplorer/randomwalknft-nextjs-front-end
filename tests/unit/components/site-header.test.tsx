@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -17,9 +18,20 @@ vi.mock("@/components/layout/connect-wallet-button", () => ({
 
 import { SiteHeader } from "@/components/layout/site-header";
 
+function renderHeader() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, enabled: false } }
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <SiteHeader />
+    </QueryClientProvider>
+  );
+}
+
 describe("SiteHeader", () => {
   it("renders the marketplace nav item as an external Axiom Zero link", () => {
-    render(<SiteHeader />);
+    renderHeader();
 
     const marketplaceLinks = screen.getAllByRole("link", { name: "Marketplace" });
 
@@ -28,9 +40,16 @@ describe("SiteHeader", () => {
     expect(marketplaceLinks[0]).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("does not render the retired My Offers shortcut", () => {
-    render(<SiteHeader />);
+  it("renders the Vault nav item", () => {
+    renderHeader();
 
-    expect(screen.queryByRole("link", { name: /my offers/i })).not.toBeInTheDocument();
+    const vaultLinks = screen.getAllByRole("link", { name: "Vault" });
+    expect(vaultLinks[0]).toHaveAttribute("href", "/vault");
+  });
+
+  it("does not render the retired Redeem nav item", () => {
+    renderHeader();
+
+    expect(screen.queryByRole("link", { name: /redeem/i })).not.toBeInTheDocument();
   });
 });

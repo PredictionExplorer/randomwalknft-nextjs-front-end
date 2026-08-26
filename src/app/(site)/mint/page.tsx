@@ -10,14 +10,14 @@ export const dynamic = "force-dynamic";
 const FEATURED_RAIL_COUNT = 12;
 
 export const metadata: Metadata = {
-  title: "Mint",
+  title: "Mint a new work — and take the vault key",
   description:
-    "Mint a unique Random Walk NFT on Arbitrum. Each mint creates a one-of-a-kind generative artwork from an on-chain seed for under $0.10 in gas.",
+    "Mint a unique Random Walk NFT on Arbitrum: a one-of-a-kind generative artwork from an on-chain seed, six works per token, under $0.10 in gas. Every mint resets the vault's 30-day clock and makes you the keyholder.",
   alternates: { canonical: "/mint" },
   openGraph: {
     title: "Mint | Random Walk NFT",
     description:
-      "Mint a unique Random Walk NFT on Arbitrum. Each mint creates a one-of-a-kind generative artwork from an on-chain seed for under $0.10 in gas."
+      "Mint a unique Random Walk NFT on Arbitrum: six generative works from one on-chain seed — and the key to the ETH vault."
   }
 };
 

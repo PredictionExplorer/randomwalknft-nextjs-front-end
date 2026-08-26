@@ -49,9 +49,9 @@ export async function buildRootMetadata(): Promise<Metadata> {
       icon: [{ url: "/images/logo2.png", type: "image/png" }],
       apple: [{ url: "/images/logo2.png" }]
     },
-    alternates: {
-      canonical: `${SITE_URL}/`
-    },
+    // No root-level canonical on purpose: a site-wide fallback pointing at "/"
+    // makes any page that forgets its own canonical declare itself a duplicate
+    // of the homepage. Every indexable route sets its own canonical instead.
     openGraph: {
       title: SITE_NAME,
       description: SITE_DESCRIPTION,
@@ -70,11 +70,14 @@ export async function buildRootMetadata(): Promise<Metadata> {
 export async function RootLayoutShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const cookie = (await headers()).get("cookie");
   const initialState = cookieToInitialState(getServerWagmiConfig(), cookie);
-  const { NFT_ADDRESS } = await getAppConfig();
+  const { API_BASE_URL, NFT_ADDRESS } = await getAppConfig();
 
   return (
     <html lang="en" className={kelson.variable}>
       <body>
+        {/* Artwork thumbs, films, and API data all come from this origin. */}
+        <link rel="preconnect" href={API_BASE_URL} />
+        <link rel="dns-prefetch" href={API_BASE_URL} />
         <a
           href="#main-content"
           className="fixed left-4 top-4 z-50 -translate-y-20 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition focus:translate-y-0"

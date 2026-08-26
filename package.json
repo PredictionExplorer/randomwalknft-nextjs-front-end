@@ -28,6 +28,7 @@
     "postinstall": "pnpm generate:contracts"
   },
   "dependencies": {
+    "@noble/hashes": "^2.3.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",

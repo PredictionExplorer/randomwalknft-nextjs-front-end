@@ -9,14 +9,14 @@ async function goto(page: Page, path: string) {
   await page.goto(path, { waitUntil: "domcontentloaded" });
 }
 
-test("home page renders primary CTA", async ({ page }) => {
+test("home page renders primary CTAs in the entry hall", async ({ page }) => {
   await goto(page, "/");
-  await expect(page.getByRole("link", { name: /mint the next work/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /collect on axiom zero/i })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: /mint a new work/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /enter the gallery/i })).toHaveAttribute(
     "href",
-    axiomZeroMarketplaceUrl
+    "/gallery"
   );
-  await expect(page.getByRole("link", { name: /random walk nft/i })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /random walk nft/i })).toBeVisible();
 });
 
 test("home page emits the configured canonical URL", async ({ page }) => {
@@ -27,42 +27,71 @@ test("home page emits the configured canonical URL", async ({ page }) => {
   );
 });
 
-test("home hero sits near the top fold without a dead spacer", async ({ page }) => {
+test("home hero fills the first viewport with the heading visible", async ({ page }) => {
   await goto(page, "/");
-  const heroHeading = page.getByRole("heading", { name: /random walk nft/i });
-  await expect(heroHeading).toBeVisible();
-
-  const top = await heroHeading.evaluate((node) => node.getBoundingClientRect().top);
-  expect(top).toBeLessThan(260);
+  const heroHeading = page.getByRole("heading", { level: 1, name: /random walk nft/i });
+  await expect(heroHeading).toBeInViewport();
 });
 
-test("home page explains how the collection works", async ({ page }) => {
+test("home page explains the art and the vault game", async ({ page }) => {
   await goto(page, "/");
-  await expect(page.getByText(/Mint your NFT/i)).toBeVisible();
-  await expect(page.getByRole("heading", { name: /on-chain provenance clearly/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /what is a random walk\?/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /how does the vault game work\?/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /a museum that runs itself/i })).toBeVisible();
 });
 
-test("home page renders a featured NFT panel", async ({ page }) => {
+test("home page renders the museum wall with live artworks", async ({ page }) => {
   await goto(page, "/");
-  const featuredPanel = page.getByTestId("homepage-featured-panel");
-  const featuredWorksCard = page.getByText("Featured works", { exact: true }).locator("..");
+  const wall = page.getByTestId("homepage-wall");
 
-  await expect(featuredWorksCard.getByText(/^15$/)).toBeVisible();
-  await expect(featuredPanel.getByText(/featured now/i)).toBeVisible();
-  await expect(featuredPanel.locator('a[href^="/detail/"]')).toHaveCount(4);
-  await expect(featuredPanel.getByRole("img", { name: /preview image for nft #\d{6}/i })).toHaveCount(3);
+  await expect(wall.getByRole("heading", { name: /newest acquisitions/i })).toBeVisible();
+  expect(await wall.locator('a[href^="/detail/"]').count()).toBeGreaterThanOrEqual(8);
+});
+
+test("home page shows the live vault state", async ({ page }) => {
+  await goto(page, "/");
+
+  await expect(page.getByTestId("vault-room-prize")).toBeVisible();
+  await expect(page.getByRole("link", { name: /visit the vault/i }).first()).toHaveAttribute(
+    "href",
+    "/vault"
+  );
 });
 
 test("home page links Random Walk NFT to Cosmic Signature", async ({ page }) => {
   await goto(page, "/");
 
-  await expect(page.getByRole("heading", { name: /random walk meets cosmic signature/i })).toBeVisible();
-  await expect(page.getByText(/50% ETH Gesture Cost reduction/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: /Anchored-NFT Stellar Selection/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /explore cosmic signature/i })).toHaveAttribute(
-    "href",
-    "https://cosmicsignature.com/"
-  );
+  await expect(
+    page.getByRole("heading", { name: /what can you do with a random walk nft\?/i })
+  ).toBeVisible();
+  await expect(page.getByText(/1,000 CST/i).first()).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /use your random walk nft in cosmic signature/i })
+  ).toHaveAttribute("href", "https://cosmicsignature.com/");
+});
+
+test("vault page shows the prize, clock, and rules", async ({ page }) => {
+  await goto(page, "/vault");
+
+  await expect(page.getByRole("heading", { level: 1, name: /the vault/i })).toBeVisible();
+  await expect(page.getByTestId("vault-prize")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /how does the vault game work\?/i })).toBeVisible();
+  await expect(page.getByTestId("vault-withdraw")).toBeDisabled();
+});
+
+test("redeem route permanently redirects to the vault", async ({ request }) => {
+  const response = await request.get("/redeem", { maxRedirects: 0 });
+
+  expect(response.status()).toBe(308);
+  expect(response.headers().location).toBe("/vault");
+});
+
+test("how-it-works page renders the full explainer", async ({ page }) => {
+  await goto(page, "/how-it-works");
+
+  await expect(page.getByRole("heading", { level: 1, name: /how random walk nft works/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /how does a seed become art\?/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /why can.t the rules change\?/i })).toBeVisible();
 });
 
 test("detail page for token 1 loads core metadata", async ({ page }) => {

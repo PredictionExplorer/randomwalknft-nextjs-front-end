@@ -47,24 +47,30 @@ test.describe("visual regressions", () => {
     });
   });
 
+  /** Live header chip (prize + ticking clock) appears on every page. */
+  const headerMasks = (page: Page) => [page.getByTestId("vault-ticker")];
+
   test("faq page matches desktop snapshot", async ({ page }) => {
     await page.goto("/faq");
     await expect(page).toHaveScreenshot("faq-desktop.png", {
-      animations: "disabled"
+      animations: "disabled",
+      mask: headerMasks(page)
     });
   });
 
   test("code page matches desktop snapshot", async ({ page }) => {
     await page.goto("/code");
     await expect(page).toHaveScreenshot("code-desktop.png", {
-      animations: "disabled"
+      animations: "disabled",
+      mask: headerMasks(page)
     });
   });
 
   test("detail page matches desktop snapshot", async ({ page }) => {
     await page.goto("/detail/1");
     await expect(page).toHaveScreenshot("detail-desktop.png", {
-      animations: "disabled"
+      animations: "disabled",
+      mask: headerMasks(page)
     });
   });
 
@@ -73,7 +79,15 @@ test.describe("visual regressions", () => {
     await expect(page).toHaveScreenshot("homepage-desktop.png", {
       animations: "disabled",
       fullPage: true,
-      mask: [page.getByTestId("homepage-featured-panel")],
+      // Live surfaces: the museum wall (daily artworks), the vault room
+      // (prize + clock), the salon pair, the atelier canvas, and the hero label.
+      mask: [
+        ...headerMasks(page),
+        page.getByTestId("homepage-wall"),
+        page.getByTestId("hero-exhibit-label"),
+        page.locator("canvas"),
+        page.locator("section#vault")
+      ],
       maxDiffPixelRatio: 0.02
     });
   });
@@ -85,6 +99,7 @@ test.describe("visual regressions", () => {
     await expect(page).toHaveScreenshot("gallery-desktop.png", {
       animations: "disabled",
       fullPage: true,
+      mask: headerMasks(page),
       maxDiffPixelRatio: 0.05
     });
   });
@@ -94,7 +109,7 @@ test.describe("visual regressions", () => {
     await expect(page).toHaveScreenshot("mint-desktop.png", {
       animations: "disabled",
       fullPage: true,
-      mask: [page.getByTestId("mint-featured-rail")],
+      mask: [...headerMasks(page), page.getByTestId("mint-featured-rail")],
       maxDiffPixelRatio: 0.02
     });
   });

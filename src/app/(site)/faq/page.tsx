@@ -6,18 +6,18 @@ import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { homepageTrustCards } from "@/lib/content/homepage";
+import { homepageCharter } from "@/lib/content/homepage";
 import { faqItems } from "@/lib/content/faq";
 
 export const metadata: Metadata = {
   title: "FAQ",
   description:
-    "Frequently asked questions about Random Walk NFT — minting, collecting on Axiom Zero, beauty scores, CC0 licensing, and the mint pool incentive on Arbitrum.",
+    "Frequently asked questions about Random Walk NFT — minting, the Vault game that pays the last minter, beauty scores, CC0 licensing, Cosmic Signature utility, and collecting on Axiom Zero.",
   alternates: { canonical: "/faq" },
   openGraph: {
     title: "FAQ | Random Walk NFT",
     description:
-      "Frequently asked questions about Random Walk NFT — minting, collecting on Axiom Zero, beauty scores, CC0 licensing, and the mint pool incentive on Arbitrum."
+      "Frequently asked questions about Random Walk NFT — minting, the Vault game that pays the last minter, beauty scores, CC0 licensing, Cosmic Signature utility, and collecting on Axiom Zero."
   }
 };
 
@@ -77,7 +77,7 @@ export default function FaqPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {homepageTrustCards.map((item) => (
+        {homepageCharter.map((item) => (
           <Card key={item.title}>
             <CardContent className="space-y-3 p-5">
               <p className="text-xs uppercase tracking-[0.24em] text-secondary">{item.eyebrow}</p>

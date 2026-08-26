@@ -51,10 +51,36 @@ export type CollectionQueryState = {
   view: CollectionViewMode;
 };
 
+/**
+ * Live state of the Vault game, read from the NFT contract in one multicall.
+ * `readAtMs` lets clients tick countdowns locally without hydration drift.
+ */
+export type VaultState = {
+  /** ETH claimable by the last minter (half the pool), in ether. */
+  prizeEth: number;
+  /** Seconds until the last minter may withdraw (0 when claimable now). */
+  secondsUntilWithdrawal: number;
+  /** Address of the current leader (last minter); undefined before first mint. */
+  lastMinter?: string | undefined;
+  /** Current mint price in ether. */
+  mintPriceEth?: number | undefined;
+  /** Total tokens minted. */
+  mintedCount: number;
+  /** Number of times the vault has ever been claimed. */
+  numWithdrawals: number;
+  /** Unix ms timestamp of the server read, for client-side countdown seeding. */
+  readAtMs: number;
+};
+
 export type HomepageStats = {
   mintedCount: number;
   mintPrice?: number | undefined;
   featuredTokenIds: number[];
+  /** Top token ids by community beauty score (best first). */
+  beautyTopIds: number[];
+  /** Newest token ids (most recent mint first). */
+  newestIds: number[];
+  vault: VaultState | null;
 };
 
 export type TrustSectionContent = {

@@ -91,6 +91,11 @@ const nextConfig: NextConfig = {
         source: "/marketplace",
         destination: AXIOM_ZERO_MARKETPLACE_URL,
         permanent: true
+      },
+      {
+        source: "/redeem",
+        destination: "/vault",
+        permanent: true
       }
     ];
   },

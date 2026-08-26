@@ -5,11 +5,28 @@ import { JsonLd } from "@/components/common/json-ld";
 import { NftDetailExperience } from "@/components/feature/nft-detail-experience";
 import { getTokenDetailOrFallback } from "@/lib/api/public";
 import { getBaseConfig } from "@/lib/config";
-import type { AssetTheme, AssetVariant } from "@/lib/types";
+import { getAppConfig } from "@/lib/server/app-config";
+import type { AssetTheme, AssetVariant, Nft } from "@/lib/types";
 import { formatId } from "@/lib/utils";
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+const CC0_LICENSE_URL = "https://creativecommons.org/publicdomain/zero/1.0/";
+
+function tokenTitle(nft: Nft): string {
+  return nft.name ? `${formatId(nft.id)} “${nft.name}”` : `NFT ${formatId(nft.id)}`;
+}
+
+/** Unique, fact-dense description per token so 4,000+ pages don't cluster as duplicates. */
+function tokenDescription(nft: Nft): string {
+  if (nft.isPendingMetadata) {
+    return `Random Walk NFT ${formatId(nft.id)} was just minted on Arbitrum. Its unique artwork — one still and two films from seed ${nft.seed.slice(0, 10)}… — is being generated now.`;
+  }
+  const mintedPart = nft.mintedAt ? ` Minted ${nft.mintedAt.slice(0, 10)}.` : "";
+  const namePart = nft.name ? ` Named “${nft.name}” by its owner.` : "";
+  return `Random Walk NFT ${formatId(nft.id)} — a CC0 generative artwork on Arbitrum drawn from on-chain seed ${nft.seed.slice(0, 10)}….${mintedPart}${namePart} View the still image, two films, provenance, and ownership history.`;
+}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { SITE_NAME } = getBaseConfig();
@@ -17,36 +34,42 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const tokenId = Number(id);
 
   if (!Number.isFinite(tokenId)) {
-    return { title: "NFT Detail" };
+    return { title: "NFT Detail", robots: { index: false, follow: false } };
   }
 
   try {
     const nft = await getTokenDetailOrFallback(tokenId);
     if (!nft) {
-      return { title: "NFT Detail" };
+      // Data temporarily unavailable: keep a self-canonical so this page never
+      // declares itself a duplicate of the homepage, and skip indexing for now.
+      return {
+        title: `NFT ${formatId(tokenId)}`,
+        alternates: { canonical: `/detail/${tokenId}` },
+        robots: { index: false, follow: true }
+      };
     }
 
+    const description = tokenDescription(nft);
+    // The composed share card comes from the sibling opengraph-image.tsx file
+    // convention; Twitter falls back to og:image, so no images are set here.
     return {
-      title: `NFT ${formatId(nft.id)}`,
-      description: nft.isPendingMetadata
-        ? `Random Walk NFT ${formatId(nft.id)} was just minted on Arbitrum. Metadata and media are still processing.`
-        : `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed. View media, provenance, and ownership history.`,
+      title: tokenTitle(nft),
+      description,
       alternates: { canonical: `/detail/${nft.id}` },
       openGraph: {
-        title: `NFT ${formatId(nft.id)} | ${SITE_NAME}`,
-        description: nft.isPendingMetadata
-          ? `Random Walk NFT ${formatId(nft.id)} was just minted on Arbitrum. Metadata and media are still processing.`
-          : `Random Walk NFT ${formatId(nft.id)} — a unique generative artwork on Arbitrum created from an on-chain seed.`,
-        images: [nft.assets.blackThumb]
+        title: `${tokenTitle(nft)} | ${SITE_NAME}`,
+        description
       },
       twitter: {
-        title: `NFT ${formatId(nft.id)} | ${SITE_NAME}`,
-        images: [nft.assets.blackThumb]
+        card: "summary_large_image",
+        title: `${tokenTitle(nft)} | ${SITE_NAME}`
       }
     };
   } catch {
     return {
-      title: "NFT Detail"
+      title: `NFT ${formatId(tokenId)}`,
+      alternates: { canonical: `/detail/${tokenId}` },
+      robots: { index: false, follow: true }
     };
   }
 }
@@ -58,7 +81,8 @@ export default async function DetailPage({
   params: Params;
   searchParams: SearchParams;
 }) {
-  const { SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getBaseConfig();
+  const { SITE_NAME, SITE_URL } = getBaseConfig();
+  const { NFT_ADDRESS } = await getAppConfig();
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   const tokenId = Number(id);
   const message = typeof resolvedSearchParams.message === "string" ? resolvedSearchParams.message : undefined;
@@ -67,7 +91,9 @@ export default async function DetailPage({
     notFound();
   }
 
-  const nft = await getTokenDetailOrFallback(tokenId, { fresh: true });
+  // Fresh reads only right after a mint; otherwise the 5-minute fetch cache
+  // keeps thousands of token pages fast for visitors and crawlers alike.
+  const nft = await getTokenDetailOrFallback(tokenId, { fresh: message === "success" });
   if (!nft) {
     notFound();
   }
@@ -79,20 +105,65 @@ export default async function DetailPage({
       ? resolvedSearchParams.media
       : "image";
 
+  const pageUrl = `${SITE_URL}/detail/${nft.id}`;
+  const displayName = nft.name || `Random Walk NFT ${formatId(nft.id)}`;
+  const mintedDate = nft.mintedAt;
+
   return (
     <>
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": "CreativeWork",
-          name: nft.name || formatId(nft.id),
-          description: nft.isPendingMetadata
-            ? `Random Walk NFT ${formatId(nft.id)} was minted on-chain and is still processing metadata and media.`
-            : `${SITE_DESCRIPTION} Details for ${formatId(nft.id)}.`,
-          image: nft.assets.blackThumb,
-          url: `${SITE_URL}/detail/${nft.id}`,
-          creator: { "@type": "Organization", name: SITE_NAME },
-          dateCreated: nft.mintedAt
+          "@type": "VisualArtwork",
+          name: displayName,
+          alternateName: `Random Walk NFT ${formatId(nft.id)}`,
+          artform: "Generative art",
+          artMedium: "Algorithmic drawing (random walk from an on-chain seed)",
+          description: tokenDescription(nft),
+          url: pageUrl,
+          license: CC0_LICENSE_URL,
+          creator: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+          ...(mintedDate ? { dateCreated: mintedDate } : {}),
+          isPartOf: {
+            "@type": "Collection",
+            name: SITE_NAME,
+            url: `${SITE_URL}/gallery`
+          },
+          identifier: [
+            { "@type": "PropertyValue", name: "Token ID", value: String(nft.id) },
+            { "@type": "PropertyValue", name: "Contract address (Arbitrum)", value: NFT_ADDRESS },
+            { "@type": "PropertyValue", name: "On-chain seed", value: nft.seed }
+          ],
+          image: {
+            "@type": "ImageObject",
+            contentUrl: nft.assets.blackImage,
+            thumbnailUrl: nft.assets.blackThumb,
+            license: CC0_LICENSE_URL,
+            acquireLicensePage: pageUrl,
+            creditText: `${SITE_NAME} ${formatId(nft.id)} (CC0)`
+          },
+          ...(nft.isPendingMetadata
+            ? {}
+            : {
+                associatedMedia: [
+                  {
+                    "@type": "VideoObject",
+                    name: `${displayName} — single walker film`,
+                    description: `Motion rendering of Random Walk NFT ${formatId(nft.id)}: one walker draws the artwork point by point.`,
+                    contentUrl: nft.assets.blackSingleVideo,
+                    thumbnailUrl: nft.assets.blackThumb,
+                    ...(mintedDate ? { uploadDate: mintedDate } : {})
+                  },
+                  {
+                    "@type": "VideoObject",
+                    name: `${displayName} — triple walker film`,
+                    description: `Motion rendering of Random Walk NFT ${formatId(nft.id)}: three walkers draw the artwork simultaneously.`,
+                    contentUrl: nft.assets.blackTripleVideo,
+                    thumbnailUrl: nft.assets.blackThumb,
+                    ...(mintedDate ? { uploadDate: mintedDate } : {})
+                  }
+                ]
+              })
         }}
       />
       <NftDetailExperience
