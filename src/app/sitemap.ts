@@ -15,6 +15,7 @@ type SitemapEntry = {
 const staticRoutes: SitemapEntry[] = [
   { route: "", changeFrequency: "hourly", priority: 1.0 },
   { route: "/gallery", changeFrequency: "daily", priority: 0.8 },
+  { route: "/atelier", changeFrequency: "monthly", priority: 0.7 },
   { route: "/mint", changeFrequency: "daily", priority: 0.8 },
   { route: "/vault", changeFrequency: "hourly", priority: 0.8 },
   { route: "/how-it-works", changeFrequency: "monthly", priority: 0.7 },

@@ -66,8 +66,18 @@ export type VaultState = {
   mintedCount: number;
   /** Number of times the vault has ever been claimed. */
   numWithdrawals: number;
+  /** Unix ms of the most recent mint — when the current keyholder took the key. */
+  lastMintAtMs?: number | undefined;
   /** Unix ms timestamp of the server read, for client-side countdown seeding. */
   readAtMs: number;
+};
+
+/** One recent acquisition for the live feed. */
+export type RecentMint = {
+  id: number;
+  minter: string;
+  /** Unix ms of the mint, when the indexer knows it. */
+  mintedAtMs?: number | undefined;
 };
 
 export type HomepageStats = {

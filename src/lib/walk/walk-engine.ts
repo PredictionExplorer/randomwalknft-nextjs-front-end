@@ -51,11 +51,35 @@ export function hexToBytes(hex: string): Uint8Array {
   return bytes;
 }
 
+function bytesToHex(bytes: Uint8Array): string {
+  return `0x${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+}
+
 /** 32 random bytes as 0x-hex — stand-in seed for demo walks. */
 export function randomSeedHex(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
-  return `0x${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+  return bytesToHex(bytes);
+}
+
+const SEED_HEX_RE = /^(0x)?[0-9a-fA-F]{64}$/;
+
+/** True for a 32-byte hex seed exactly as the contract stores it. */
+export function isSeedHex(value: string): boolean {
+  return SEED_HEX_RE.test(value.trim());
+}
+
+/**
+ * Turns free text into a usable seed: real seeds pass through (normalised to
+ * lowercase 0x-hex), anything else is hashed with SHA3-256 so a name, a date, or
+ * a sentence becomes a 32-byte seed for the same algorithm.
+ */
+export function seedFromInput(input: string): string {
+  const trimmed = input.trim();
+  if (isSeedHex(trimmed)) {
+    return `0x${trimmed.replace(/^0x/i, "").toLowerCase()}`;
+  }
+  return bytesToHex(sha3_256(new TextEncoder().encode(trimmed)));
 }
 
 export type GeneratedWalk = {

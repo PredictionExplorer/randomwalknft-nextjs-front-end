@@ -79,14 +79,15 @@ test.describe("visual regressions", () => {
     await expect(page).toHaveScreenshot("homepage-desktop.png", {
       animations: "disabled",
       fullPage: true,
-      // Live surfaces: the museum wall (daily artworks), the vault room
-      // (prize + clock), the salon pair, the atelier canvas, and the hero label.
+      // Live surfaces: the masthead facts, the story stage, the collection wall
+      // (daily artworks + constellation), the vault chapter, and the salon pair.
       mask: [
         ...headerMasks(page),
+        page.getByTestId("masthead-facts"),
         page.getByTestId("homepage-wall"),
-        page.getByTestId("hero-exhibit-label"),
         page.locator("canvas"),
-        page.locator("section#vault")
+        page.locator("section#vault"),
+        page.getByRole("heading", { name: /which is more beautiful/i }).locator("xpath=ancestor::section")
       ],
       maxDiffPixelRatio: 0.02
     });

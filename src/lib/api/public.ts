@@ -11,7 +11,7 @@ import { getAppConfig } from "@/lib/server/app-config";
 
 import { nftAbi } from "@/generated/wagmi";
 import { dailyFeaturedTokenIds, getUtcDayKey, sampleDistinctIntegers } from "@/lib/featured-tokens";
-import type { HomepageStats, Nft, VaultState } from "@/lib/types";
+import type { HomepageStats, Nft, RecentMint, VaultState } from "@/lib/types";
 import { createAssetUrls } from "@/lib/utils";
 import { getPublicClient } from "@/lib/web3/public-client";
 
@@ -155,6 +155,7 @@ type VaultReads = {
   lastMinter: `0x${string}` | undefined;
   mintPrice: bigint | undefined;
   numWithdrawals: bigint | undefined;
+  lastMintTime: bigint | undefined;
 };
 
 /**
@@ -172,7 +173,8 @@ async function readVaultFromChain(): Promise<VaultReads | null> {
     { ...contract, functionName: "timeUntilWithdrawal" },
     { ...contract, functionName: "lastMinter" },
     { ...contract, functionName: "getMintPrice" },
-    { ...contract, functionName: "numWithdrawals" }
+    { ...contract, functionName: "numWithdrawals" },
+    { ...contract, functionName: "lastMintTime" }
   ] as const;
 
   const settled: Array<{ status: "success"; result: unknown } | { status: "failure" }> = client.chain?.contracts
@@ -200,7 +202,8 @@ async function readVaultFromChain(): Promise<VaultReads | null> {
     untilWithdrawal: value<bigint>(2),
     lastMinter: value<`0x${string}`>(3),
     mintPrice: value<bigint>(4),
-    numWithdrawals: value<bigint>(5)
+    numWithdrawals: value<bigint>(5),
+    lastMintTime: value<bigint>(6)
   };
 }
 
@@ -229,6 +232,8 @@ export const getVaultState = cache(async (): Promise<VaultState | null> => {
       mintPriceWei: reads.mintPrice?.toString(),
       mintedCount: Number(reads.supply),
       numWithdrawals: reads.numWithdrawals !== undefined ? Number(reads.numWithdrawals) : 0,
+      lastMintAtMs:
+        reads.lastMintTime !== undefined && reads.lastMintTime > 0n ? Number(reads.lastMintTime) * 1000 : undefined,
       readAtMs: Date.now()
     };
 
@@ -240,6 +245,33 @@ export const getVaultState = cache(async (): Promise<VaultState | null> => {
 });
 
 const WALL_ROW_COUNT = 8;
+
+/**
+ * The newest works with who minted them and when — the "recent acquisitions" feed.
+ * Each token costs two cached upstream reads; the count is kept small on purpose.
+ */
+export const getRecentMints = cache(async (count: number): Promise<RecentMint[]> => {
+  const vault = await getVaultState();
+  const supply = vault?.mintedCount ?? 0;
+  const ids = Array.from({ length: Math.min(count, supply) }, (_, index) => supply - 1 - index);
+
+  const results = await Promise.allSettled(
+    ids.map(async (id): Promise<RecentMint> => {
+      const [info, history] = await Promise.all([
+        fetchRwalk(`tokens/info/${id}`, { revalidate: REVALIDATE_SHORT }, tokenInfoSchema),
+        fetchRwalk(`tokens/history/${id}/0/1`, { revalidate: REVALIDATE_SHORT }, tokenHistorySchema).catch(() => null)
+      ]);
+      const mintRecord = history?.TokenHistory[0]?.Record;
+      return {
+        id,
+        minter: mintRecord?.OwnerAddr ?? info.TokenInfo.CurOwnerAddr,
+        mintedAtMs: mintRecord ? mintRecord.TimeStamp * 1000 : undefined
+      };
+    })
+  );
+
+  return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+});
 
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
   const [vault, ratingOrderResult] = await Promise.all([getVaultState(), getRatingOrder().catch(() => [] as number[])]);

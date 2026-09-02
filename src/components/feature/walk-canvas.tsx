@@ -1,17 +1,48 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useImperativeHandle, useRef, useState, type Ref } from "react";
 
 import { cn } from "@/lib/utils";
 import { generateWalk, randomSeedHex, type GeneratedWalk } from "@/lib/walk/walk-engine";
+import { WalkPainter, type WalkBackground } from "@/lib/walk/walk-painter";
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+/** Imperative surface for scroll-driven drawing; avoids a React render per frame. */
+export type WalkCanvasHandle = {
+  /** Paint up to a fraction of the walk, optionally with a smaller coloured fraction. */
+  paintTo: (drawFraction: number, colorFraction?: number) => void;
+  /** Canvas-space position of the walker's head after the last paint. */
+  headPosition: () => { x: number; y: number };
+};
+
+type WalkCanvasProps = {
+  /** 0x-hex seed. Omit for a random walk per draw. */
+  seed?: string | undefined;
+  /** Bump to redraw (used with random seeds). */
+  drawKey?: number;
+  /** Walk resolution: target height in walk pixels. */
+  vert?: number;
+  background?: WalkBackground;
+  /**
+   * Autonomous mode: animate the drawing over this many milliseconds. Set to `0`
+   * (or pass `handle`) for controlled mode, where the parent drives `paintTo`.
+   */
+  durationMs?: number;
+  /** Controlled mode: receive the imperative painter. */
+  handle?: Ref<WalkCanvasHandle | null> | undefined;
+  onComplete?: (() => void) | undefined;
+  /** Fires once the walk is generated (controlled mode uses it for overlays). */
+  onWalk?: ((walk: GeneratedWalk, seed: string) => void) | undefined;
+  className?: string;
+  label?: string;
+};
+
 /**
- * Draws a random walk live on a canvas using the real generation algorithm.
- * With no `seed`, a random one is drawn — pass a new `drawKey` to redraw.
+ * Draws a random walk on a canvas using the real generation algorithm. Runs on
+ * its own clock by default; hand it a `handle` to drive the drawing from scroll.
  */
 export function WalkCanvas({
   seed,
@@ -19,29 +50,30 @@ export function WalkCanvas({
   vert = 300,
   background = "black",
   durationMs = 16_000,
+  handle,
   onComplete,
+  onWalk,
   className,
   label = "Random walk artwork drawing itself point by point"
-}: {
-  /** 0x-hex seed. Omit for a random walk per draw. */
-  seed?: string | undefined;
-  /** Bump to redraw (used with random seeds). */
-  drawKey?: number;
-  /** Walk resolution: target height in walk pixels. */
-  vert?: number;
-  background?: "black" | "white";
-  durationMs?: number;
-  onComplete?: (() => void) | undefined;
-  className?: string;
-  label?: string;
-}) {
+}: WalkCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const onCompleteRef = useRef(onComplete);
+  const painterRef = useRef<WalkPainter | null>(null);
   const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
+  const controlled = handle !== undefined || durationMs <= 0;
 
-  useEffect(() => {
-    onCompleteRef.current = onComplete;
-  }, [onComplete]);
+  const notifyComplete = useEffectEvent(() => onComplete?.());
+  const notifyWalk = useEffectEvent((walk: GeneratedWalk, usedSeed: string) => onWalk?.(walk, usedSeed));
+
+  useImperativeHandle(
+    handle,
+    () => ({
+      paintTo: (drawFraction, colorFraction) => {
+        painterRef.current?.paintTo(drawFraction, colorFraction ?? drawFraction, { head: drawFraction < 1 });
+      },
+      headPosition: () => painterRef.current?.headPosition() ?? { x: 0, y: 0 }
+    }),
+    []
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -58,42 +90,28 @@ export function WalkCanvas({
         return;
       }
 
-      const walk: GeneratedWalk = generateWalk(seed ?? randomSeedHex(), { vert });
-      canvas.width = walk.width;
-      canvas.height = walk.height;
+      const usedSeed = seed ?? randomSeedHex();
+      const walk = generateWalk(usedSeed, { vert });
+      let painter: WalkPainter;
+      try {
+        painter = new WalkPainter(canvas, walk, background);
+      } catch {
+        return;
+      }
+      painterRef.current = painter;
       setDimensions({ width: walk.width, height: walk.height });
+      notifyWalk(walk, usedSeed);
 
-      const context = canvas.getContext("2d");
-      if (!context) {
+      if (controlled) {
+        // The parent decides how much is visible; start from an empty canvas.
+        painter.paintTo(0, 0);
         return;
       }
 
-      const backgroundByte = background === "black" ? 0 : 255;
-      const frame = context.createImageData(walk.width, walk.height);
-      const pixels = frame.data;
-      for (let index = 0; index < pixels.length; index += 4) {
-        pixels[index] = backgroundByte;
-        pixels[index + 1] = backgroundByte;
-        pixels[index + 2] = backgroundByte;
-        pixels[index + 3] = 255;
-      }
-
-      let drawnCount = 0;
-      const paintRange = (until: number) => {
-        for (let index = drawnCount; index < until; index += 1) {
-          const offset = (walk.ys[index]! * walk.width + walk.xs[index]!) * 4;
-          pixels[offset] = walk.colors[index * 3]!;
-          pixels[offset + 1] = walk.colors[index * 3 + 1]!;
-          pixels[offset + 2] = walk.colors[index * 3 + 2]!;
-        }
-        drawnCount = until;
-        context.putImageData(frame, 0, 0);
-      };
-
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reducedMotion || durationMs <= 0) {
-        paintRange(walk.pointCount);
-        onCompleteRef.current?.();
+      if (reducedMotion) {
+        painter.paintTo(1, 1);
+        notifyComplete();
         return;
       }
 
@@ -103,16 +121,13 @@ export function WalkCanvas({
           return;
         }
         const progress = Math.min(1, (now - startedAt) / durationMs);
-        paintRange(Math.max(1, Math.floor(easeInOutCubic(progress) * walk.pointCount)));
+        const fraction = Math.max(1 / walk.pointCount, easeInOutCubic(progress));
+        painter.paintTo(fraction, fraction, { head: progress < 1 });
 
         if (progress < 1) {
-          // Walker head: a bright dot marking the newest point.
-          const headIndex = Math.max(0, drawnCount - 1);
-          context.fillStyle = background === "black" ? "#ffffff" : "#000000";
-          context.fillRect(walk.xs[headIndex]! - 1, walk.ys[headIndex]! - 1, 3, 3);
           frameId = window.requestAnimationFrame(tick);
         } else {
-          onCompleteRef.current?.();
+          notifyComplete();
         }
       };
       frameId = window.requestAnimationFrame(tick);
@@ -120,10 +135,11 @@ export function WalkCanvas({
 
     return () => {
       cancelled = true;
+      painterRef.current = null;
       window.clearTimeout(startId);
       window.cancelAnimationFrame(frameId);
     };
-  }, [seed, drawKey, vert, background, durationMs]);
+  }, [seed, drawKey, vert, background, durationMs, controlled]);
 
   return (
     <div

@@ -100,7 +100,7 @@ export default async function HowItWorksPage() {
             <Link href="/code">Read the full generator source</Link>
           </Button>
         </div>
-        <AtelierStudio />
+        <AtelierStudio compact />
       </section>
 
       <section className="max-w-3xl space-y-4">

@@ -55,7 +55,8 @@ describe("getVaultState", () => {
       { status: "success", result: 2_386_000n },
       { status: "success", result: LAST_MINTER },
       { status: "success", result: 90_500_000_000_000_000n },
-      { status: "success", result: 0n }
+      { status: "success", result: 0n },
+      { status: "success", result: 1_754_000_000n }
     ]);
     const { getVaultState } = await import("@/lib/api/public");
 
@@ -72,6 +73,7 @@ describe("getVaultState", () => {
       mintPriceEth: 0.0905,
       mintPriceWei: "90500000000000000",
       numWithdrawals: 0,
+      lastMintAtMs: 1_754_000_000_000,
       readAtMs: Date.now()
     });
   });
@@ -82,6 +84,7 @@ describe("getVaultState", () => {
       { status: "failure", error: new Error("revert") },
       { status: "failure", error: new Error("revert") },
       { status: "success", result: "0x0000000000000000000000000000000000000000" },
+      { status: "failure", error: new Error("revert") },
       { status: "failure", error: new Error("revert") },
       { status: "failure", error: new Error("revert") }
     ]);
@@ -98,6 +101,7 @@ describe("getVaultState", () => {
     });
     expect(vault?.lastMinter).toBeUndefined();
     expect(vault?.mintPriceEth).toBeUndefined();
+    expect(vault?.lastMintAtMs).toBeUndefined();
   });
 
   it("returns null when the supply read itself fails", async () => {

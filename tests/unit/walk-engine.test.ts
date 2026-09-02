@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { generateWalk, hexToBytes, randomSeedHex } from "@/lib/walk/walk-engine";
+import { generateWalk, hexToBytes, isSeedHex, randomSeedHex, seedFromInput } from "@/lib/walk/walk-engine";
 
 /** Seed of token #0 (public on-chain data), used as a stable fixture. */
 const FIXTURE_SEED = "0xa8dfd4a1e51e1d29fbbadd2c6e61d2b0c9c6d38ba26f291f04340722d5c2792d";
@@ -68,5 +68,22 @@ describe("walk-engine", () => {
       expect(low).toBe(0);
       expect(high).toBe(255);
     }
+  });
+});
+
+describe("seed helpers", () => {
+  it("accepts exactly 32-byte hex seeds, with or without the 0x prefix", () => {
+    expect(isSeedHex("0x" + "ab".repeat(32))).toBe(true);
+    expect(isSeedHex("AB".repeat(32))).toBe(true);
+    expect(isSeedHex("0x" + "ab".repeat(31))).toBe(false);
+    expect(isSeedHex("hello")).toBe(false);
+  });
+
+  it("normalises real seeds and hashes anything else into one", () => {
+    expect(seedFromInput(" " + "AB".repeat(32) + " ")).toBe("0x" + "ab".repeat(32));
+    const hashed = seedFromInput("a name, a date, a sentence");
+    expect(isSeedHex(hashed)).toBe(true);
+    expect(seedFromInput("a name, a date, a sentence")).toBe(hashed);
+    expect(seedFromInput("another")).not.toBe(hashed);
   });
 });

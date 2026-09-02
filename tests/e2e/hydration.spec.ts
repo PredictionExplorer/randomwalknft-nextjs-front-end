@@ -12,6 +12,7 @@ const HYDRATION_PATTERNS = [
 const pages = [
   "/",
   "/gallery",
+  "/atelier",
   "/mint",
   "/vault",
   "/how-it-works",
