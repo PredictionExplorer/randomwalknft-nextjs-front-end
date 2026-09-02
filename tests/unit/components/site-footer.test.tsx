@@ -14,7 +14,7 @@ describe("SiteFooter", () => {
   it("renders internal navigation links with correct hrefs", () => {
     render(<SiteFooter />);
 
-    const marketplaceLink = screen.getByRole("link", { name: "Marketplace on Axiom Zero" });
+    const marketplaceLink = screen.getByRole("link", { name: /^Marketplace on Axiom Zero/ });
 
     expect(screen.getByRole("link", { name: "Collection" })).toHaveAttribute("href", "/gallery");
     expect(marketplaceLink).toHaveAttribute("href", AXIOM_ZERO_MARKETPLACE_URL);
@@ -26,12 +26,13 @@ describe("SiteFooter", () => {
     expect(screen.getByRole("link", { name: "FAQ" })).toHaveAttribute("href", "/faq");
   });
 
-  it("links to Cosmic Signature with descriptive anchor text", () => {
+  it("links to Cosmic Signature with descriptive anchor text and a new-tab cue", () => {
     render(<SiteFooter />);
 
-    const cosmicLink = screen.getByRole("link", { name: "Use your NFT in Cosmic Signature" });
+    const cosmicLink = screen.getByRole("link", { name: /^Use your NFT in Cosmic Signature/ });
     expect(cosmicLink).toHaveAttribute("href", "https://cosmicsignature.com/");
     expect(cosmicLink).toHaveAttribute("target", "_blank");
+    expect(cosmicLink).toHaveAccessibleName(/opens in a new tab/);
   });
 
   it("does not advertise a built-in zero-fee marketplace", () => {
@@ -43,8 +44,8 @@ describe("SiteFooter", () => {
   it("renders social links with target=_blank and rel attributes", () => {
     render(<SiteFooter />);
 
-    const twitterLink = screen.getByRole("link", { name: "Twitter" });
-    const discordLink = screen.getByRole("link", { name: "Discord" });
+    const twitterLink = screen.getByRole("link", { name: /^Twitter/ });
+    const discordLink = screen.getByRole("link", { name: /^Discord/ });
 
     expect(twitterLink).toHaveAttribute("target", "_blank");
     expect(twitterLink).toHaveAttribute("rel", "noopener noreferrer");

@@ -1,3 +1,6 @@
+import type { Route } from "next";
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { getPaginationWindow } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
@@ -31,25 +34,25 @@ export function Pager({
   const pages = getPaginationWindow(page, totalPages);
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2">
+    <nav aria-label="Pagination" className="flex flex-wrap items-center justify-center gap-2">
       {pages.map((value, index) =>
         value === "ellipsis" ? (
-          <span key={`ellipsis-${index}`} className="px-2 text-sm text-muted-foreground">
-            ...
+          <span key={`ellipsis-${index}`} className="px-2 font-mono text-sm text-muted-foreground" aria-hidden>
+            …
           </span>
         ) : (
           <Button key={value} variant={value === page ? "default" : "outline"} asChild size="sm">
-            <a
-              href={buildHref(pathname, value, searchParams)}
-              className={cn(value === page && "pointer-events-none")}
+            <Link
+              href={buildHref(pathname, value, searchParams) as Route}
+              className={cn("font-mono tabular-nums", value === page && "pointer-events-none")}
               aria-label={value === page ? `Current page, page ${value}` : `Go to page ${value}`}
               aria-current={value === page ? "page" : undefined}
             >
               {value}
-            </a>
+            </Link>
           </Button>
         )
       )}
-    </div>
+    </nav>
   );
 }

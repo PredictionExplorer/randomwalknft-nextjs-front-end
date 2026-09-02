@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { Route } from "next";
+import Link from "next/link";
 
 import { JsonLd } from "@/components/common/json-ld";
 import { getBaseConfig } from "@/lib/config";
@@ -25,18 +25,17 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           }))
         }}
       />
-      <nav
-        aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.24em] text-muted-foreground"
-      >
+      <nav aria-label="Breadcrumb" className="eyebrow flex flex-wrap items-center gap-2">
         {items.map((item, index) => (
           <span key={`${item.label}-${index}`} className="flex items-center gap-2">
             {item.href ? (
-              <Link href={item.href as Route} className="transition hover:text-foreground">
+              <Link href={item.href as Route} className="transition-colors hover:text-foreground">
                 {item.label}
               </Link>
             ) : (
-              <span className="text-secondary">{item.label}</span>
+              <span className="text-foreground" aria-current="page">
+                {item.label}
+              </span>
             )}
             {index < items.length - 1 ? <span aria-hidden="true">/</span> : null}
           </span>

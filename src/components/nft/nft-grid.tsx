@@ -1,7 +1,6 @@
 import { AnimatedList } from "@/components/common/animated-list";
 import { EmptyState } from "@/components/common/empty-state";
 import { NftCard } from "@/components/nft/nft-card";
-import { createAssetUrls } from "@/lib/utils";
 import type { CollectionViewMode } from "@/lib/types";
 
 export function NftGrid({
@@ -34,7 +33,6 @@ export function NftGrid({
     <NftCard
       key={id}
       id={id}
-      image={createAssetUrls(id).blackThumb}
       href={`/detail/${id}`}
       compact={view === "compact"}
       sublabel={rankOffset !== undefined ? `Beauty rank #${rankOffset + index + 1}` : undefined}

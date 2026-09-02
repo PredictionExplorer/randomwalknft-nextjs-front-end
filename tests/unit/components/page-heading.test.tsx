@@ -30,11 +30,24 @@ describe("PageHeading", () => {
     expect(screen.queryByText("Featured")).not.toBeInTheDocument();
   });
 
-  it("applies primary tone style", () => {
-    render(<PageHeading title={[{ text: "Primary", tone: "primary" }]} />);
+  it("keeps the primary tone achromatic and reserves brass for the accent tone", () => {
+    render(
+      <PageHeading
+        title={[
+          { text: "Primary", tone: "primary" },
+          { text: "Brass", tone: "accent" }
+        ]}
+      />
+    );
 
-    const span = screen.getByText("Primary");
-    expect(span).toHaveClass("text-primary");
+    expect(screen.getByText("Primary")).toHaveClass("text-foreground");
+    expect(screen.getByText("Brass")).toHaveClass("text-accent");
+  });
+
+  it("accepts a plain string title", () => {
+    render(<PageHeading title="Every walk begins with a seed." as="h2" />);
+
+    expect(screen.getByRole("heading", { level: 2, name: "Every walk begins with a seed." })).toBeInTheDocument();
   });
 
   it("applies secondary tone style", () => {

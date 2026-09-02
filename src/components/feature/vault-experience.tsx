@@ -16,7 +16,7 @@ import { useContracts } from "@/components/providers/contracts-context";
 import { nftAbi } from "@/generated/wagmi";
 import { splitDuration } from "@/lib/time";
 import type { VaultState } from "@/lib/types";
-import { createAssetUrls, formatEth, formatId, shortenAddress } from "@/lib/utils";
+import { formatEth, formatId, shortenAddress } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
 import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
@@ -186,7 +186,6 @@ export function VaultExperience({
                 <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Their latest work</p>
                 <NftCard
                   id={keyholderTokenId}
-                  image={createAssetUrls(keyholderTokenId).blackThumb}
                   href={`/detail/${keyholderTokenId}`}
                   label={formatId(keyholderTokenId)}
                   compact

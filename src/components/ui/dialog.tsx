@@ -30,14 +30,14 @@ export function DialogContent({ className, children, hideClose = false, ...props
       <DialogOverlay />
       <DialogPrimitive.Content
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 w-[min(92vw,64rem)] -translate-x-1/2 -translate-y-1/2 rounded-[1.75rem] border border-border bg-background/95 p-4 shadow-[0_0_40px_rgba(0,0,0,0.45)] focus:outline-none",
+          "fixed left-1/2 top-1/2 z-50 w-[min(92vw,64rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-4 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] focus:outline-none data-[state=open]:animate-fade-in",
           className
         )}
         {...props}
       >
         {children}
         {hideClose ? null : (
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md p-2 text-muted-foreground transition hover:bg-foreground/6 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <X className="h-4 w-4" aria-hidden />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>

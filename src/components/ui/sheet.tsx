@@ -1,6 +1,8 @@
+"use client";
+
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -15,23 +17,23 @@ export function SheetContent({
   children,
   side = "right",
   ...props
-}: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+}: React.ComponentProps<typeof DialogPrimitive.Content> & {
   side?: "left" | "right";
 }) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
+      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-fade-in" />
       <DialogPrimitive.Content
         className={cn(
-          "fixed top-0 z-50 h-full w-[min(90vw,22rem)] border-border bg-background/95 p-6 shadow-[0_0_40px_rgba(0,0,0,0.45)] backdrop-blur",
+          "fixed top-0 z-50 flex h-full w-[min(90vw,22rem)] flex-col border-border bg-background p-6 shadow-[0_0_60px_rgba(0,0,0,0.45)] focus:outline-none",
           side === "right" ? "right-0 border-l" : "left-0 border-r",
           className
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground">
-          <X className="h-4 w-4" />
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md p-2 text-muted-foreground transition hover:bg-foreground/6 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <X className="h-4 w-4" aria-hidden />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>

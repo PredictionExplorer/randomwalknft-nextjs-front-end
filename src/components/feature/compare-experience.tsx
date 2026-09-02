@@ -18,7 +18,6 @@ import { buildBeautyVoteMessage } from "@/lib/web3/beauty-vote-message";
 import { getChainDisplayName, getConfiguredEvmChain } from "@/lib/web3/evm-chain";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
-import { createAssetUrls } from "@/lib/utils";
 
 const compareResponseSchema = z.object({
   tokenIds: z.array(z.number()),
@@ -216,7 +215,7 @@ export function CompareExperience() {
       <div className="grid gap-6 lg:grid-cols-2">
         {[firstId, secondId].map((id) => (
           <div key={id} className="space-y-4">
-            <NftCard id={id} image={createAssetUrls(id).blackThumb} href={`/detail/${id}`} />
+            <NftCard id={id} href={`/detail/${id}`} />
             <Button
               className="w-full"
               disabled={voteMutation.isPending || !canTransact || votingBlocked}

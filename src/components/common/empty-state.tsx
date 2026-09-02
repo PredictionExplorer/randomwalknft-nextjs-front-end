@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import { cn } from "@/lib/utils";
 
 type EmptyStateProps = {
@@ -13,13 +11,15 @@ export function EmptyState({ title, description, children, className }: EmptySta
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center space-y-5 rounded-2xl border border-border/50 bg-card/40 px-6 py-16 text-center",
+        "flex flex-col items-center justify-center gap-5 rounded-lg border border-dashed border-border-strong px-6 py-16 text-center",
         className
       )}
     >
-      <Image src="/images/question.svg" alt="" width={48} height={48} className="opacity-40" aria-hidden />
+      <span className="font-display text-4xl text-muted-foreground" aria-hidden>
+        ∅
+      </span>
       <div className="space-y-2">
-        <p className="text-lg font-semibold text-foreground">{title}</p>
+        <p className="text-lg font-medium text-foreground">{title}</p>
         <p className="max-w-md text-sm leading-7 text-muted-foreground">{description}</p>
       </div>
       {children ? <div className="flex flex-wrap justify-center gap-3">{children}</div> : null}

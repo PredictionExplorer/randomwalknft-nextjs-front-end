@@ -1,51 +1,20 @@
-"use client";
-
-import { Children, useEffect, useRef, useState } from "react";
-
-import { cn } from "@/lib/utils";
+import { Children } from "react";
 
 type AnimatedListProps = {
   children: React.ReactNode;
   className?: string;
-  staggerMs?: number;
 };
 
-export function AnimatedList({ children, className, staggerMs = 60 }: AnimatedListProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.05 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
+/**
+ * Items rise in as they scroll into view. Purely CSS (`.reveal` uses a scroll-driven
+ * animation timeline), so it renders on the server, costs no JavaScript, and is
+ * automatically disabled under `prefers-reduced-motion`.
+ */
+export function AnimatedList({ children, className }: AnimatedListProps) {
   return (
-    <div ref={ref} className={className}>
-      {Children.map(children, (child, index) => (
-        <div
-          className={cn(
-            "transition-all duration-500",
-            visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-          )}
-          style={{
-            transitionDelay: visible ? `${index * staggerMs}ms` : "0ms"
-          }}
-        >
-          {child}
-        </div>
+    <div className={className}>
+      {Children.map(children, (child) => (
+        <div className="reveal">{child}</div>
       ))}
     </div>
   );

@@ -23,7 +23,7 @@ import { getErrorMessage } from "@/lib/web3/errors";
 import { applyBasisPointsBuffer, estimateBufferedTransactionFees } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
-import { arbiscanContractUrl, createAssetUrls } from "@/lib/utils";
+import { arbiscanContractUrl } from "@/lib/utils";
 import { getChainDisplayName, getConfiguredEvmChain, getCurrentNetworkName, getRpcHttpUrl } from "@/lib/web3/evm-chain";
 
 const MINT_VALUE_BUFFER_BPS = 10_025n;
@@ -323,7 +323,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1" data-testid="mint-featured-rail">
           {featuredIds.map((id) => (
-            <NftCard key={id} id={id} image={createAssetUrls(id).blackThumb} href={`/detail/${id}`} />
+            <NftCard key={id} id={id} href={`/detail/${id}`} />
           ))}
         </div>
       </div>

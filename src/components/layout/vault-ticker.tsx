@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Lock } from "lucide-react";
 
 import { formatClock } from "@/lib/time";
 import type { VaultState } from "@/lib/types";
@@ -18,8 +18,9 @@ async function fetchVaultState(): Promise<VaultState> {
 }
 
 /**
- * Ambient header chip with the live Vault prize and claim countdown.
- * Values come from /api/vault (CDN-cached); the clock ticks locally between refreshes.
+ * Ambient header chip with the live Vault prize and claim countdown — the one brass
+ * element in the chrome. Values come from /api/vault (CDN-cached); the clock ticks
+ * locally between refreshes.
  */
 export function VaultTicker({ className }: { className?: string }) {
   const { data: vault } = useQuery({
@@ -52,20 +53,20 @@ export function VaultTicker({ className }: { className?: string }) {
       }`}
       data-testid="vault-ticker"
       className={cn(
-        "group inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-secondary hover:bg-secondary/20",
+        "group inline-flex h-9 items-center gap-2 rounded-md border border-accent/40 bg-accent-soft px-3 font-mono text-[0.7rem] text-foreground transition-colors hover:border-accent",
         className
       )}
     >
-      <Lock className="h-3.5 w-3.5 text-secondary" aria-hidden />
+      <KeyRound className="h-3.5 w-3.5 text-accent" aria-hidden />
       <span className="whitespace-nowrap tabular-nums">{vault.prizeEth.toFixed(2)} ETH</span>
       <span
         aria-hidden
         className={cn(
           "hidden whitespace-nowrap tabular-nums text-muted-foreground group-hover:text-foreground sm:inline",
-          claimable && "text-secondary"
+          claimable && "text-accent"
         )}
       >
-        {claimable ? "claimable now" : formatClock(remaining)}
+        {claimable ? "open now" : formatClock(remaining)}
       </span>
     </Link>
   );

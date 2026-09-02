@@ -9,6 +9,8 @@ export type AnalyticsEvent =
   | "transaction_submitted"
   | "transaction_confirmed"
   | "transaction_failed"
+  | "wing_changed"
+  | "atelier_draw"
   | "web_vital";
 
 export type AnalyticsPayload = Record<string, number | string | boolean | undefined>;

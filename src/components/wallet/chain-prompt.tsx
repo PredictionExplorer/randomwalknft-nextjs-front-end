@@ -48,7 +48,7 @@ export function ChainPrompt({ open, onOpenChange }: ChainPromptProps) {
     >
       <DialogContent className="w-[min(92vw,26rem)] p-6" data-testid="chain-prompt">
         <DialogTitle className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-          {onTarget ? null : <AlertTriangle className="h-5 w-5 text-amber-300" aria-hidden />}
+          {onTarget ? null : <AlertTriangle className="h-5 w-5 text-accent" aria-hidden />}
           {onTarget ? "Network" : "Wrong network"}
         </DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
@@ -58,7 +58,7 @@ export function ChainPrompt({ open, onOpenChange }: ChainPromptProps) {
         </DialogDescription>
 
         {error ? (
-          <p className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-100" role="alert">
+          <p className="mt-4 rounded-md border border-danger/40 bg-danger/10 p-3 text-sm text-danger" role="alert">
             {error}
           </p>
         ) : null}

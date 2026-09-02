@@ -3,12 +3,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RootLoading() {
   return (
-    <PageShell className="space-y-8 py-20">
-      <Skeleton className="h-12 w-72" />
+    <PageShell className="space-y-8 py-20" aria-busy="true" aria-label="Loading">
+      <Skeleton className="h-4 w-40" />
+      <Skeleton className="h-14 w-[min(100%,32rem)]" />
       <Skeleton className="h-6 w-[min(100%,42rem)]" />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="aspect-[1.6/1] w-full rounded-[1.75rem]" />
+          <Skeleton key={index} className="aspect-[1.6/1] w-full" />
         ))}
       </div>
     </PageShell>

@@ -8,17 +8,21 @@ import { type State, WagmiProvider } from "wagmi";
 
 import type { ContractsContextValue } from "@/components/providers/contracts-context";
 import { ContractsProvider } from "@/components/providers/contracts-context";
+import { MotionProvider } from "@/components/providers/motion-provider";
+import { WingProvider } from "@/components/providers/wing-provider";
 import { WalletLifecycleBridge } from "@/components/wallet/wallet-lifecycle-bridge";
 import { WalletProvider } from "@/components/wallet/wallet-provider";
 import { getWagmiConfig } from "@/lib/web3/wagmi";
+import type { Wing } from "@/lib/wing";
 
 type AppProvidersProps = {
   children: React.ReactNode;
   initialState?: State | undefined;
+  initialWing: Wing;
   contracts: ContractsContextValue;
 };
 
-export function AppProviders({ children, initialState, contracts }: AppProvidersProps) {
+export function AppProviders({ children, initialState, initialWing, contracts }: AppProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -33,17 +37,21 @@ export function AppProviders({ children, initialState, contracts }: AppProviders
   );
 
   return (
-    <ContractsProvider value={contracts}>
-      <WagmiProvider config={getWagmiConfig()} initialState={initialState}>
-        <QueryClientProvider client={queryClient}>
-          <WalletProvider>
-            <WalletLifecycleBridge />
-            {children}
-          </WalletProvider>
-          <Toaster position="top-right" richColors />
-          {process.env.NODE_ENV === "development" ? <ReactQueryDevtools initialIsOpen={false} /> : null}
-        </QueryClientProvider>
-      </WagmiProvider>
-    </ContractsProvider>
+    <WingProvider initialWing={initialWing}>
+      <MotionProvider>
+        <ContractsProvider value={contracts}>
+          <WagmiProvider config={getWagmiConfig()} initialState={initialState}>
+            <QueryClientProvider client={queryClient}>
+              <WalletProvider>
+                <WalletLifecycleBridge />
+                {children}
+              </WalletProvider>
+              <Toaster position="top-right" theme={initialWing === "light" ? "light" : "dark"} richColors />
+              {process.env.NODE_ENV === "development" ? <ReactQueryDevtools initialIsOpen={false} /> : null}
+            </QueryClientProvider>
+          </WagmiProvider>
+        </ContractsProvider>
+      </MotionProvider>
+    </WingProvider>
   );
 }

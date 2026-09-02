@@ -73,6 +73,8 @@ const nextConfig: NextConfig = {
   },
   typedRoutes: true,
   reactStrictMode: true,
+  /** The repository keeps its own README; skip Next's generated AGENTS.md/CLAUDE.md. */
+  agentRules: false,
   /**
    * React Compiler (stable in Next 16): automatic memoization across every component.
    * View Transitions need no flag: the App Router ships React canary, so `ViewTransition`
