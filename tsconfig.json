@@ -22,7 +22,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "types": ["react/canary", "vitest/globals", "@testing-library/jest-dom"],
     "plugins": [
       {
         "name": "next"

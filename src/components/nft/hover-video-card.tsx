@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { ArtworkTransition } from "@/components/common/view-transition";
 import { useArtworkAssets } from "@/lib/use-artwork-assets";
 import { formatId } from "@/lib/utils";
 
@@ -47,15 +48,17 @@ export function HoverVideoCard({
       onBlur={deactivate}
     >
       <div className="relative aspect-[1.6/1] w-[16rem] sm:w-[18rem]">
-        <Image
-          src={assets.thumb}
-          alt={`Random Walk NFT ${formatId(id)} — generative random walk artwork, ${assets.edition} edition`}
-          fill
-          sizes="18rem"
-          className="object-cover"
-          unoptimized
-          priority={priority}
-        />
+        <ArtworkTransition tokenId={id}>
+          <Image
+            src={assets.thumb}
+            alt={`Random Walk NFT ${formatId(id)} — generative random walk artwork, ${assets.edition} edition`}
+            fill
+            sizes="18rem"
+            className="object-cover"
+            unoptimized
+            priority={priority}
+          />
+        </ArtworkTransition>
         {active ? (
           <video
             autoPlay

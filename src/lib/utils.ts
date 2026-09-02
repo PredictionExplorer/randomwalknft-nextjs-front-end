@@ -18,6 +18,16 @@ export function arbiscanTxUrl(hash: string) {
   return `${getExplorerBaseUrl()}/tx/${hash}`;
 }
 
+/** Explorer page for one token of an ERC-721 contract. */
+export function arbiscanTokenUrl(contract: string, tokenId: number) {
+  return `${getExplorerBaseUrl()}/token/${contract}?a=${tokenId}`;
+}
+
+/** Final path segment of an asset URL, e.g. `000001_black.png`. */
+export function assetFileName(url: string) {
+  return url.split("/").pop() ?? url;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

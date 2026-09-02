@@ -10,6 +10,7 @@ import type { ContractsContextValue } from "@/components/providers/contracts-con
 import { ContractsProvider } from "@/components/providers/contracts-context";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import { WingProvider } from "@/components/providers/wing-provider";
+import { HydrationMarker } from "@/components/providers/hydration-marker";
 import { WalletLifecycleBridge } from "@/components/wallet/wallet-lifecycle-bridge";
 import { WalletProvider } from "@/components/wallet/wallet-provider";
 import { getWagmiConfig } from "@/lib/web3/wagmi";
@@ -44,6 +45,7 @@ export function AppProviders({ children, initialState, initialWing, contracts }:
             <QueryClientProvider client={queryClient}>
               <WalletProvider>
                 <WalletLifecycleBridge />
+                <HydrationMarker />
                 {children}
               </WalletProvider>
               <Toaster position="top-right" theme={initialWing === "light" ? "light" : "dark"} richColors />

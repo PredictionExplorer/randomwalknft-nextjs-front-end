@@ -66,6 +66,8 @@ export async function RootLayoutShell({ children }: Readonly<{ children: React.R
     <html
       lang="en"
       data-wing={wing}
+      // Tells Next to suspend smooth scrolling while it restores position on route changes.
+      data-scroll-behavior="smooth"
       className={`${GeistSans.variable} ${GeistMono.variable} ${instrumentSerif.variable}`}
       suppressHydrationWarning
     >

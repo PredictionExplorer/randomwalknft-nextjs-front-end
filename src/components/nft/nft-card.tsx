@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { ArtworkTransition } from "@/components/common/view-transition";
 import { Badge } from "@/components/ui/badge";
 import type { AssetTheme } from "@/lib/types";
 import { useArtworkAssets } from "@/lib/use-artwork-assets";
@@ -67,20 +68,22 @@ export function NftCard({
             <span className="text-xs text-muted-foreground/80">Preview not available yet</span>
           </div>
         ) : (
-          <Image
-            src={assets.thumb}
-            alt={`Random Walk NFT ${formatId(id)} — generative random walk artwork, ${assets.edition} edition`}
-            fill
-            className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.02]"
-            sizes={
-              compact
-                ? "(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-                : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            }
-            unoptimized
-            priority={priority}
-            onError={() => setFailedPreviewKey(previewKey)}
-          />
+          <ArtworkTransition tokenId={id}>
+            <Image
+              src={assets.thumb}
+              alt={`Random Walk NFT ${formatId(id)} — generative random walk artwork, ${assets.edition} edition`}
+              fill
+              className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.02]"
+              sizes={
+                compact
+                  ? "(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                  : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              }
+              unoptimized
+              priority={priority}
+              onError={() => setFailedPreviewKey(previewKey)}
+            />
+          </ArtworkTransition>
         )}
         {showVideo ? (
           <video

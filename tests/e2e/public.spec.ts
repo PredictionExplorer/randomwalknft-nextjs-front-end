@@ -12,8 +12,10 @@ const expectedCanonicalOrigin = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://ra
  */
 async function goto(page: Page, path: string) {
   await page.goto(path, { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() =>
-    Array.from(document.querySelectorAll("body > div[hidden]")).every((node) => node.childElementCount === 0)
+  await page.waitForFunction(
+    () =>
+      document.documentElement.dataset.hydrated === "true" &&
+      Array.from(document.querySelectorAll("body > div[hidden]")).every((node) => node.childElementCount === 0)
   );
 }
 
@@ -121,13 +123,53 @@ test("how-it-works page renders the full explainer", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /why can.t the rules change\?/i })).toBeVisible();
 });
 
-test("detail page for token 1 loads core metadata", async ({ page }) => {
+test("detail page for token 1 shows the work, its provenance, and the stage controls", async ({ page }) => {
   await goto(page, "/detail/1");
-  await expect(page.getByRole("heading", { name: /#000001/i })).toBeVisible();
-  await expect(page.getByText(/^Owner$/)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /#000001/i })).toBeVisible();
+
+  const stage = page.getByTestId("artwork-stage");
+  await expect(stage.getByRole("img", { name: /random walk nft #000001/i })).toBeVisible();
+  await expect(stage.getByTestId("media-image")).toHaveAttribute("aria-pressed", "true");
+  await stage.getByTestId("media-singleVideo").click();
+  await expect(stage.getByTestId("artwork-video")).toBeVisible();
+  await stage.getByRole("button", { name: /white edition/i }).click();
+  await expect(stage.getByTestId("artwork-video").locator("source")).toHaveAttribute("src", /_white_single\.mp4$/);
+
+  const provenance = page.getByTestId("provenance");
+  await expect(provenance.getByText(/^Owner$/)).toBeVisible();
+  await expect(provenance.getByText(/on-chain seed/i)).toBeVisible();
+  await expect(provenance.getByRole("link", { name: /redraw in the atelier/i })).toHaveAttribute(
+    "href",
+    /^\/atelier\?seed=(0x)?[0-9a-f]{64}$/
+  );
+  await expect(provenance.getByTestId("history-timeline").getByText(/^Minted$/)).toBeVisible();
+
+  await expect(page.getByTestId("collector-tools").getByRole("link", { name: /open on axiom zero/i })).toBeVisible();
   await expect(page.getByText(/order book/i)).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /^bid$/i })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /^list$/i })).toHaveCount(0);
+});
+
+test("detail page browses neighbours with the keyboard and skips typing targets", async ({ page }) => {
+  await goto(page, "/detail/5");
+  await expect(page.getByTestId("token-nav").getByRole("link", { name: /next work, #000006/i })).toHaveAttribute(
+    "href",
+    "/detail/6"
+  );
+
+  await page.keyboard.press("ArrowRight");
+  await expect(page).toHaveURL(/\/detail\/6$/);
+  // Wait for the new page to render before the next shortcut, which it owns.
+  await expect(page.getByRole("heading", { level: 1, name: /#000006/i })).toBeVisible();
+  await page.keyboard.press("ArrowLeft");
+  await expect(page).toHaveURL(/\/detail\/5$/);
+  await expect(page.getByRole("heading", { level: 1, name: /#000005/i })).toBeVisible();
+});
+
+test("detail page redraws the work live from its seed", async ({ page }) => {
+  await goto(page, "/detail/1");
+  const stage = page.getByTestId("artwork-stage");
+  await stage.getByTestId("proof-toggle").click();
+  await expect(stage.locator("canvas")).toBeVisible();
+  await expect(stage.getByText(/drawn live from the seed/i)).toBeVisible();
 });
 
 test("home page passes an axe smoke check", async ({ page }) => {
