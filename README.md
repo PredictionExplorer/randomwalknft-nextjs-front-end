@@ -4,18 +4,24 @@ Next.js Front-end for https://randomwalknft.com
 
 ## Wallet compatibility
 
-The app intentionally does not register a WalletConnect connector. It supports:
+The wallet layer is wagmi 3 with an app-owned connect dialog (`src/components/wallet/`); there is
+no RainbowKit and no WalletConnect connector. It supports:
 
-- MetaMask browser extensions and MetaMask Mobile through the Wagmi 2 MetaMask SDK connector.
-- Installed EIP-6963 browser wallets, with a generic injected-provider fallback.
-- MetaMask's in-app browser and MetaMask deep links from iOS Safari or Android Chrome.
+- The MetaMask browser extension and every other EIP-6963 wallet the browser announces, over plain
+  EIP-1193 (no SDK download for extension users).
+- MetaMask Mobile through wagmi's `metaMask` connector (`@metamask/connect-evm`): deep links on
+  phones, and a QR code rendered inside the site's own dialog for desktops without the extension.
+- MetaMask's in-app browser, plus an "Open this page in MetaMask" fallback when a mobile attempt
+  stalls.
+- A generic injected-provider entry for legacy browsers that expose `window.ethereum` without
+  EIP-6963.
 
 `NEXT_PUBLIC_SITE_URL` must be the canonical HTTPS origin in non-local environments because it is
-included in wallet metadata. No WalletConnect/Reown project ID is used.
+included in the MetaMask dapp metadata. No WalletConnect/Reown project ID is used.
 
-The Wagmi 2 MetaMask SDK is deprecated upstream. It remains isolated behind
-`src/lib/web3/wallets/meta-mask-sdk-wallet.ts` until a later Wagmi 3 migration. Without
-WalletConnect, a desktop browser that has no wallet extension does not have a QR-to-mobile fallback.
+`src/lib/web3/wallets/meta-mask-wallet.ts` wraps the stock connector so that (a) an installed
+extension is not claimed by the SDK connector and (b) anonymous visitors never load the SDK just to
+probe for a session that cannot exist.
 
 ## MetaMask Mobile release check
 

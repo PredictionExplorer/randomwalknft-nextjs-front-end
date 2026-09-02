@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAccount, useWalletClient } from "wagmi";
+import { useConnection, useWalletClient } from "wagmi";
 
 import { getConfiguredEvmChain } from "@/lib/web3/evm-chain";
 import { WALLET_RESUME_EVENT } from "@/lib/web3/wallet-events";
 
 export function useWalletStatus() {
-  const { address, chain, connector, isConnected, isConnecting, isReconnecting, status } = useAccount();
+  const { address, chain, chainId, connector, isConnected, isConnecting, isReconnecting, status } = useConnection();
   const configuredChainId = getConfiguredEvmChain().id;
-  const chainUnsupported = (chain as (typeof chain & { unsupported?: boolean }) | undefined)?.unsupported === true;
-  const isWrongNetwork = isConnected && (chain?.id !== configuredChainId || chainUnsupported);
+  // `chain` is undefined whenever the wallet sits on a network this app does not configure.
+  const isWrongNetwork = isConnected && (chain === undefined || chainId !== configuredChainId);
   const isReady = isConnected && !isConnecting && !isReconnecting && !isWrongNetwork;
   const {
     data: walletClient,

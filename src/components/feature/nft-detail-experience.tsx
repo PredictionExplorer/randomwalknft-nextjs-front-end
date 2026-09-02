@@ -110,7 +110,7 @@ export function NftDetailExperience({ nft, message, initialTheme, initialMedia }
     args: address ? [address] : undefined,
     query: { enabled: Boolean(address) }
   });
-  const { writeContractAsync } = useWriteContract();
+  const writeContract = useWriteContract();
 
   const owner = ownerOf ?? nft.owner;
   const isPendingMetadata = Boolean(nft.isPendingMetadata);
@@ -252,7 +252,7 @@ export function NftDetailExperience({ nft, message, initialTheme, initialMedia }
       functionName: "setTokenName",
       args: [BigInt(nft.id), tokenName.trim()]
     });
-    const hash = await writeContractAsync({
+    const hash = await writeContract.mutateAsync({
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "setTokenName",
@@ -279,7 +279,7 @@ export function NftDetailExperience({ nft, message, initialTheme, initialMedia }
       functionName: "transferFrom",
       args: [address, transferAddress, BigInt(nft.id)]
     });
-    const hash = await writeContractAsync({
+    const hash = await writeContract.mutateAsync({
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "transferFrom",

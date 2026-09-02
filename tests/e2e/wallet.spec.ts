@@ -26,7 +26,7 @@ test("connect wallet works with a browser wallet provider", async ({ page }) => 
   await expect(page.getByRole("button", { name: /0x12/i })).toBeVisible();
 });
 
-test("MetaMask SDK connects an installed extension provider", async ({ page }) => {
+test("MetaMask connects through an announced EIP-6963 extension provider", async ({ page }) => {
   await installMockWallet(page, {
     announceEip6963: true,
     chainId: "0xa4b1"

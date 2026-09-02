@@ -1,18 +1,20 @@
-import { cookieStorage, createConfig, createStorage } from "wagmi";
-import type { Config, CreateConnectorFn } from "wagmi";
-import { injected, metaMask } from "wagmi/connectors";
+import { cookieStorage, createConfig, createStorage, type Config } from "wagmi";
+import { injected } from "wagmi/connectors";
 
 import { getConfiguredEvmChain } from "@/lib/web3/evm-chain";
 import { getRpcTransport } from "@/lib/web3/rpc-transport";
-import { getMetaMaskParameters } from "@/lib/web3/wallets/meta-mask-parameters";
+import { metaMaskWallet } from "@/lib/web3/wallets/meta-mask-wallet";
 
-let serverWagmiConfigSingleton: Config | undefined;
+let configSingleton: Config | undefined;
 
-export function createAppWagmiConfig(connectors: CreateConnectorFn[]): Config {
+export function createAppWagmiConfig(): Config {
   const chain = getConfiguredEvmChain();
   return createConfig({
     chains: [chain],
-    connectors,
+    // MetaMask (extension or mobile via the SDK) plus any EIP-6963 wallet the
+    // browser announces. WalletConnect is intentionally absent.
+    connectors: [metaMaskWallet(), injected({ shimDisconnect: true })],
+    multiInjectedProviderDiscovery: true,
     ssr: true,
     storage: createStorage({ storage: cookieStorage }),
     transports: {
@@ -22,17 +24,10 @@ export function createAppWagmiConfig(connectors: CreateConnectorFn[]): Config {
 }
 
 /**
- * Server Components cannot call RainbowKit's client-only connector builder.
- * Use connector factories with matching IDs solely to deserialize Wagmi's
- * cookie state; the browser config adds RainbowKit metadata.
+ * One config for both runtimes: the server uses it to deserialize wagmi's cookie
+ * state during SSR, the browser drives connections with it.
  */
-export function getServerWagmiConfig(): Config {
-  if (!serverWagmiConfigSingleton) {
-    serverWagmiConfigSingleton = createAppWagmiConfig([
-      metaMask(getMetaMaskParameters()),
-      injected({ shimDisconnect: true })
-    ]);
-  }
-
-  return serverWagmiConfigSingleton;
+export function getWagmiConfig(): Config {
+  configSingleton ??= createAppWagmiConfig();
+  return configSingleton;
 }

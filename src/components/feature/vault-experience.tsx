@@ -50,7 +50,8 @@ export function VaultExperience({
     staleTime: 30_000
   });
   const [nowMs, setNowMs] = useState(() => initialVault.readAtMs);
-  const { writeContractAsync, data: hash, isPending } = useWriteContract();
+  const withdraw = useWriteContract();
+  const { data: hash, isPending } = withdraw;
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   useEffect(() => {
@@ -86,7 +87,7 @@ export function VaultExperience({
       });
 
       trackEvent("transaction_submitted", { flow: "redeem" });
-      await writeContractAsync({
+      await withdraw.mutateAsync({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: "withdraw",

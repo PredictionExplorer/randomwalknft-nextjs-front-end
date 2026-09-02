@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
-import { useAccount, useAccountEffect, useReconnect } from "wagmi";
+import { useEffect, useEffectEvent, useRef } from "react";
+import { useConnection, useConnectionEffect, useConnectors, useReconnect } from "wagmi";
 
 import { trackEvent } from "@/lib/analytics";
 import { getErrorMessage } from "@/lib/web3/errors";
 import { WALLET_RESUME_EVENT } from "@/lib/web3/wallet-events";
+import { META_MASK_CONNECTOR_ID } from "@/lib/web3/wallets/meta-mask-wallet";
 import { markMetaMaskSessionAuthorized } from "@/lib/web3/wallets/meta-mask-session";
 
 const RECOVERY_COOLDOWN_MS = 2_000;
@@ -16,15 +17,16 @@ const RECOVERY_COOLDOWN_MS = 2_000;
  * pass when it becomes visible again.
  */
 export function WalletLifecycleBridge() {
-  const { isConnected, isConnecting, isReconnecting } = useAccount();
-  const { connectors, reconnectAsync } = useReconnect();
+  const { isConnected, isConnecting, isReconnecting } = useConnection();
+  const connectors = useConnectors();
+  const reconnect = useReconnect();
   const recoveryInFlight = useRef(false);
   const hiddenSinceLastRecovery = useRef(false);
   const lastRecoveryAt = useRef(0);
 
-  useAccountEffect({
+  useConnectionEffect({
     onConnect({ chainId, connector, isReconnected }) {
-      if (connector.id === "metaMaskSDK") {
+      if (connector.id === META_MASK_CONNECTOR_ID) {
         markMetaMaskSessionAuthorized();
       }
       trackEvent("wallet_connect_success", {
@@ -35,7 +37,7 @@ export function WalletLifecycleBridge() {
     }
   });
 
-  const recover = useCallback(async () => {
+  const recover = useEffectEvent(async () => {
     window.dispatchEvent(new Event(WALLET_RESUME_EVENT));
 
     if (
@@ -48,7 +50,7 @@ export function WalletLifecycleBridge() {
       return;
     }
 
-    const metaMaskConnector = connectors.find((connector) => connector.id === "metaMaskSDK");
+    const metaMaskConnector = connectors.find((connector) => connector.id === META_MASK_CONNECTOR_ID);
     if (!metaMaskConnector) {
       return;
     }
@@ -56,7 +58,7 @@ export function WalletLifecycleBridge() {
     recoveryInFlight.current = true;
     lastRecoveryAt.current = Date.now();
     try {
-      const connections = await reconnectAsync({ connectors: [metaMaskConnector] });
+      const connections = await reconnect.mutateAsync({ connectors: [metaMaskConnector] });
       if (connections.length > 0) {
         trackEvent("wallet_session_recovered", {
           connector: metaMaskConnector.id
@@ -71,7 +73,7 @@ export function WalletLifecycleBridge() {
     } finally {
       recoveryInFlight.current = false;
     }
-  }, [connectors, isConnected, isConnecting, isReconnecting, reconnectAsync]);
+  });
 
   useEffect(() => {
     function onVisibilityChange() {
@@ -98,7 +100,7 @@ export function WalletLifecycleBridge() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("pageshow", onPageShow);
     };
-  }, [recover]);
+  }, []);
 
   return null;
 }

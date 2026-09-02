@@ -6,7 +6,8 @@ import { WALLET_RESUME_EVENT } from "@/lib/web3/wallet-events";
 const refetchWalletClient = vi.fn();
 const accountState: {
   address?: `0x${string}`;
-  chain?: { id: number; unsupported?: boolean };
+  chain?: { id: number };
+  chainId?: number;
   isConnected: boolean;
   isConnecting: boolean;
   isReconnecting: boolean;
@@ -21,7 +22,7 @@ let walletClient: object | undefined;
 let walletClientFetching = false;
 
 vi.mock("wagmi", () => ({
-  useAccount: () => accountState,
+  useConnection: () => accountState,
   useWalletClient: () => ({
     data: walletClient,
     error: null,
@@ -37,6 +38,7 @@ describe("useWalletStatus", () => {
     Object.assign(accountState, {
       address: undefined,
       chain: undefined,
+      chainId: undefined,
       isConnected: false,
       isConnecting: false,
       isReconnecting: false,
@@ -55,6 +57,7 @@ describe("useWalletStatus", () => {
     Object.assign(accountState, {
       address: "0x0000000000000000000000000000000000000001",
       chain: { id: 42161 },
+      chainId: 42161,
       isConnected: true,
       isReconnecting: true,
       status: "reconnecting"
@@ -69,6 +72,7 @@ describe("useWalletStatus", () => {
     Object.assign(accountState, {
       address: "0x0000000000000000000000000000000000000001",
       chain: { id: 1 },
+      chainId: 1,
       isConnected: true,
       status: "connected"
     });
@@ -80,10 +84,11 @@ describe("useWalletStatus", () => {
     expect(result.current.canTransact).toBe(false);
   });
 
-  it("treats an explicitly unsupported configured chain as wrong", () => {
+  it("treats a wallet on an unconfigured network (no resolved chain) as wrong", () => {
     Object.assign(accountState, {
       address: "0x0000000000000000000000000000000000000001",
-      chain: { id: 42161, unsupported: true },
+      chain: undefined,
+      chainId: 8453,
       isConnected: true,
       status: "connected"
     });
@@ -98,6 +103,7 @@ describe("useWalletStatus", () => {
     Object.assign(accountState, {
       address: "0x0000000000000000000000000000000000000001",
       chain: { id: 42161 },
+      chainId: 42161,
       isConnected: true,
       status: "connected"
     });
@@ -115,6 +121,7 @@ describe("useWalletStatus", () => {
     Object.assign(accountState, {
       address: "0x0000000000000000000000000000000000000001",
       chain: { id: 42161 },
+      chainId: 42161,
       isConnected: true,
       status: "connected"
     });

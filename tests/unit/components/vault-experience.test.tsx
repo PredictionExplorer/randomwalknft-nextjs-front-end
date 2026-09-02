@@ -26,13 +26,12 @@ vi.mock("wagmi", () => ({
   useWriteContract: () => ({
     data: undefined,
     isPending: false,
-    writeContractAsync
+    mutateAsync: writeContractAsync
   })
 }));
 
-vi.mock("@rainbow-me/rainbowkit", () => ({
-  useChainModal: () => ({ openChainModal: vi.fn() }),
-  useConnectModal: () => ({ openConnectModal: vi.fn() })
+vi.mock("@/components/wallet/wallet-provider", () => ({
+  useWalletUi: () => ({ openChainModal: vi.fn(), openConnectModal: vi.fn() })
 }));
 
 vi.mock("@/lib/web3/transaction-preflight", () => ({

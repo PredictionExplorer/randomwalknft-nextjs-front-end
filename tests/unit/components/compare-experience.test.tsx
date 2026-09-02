@@ -15,15 +15,16 @@ const walletClient = {
 };
 
 vi.mock("wagmi", () => ({
-  useAccount: () => ({
+  useConnection: () => ({
     address: "0x0000000000000000000000000000000000000001",
     chain: { id: 31337 },
+    chainId: 31337,
     isConnected: true,
     isConnecting: false,
     isReconnecting: false,
     status: "connected"
   }),
-  useSignMessage: () => ({ signMessageAsync }),
+  useSignMessage: () => ({ mutateAsync: signMessageAsync }),
   useWalletClient: () => ({
     data: walletClient,
     error: null,

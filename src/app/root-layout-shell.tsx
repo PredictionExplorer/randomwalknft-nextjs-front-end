@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { headers } from "next/headers";
-import "@rainbow-me/rainbowkit/styles.css";
 import { cookieToInitialState } from "wagmi";
 
 import { AppProviders } from "@/components/providers/app-providers";
@@ -9,7 +8,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getBaseConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
-import { getServerWagmiConfig } from "@/lib/web3/wagmi";
+import { getWagmiConfig } from "@/lib/web3/wagmi";
 
 import "@/app/globals.css";
 
@@ -69,7 +68,7 @@ export function buildRootMetadata(): Metadata {
 
 export async function RootLayoutShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const cookie = (await headers()).get("cookie");
-  const initialState = cookieToInitialState(getServerWagmiConfig(), cookie);
+  const initialState = cookieToInitialState(getWagmiConfig(), cookie);
   const { API_BASE_URL, NFT_ADDRESS } = await getAppConfig();
 
   return (

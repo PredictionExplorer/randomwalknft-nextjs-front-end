@@ -1,13 +1,9 @@
 "use client";
 
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
 import { AlertTriangle, ChevronDown, ExternalLink as ExternalLinkIcon, LogOut, Wallet } from "lucide-react";
-import { useDisconnect } from "wagmi";
+import { useConnection, useDisconnect } from "wagmi";
 
-import { trackEvent } from "@/lib/analytics";
-import { getChainDisplayName, getConfiguredEvmChain } from "@/lib/web3/evm-chain";
-import { arbiscanAddressUrl } from "@/lib/utils";
 import { ExternalLink } from "@/components/common/external-link";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,100 +12,90 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { useWalletUi } from "@/components/wallet/wallet-provider";
+import { trackEvent } from "@/lib/analytics";
+import { arbiscanAddressUrl, shortenAddress } from "@/lib/utils";
+import { getChainDisplayName, getConfiguredEvmChain } from "@/lib/web3/evm-chain";
 
 type ConnectWalletButtonProps = {
+  /** Runs before the connect dialog opens (e.g. to close a mobile navigation sheet). */
   onBeforeOpen?: () => void;
 };
 
-function RainbowKitConnectWalletButton({ onBeforeOpen }: ConnectWalletButtonProps) {
-  const { disconnect } = useDisconnect();
+export function ConnectWalletButton({ onBeforeOpen }: ConnectWalletButtonProps) {
+  const { address, chain, chainId, isConnected } = useConnection();
+  const disconnect = useDisconnect();
+  const { openAccountModal, openChainModal, openConnectModal } = useWalletUi();
+
+  if (!isConnected || !address) {
+    return (
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => {
+          onBeforeOpen?.();
+          trackEvent("wallet_connect_attempt", { mode: "header" });
+          openConnectModal();
+        }}
+      >
+        <Wallet className="h-4 w-4" aria-hidden />
+        Connect Wallet
+      </Button>
+    );
+  }
+
+  const expectedChainId = getConfiguredEvmChain().id;
+  // `chain` is undefined when the wallet sits on a network this app does not configure.
+  const wrongNetwork = chain === undefined || chainId !== expectedChainId;
 
   return (
-    <ConnectButton.Custom>
-      {({ account, chain, mounted, openAccountModal, openChainModal, openConnectModal }) => {
-        const ready = mounted;
-        const connected = Boolean(ready && account && chain);
+    <div className="flex items-center gap-2">
+      {wrongNetwork ? (
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            trackEvent("wallet_switch_network", { chainId: expectedChainId });
+            openChainModal();
+          }}
+        >
+          <AlertTriangle className="h-4 w-4" aria-hidden />
+          Switch network
+        </Button>
+      ) : (
+        <Button variant="ghost" size="sm" onClick={openChainModal}>
+          {chain.name || getChainDisplayName()}
+        </Button>
+      )}
 
-        if (!connected) {
-          return (
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={!openConnectModal}
-              onClick={() => {
-                onBeforeOpen?.();
-                trackEvent("wallet_connect_attempt", { mode: "rainbowkit" });
-                openConnectModal();
-              }}
-            >
-              <Wallet className="h-4 w-4" />
-              Connect Wallet
-            </Button>
-          );
-        }
-
-        const currentAccount = account!;
-        const currentChain = chain!;
-        const expectedChainId = getConfiguredEvmChain().id;
-        const wrongNetwork = currentChain.id !== expectedChainId || currentChain.unsupported;
-
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant={wrongNetwork ? "destructive" : "ghost"}
-              size="sm"
-              onClick={() => {
-                if (wrongNetwork) {
-                  trackEvent("wallet_switch_network", { chainId: expectedChainId });
-                }
-                openChainModal();
-              }}
-            >
-              {wrongNetwork ? (
-                <>
-                  <AlertTriangle className="h-4 w-4" />
-                  Switch network
-                </>
-              ) : (
-                (currentChain.name ?? getChainDisplayName())
-              )}
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  {currentAccount.displayName}
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={openAccountModal}>Wallet details</DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/my-nfts">My NFTs</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <ExternalLink href={arbiscanAddressUrl(currentAccount.address)}>
-                    View on block explorer
-                    <ExternalLinkIcon className="ml-auto h-4 w-4" />
-                  </ExternalLink>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    disconnect();
-                  }}
-                >
-                  Disconnect
-                  <LogOut className="ml-auto h-4 w-4" />
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      }}
-    </ConnectButton.Custom>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm">
+            {shortenAddress(address)}
+            <ChevronDown className="h-4 w-4" aria-hidden />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={openAccountModal}>Wallet details</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/my-nfts">My NFTs</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <ExternalLink href={arbiscanAddressUrl(address)}>
+              View on block explorer
+              <ExternalLinkIcon className="ml-auto h-4 w-4" aria-hidden />
+            </ExternalLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              disconnect.mutate();
+            }}
+          >
+            Disconnect
+            <LogOut className="ml-auto h-4 w-4" aria-hidden />
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
-}
-
-export function ConnectWalletButton(props: ConnectWalletButtonProps) {
-  return <RainbowKitConnectWalletButton {...props} />;
 }

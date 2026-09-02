@@ -1,17 +1,16 @@
 "use client";
 
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
-import { type State, WagmiProvider } from "wagmi";
 import { Toaster } from "sonner";
+import { type State, WagmiProvider } from "wagmi";
 
 import type { ContractsContextValue } from "@/components/providers/contracts-context";
 import { ContractsProvider } from "@/components/providers/contracts-context";
 import { WalletLifecycleBridge } from "@/components/wallet/wallet-lifecycle-bridge";
-import { getRainbowKitAppInfo, rainbowKitTheme } from "@/lib/web3/rainbowkit";
-import { getWagmiConfig } from "@/lib/web3/wagmi-client";
+import { WalletProvider } from "@/components/wallet/wallet-provider";
+import { getWagmiConfig } from "@/lib/web3/wagmi";
 
 type AppProvidersProps = {
   children: React.ReactNode;
@@ -37,10 +36,10 @@ export function AppProviders({ children, initialState, contracts }: AppProviders
     <ContractsProvider value={contracts}>
       <WagmiProvider config={getWagmiConfig()} initialState={initialState}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider appInfo={getRainbowKitAppInfo()} modalSize="compact" theme={rainbowKitTheme}>
+          <WalletProvider>
             <WalletLifecycleBridge />
             {children}
-          </RainbowKitProvider>
+          </WalletProvider>
           <Toaster position="top-right" richColors />
           {process.env.NODE_ENV === "development" ? <ReactQueryDevtools initialIsOpen={false} /> : null}
         </QueryClientProvider>

@@ -82,7 +82,7 @@ async function submitVote(payload: {
 export function CompareExperience() {
   const queryClient = useQueryClient();
   const { address, canTransact, isConnected, isReady } = useWalletStatus();
-  const { signMessageAsync } = useSignMessage();
+  const signMessage = useSignMessage();
   const [relaxedVoter, setRelaxedVoter] = useState<string | null>(null);
   const voter = isConnected && address ? address : undefined;
   const relaxPairFilter = voter !== undefined && relaxedVoter === voter;
@@ -120,7 +120,7 @@ export function CompareExperience() {
         nft2: secondId,
         winner
       });
-      const signature = await signMessageAsync({ message });
+      const signature = await signMessage.mutateAsync({ message });
       await submitVote({
         firstId,
         secondId,

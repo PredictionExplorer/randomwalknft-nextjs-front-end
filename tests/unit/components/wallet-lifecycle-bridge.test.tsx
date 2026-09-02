@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WALLET_RESUME_EVENT } from "@/lib/web3/wallet-events";
 
-const { accountState, metaMaskConnector, reconnectAsync, trackEvent } = vi.hoisted(() => ({
-  reconnectAsync: vi.fn(),
+const { connectionState, metaMaskConnector, reconnectMutateAsync, trackEvent } = vi.hoisted(() => ({
+  reconnectMutateAsync: vi.fn(),
   trackEvent: vi.fn(),
-  accountState: {
+  connectionState: {
     isConnected: false,
     isConnecting: false,
     isReconnecting: false
@@ -15,12 +15,10 @@ const { accountState, metaMaskConnector, reconnectAsync, trackEvent } = vi.hoist
 }));
 
 vi.mock("wagmi", () => ({
-  useAccount: () => accountState,
-  useAccountEffect: vi.fn(),
-  useReconnect: () => ({
-    connectors: [metaMaskConnector],
-    reconnectAsync
-  })
+  useConnection: () => connectionState,
+  useConnectionEffect: vi.fn(),
+  useConnectors: () => [metaMaskConnector],
+  useReconnect: () => ({ mutateAsync: reconnectMutateAsync })
 }));
 
 vi.mock("@/lib/analytics", () => ({
@@ -38,13 +36,13 @@ function setVisibility(value: DocumentVisibilityState) {
 
 describe("WalletLifecycleBridge", () => {
   beforeEach(() => {
-    Object.assign(accountState, {
+    Object.assign(connectionState, {
       isConnected: false,
       isConnecting: false,
       isReconnecting: false
     });
-    reconnectAsync.mockReset();
-    reconnectAsync.mockResolvedValue([{ accounts: ["0x1"] }]);
+    reconnectMutateAsync.mockReset();
+    reconnectMutateAsync.mockResolvedValue([{ accounts: ["0x1"] }]);
     trackEvent.mockReset();
     setVisibility("visible");
   });
@@ -59,7 +57,7 @@ describe("WalletLifecycleBridge", () => {
 
     setVisibility("hidden");
     document.dispatchEvent(new Event("visibilitychange"));
-    expect(reconnectAsync).not.toHaveBeenCalled();
+    expect(reconnectMutateAsync).not.toHaveBeenCalled();
 
     setVisibility("visible");
     await act(async () => {
@@ -67,7 +65,7 @@ describe("WalletLifecycleBridge", () => {
       await Promise.resolve();
     });
 
-    expect(reconnectAsync).toHaveBeenCalledWith({
+    expect(reconnectMutateAsync).toHaveBeenCalledWith({
       connectors: [metaMaskConnector]
     });
     expect(trackEvent).toHaveBeenCalledWith("wallet_session_recovered", {
@@ -78,11 +76,11 @@ describe("WalletLifecycleBridge", () => {
     document.dispatchEvent(new Event("visibilitychange"));
     setVisibility("visible");
     document.dispatchEvent(new Event("visibilitychange"));
-    expect(reconnectAsync).toHaveBeenCalledTimes(1);
+    expect(reconnectMutateAsync).toHaveBeenCalledTimes(1);
   });
 
   it("refreshes subscribers but does not reconnect an already connected wallet", async () => {
-    accountState.isConnected = true;
+    connectionState.isConnected = true;
     const onResume = vi.fn();
     window.addEventListener(WALLET_RESUME_EVENT, onResume);
     render(<WalletLifecycleBridge />);
@@ -96,7 +94,25 @@ describe("WalletLifecycleBridge", () => {
     });
 
     expect(onResume).toHaveBeenCalledTimes(1);
-    expect(reconnectAsync).not.toHaveBeenCalled();
+    expect(reconnectMutateAsync).not.toHaveBeenCalled();
     window.removeEventListener(WALLET_RESUME_EVENT, onResume);
+  });
+
+  it("records a recovery failure without throwing", async () => {
+    reconnectMutateAsync.mockRejectedValueOnce(new Error("relay unavailable"));
+    render(<WalletLifecycleBridge />);
+
+    setVisibility("hidden");
+    document.dispatchEvent(new Event("visibilitychange"));
+    setVisibility("visible");
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+      await Promise.resolve();
+    });
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      "wallet_connect_error",
+      expect.objectContaining({ connector: "metaMaskSDK", recovery: true })
+    );
   });
 });

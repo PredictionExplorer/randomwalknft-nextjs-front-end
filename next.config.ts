@@ -25,11 +25,6 @@ type AssetRemotePattern = {
   pathname: string;
 };
 
-/** The slice of webpack's configuration this file touches; Next types the callback argument as `any`. */
-type WebpackAliasConfig = {
-  resolve: { alias?: Record<string, string | false | string[]> };
-};
-
 /**
  * One remote pattern per configured API origin. `NEXT_PUBLIC_API_URLS` is the
  * comma-separated rotation list (see `src/lib/server-rotation.ts`); the singular
@@ -64,10 +59,6 @@ const assetRemotes = assetBaseRemotePatterns();
 /** Pin bare `tailwindcss` imports (e.g. from tooling) to this app’s install when parent lockfiles confuse the resolver. */
 const tailwindPkgDir = path.join(projectRoot, "node_modules", "tailwindcss");
 
-/** Webpack needs an absolute path; Turbopack treats absolute values as broken server-relative imports (Next 16). */
-const asyncStorageStubWebpack = path.join(projectRoot, "src/stubs/async-storage.ts");
-const asyncStorageStubTurbopack = "./src/stubs/async-storage.ts";
-
 const nextConfig: NextConfig = {
   /**
    * Both must match (see `next/dist/server/config.js`): otherwise Next falls back to lockfile-based
@@ -77,16 +68,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
     resolveAlias: {
-      tailwindcss: tailwindPkgDir,
-      "@react-native-async-storage/async-storage": asyncStorageStubTurbopack
+      tailwindcss: tailwindPkgDir
     }
-  },
-  webpack: (config: WebpackAliasConfig) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@react-native-async-storage/async-storage": asyncStorageStubWebpack
-    };
-    return config;
   },
   typedRoutes: true,
   reactStrictMode: true,

@@ -8,5 +8,5 @@
   ],
   "project": ["src/**/*.{ts,tsx,css}", "tests/**/*.{ts,tsx}"],
   "ignore": ["src/generated/**"],
-  "ignoreDependencies": ["tailwindcss"]
+  "ignoreDependencies": ["tailwindcss", "@metamask/connect-evm"]
 }
