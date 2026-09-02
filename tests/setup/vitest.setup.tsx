@@ -35,6 +35,23 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
   });
 }
 
+// jsdom has no ResizeObserver; the stage and constellation size themselves with it.
+if (typeof window !== "undefined" && typeof window.ResizeObserver !== "function") {
+  class ResizeObserverStub {
+    private readonly callback: ResizeObserverCallback;
+    constructor(callback: ResizeObserverCallback) {
+      this.callback = callback;
+    }
+    observe(target: Element) {
+      // Fire once so components measure their (jsdom-sized) box on mount.
+      this.callback([{ target } as ResizeObserverEntry], this as unknown as ResizeObserver);
+    }
+    unobserve() {}
+    disconnect() {}
+  }
+  Object.defineProperty(window, "ResizeObserver", { writable: true, value: ResizeObserverStub });
+}
+
 vi.mock("next/image", () => ({
   default: ({
     fill: _fill,

@@ -91,7 +91,7 @@ export function VaultExperience({
     }
   }, [isSuccess]);
 
-  const elapsedSeconds = Math.floor((nowMs - vault.readAtMs) / 1000);
+  const elapsedSeconds = Math.max(0, Math.floor((nowMs - vault.readAtMs) / 1000));
   const remaining = Math.max(0, vault.secondsUntilWithdrawal - elapsedSeconds);
   const claimable = remaining <= 0;
   const parts = splitDuration(remaining);
@@ -160,8 +160,9 @@ export function VaultExperience({
               <span className="ml-3 font-mono text-lg uppercase tracking-[0.2em] text-muted-foreground">ETH</span>
             </p>
             <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">
-              Half of it — {formatEth(vault.prizeEth / 2, 2)} — goes to the keyholder when the clock reaches zero. The
-              other half seeds the next round.{ratio ? ` The prize is about ${ratio}× the price of one mint.` : ""}
+              This is the keyholder&apos;s prize when the clock reaches zero: half of everything the contract holds. The
+              other half stays behind to seed the next round.
+              {ratio ? ` It is about ${ratio}× the price of one mint.` : ""}
             </p>
           </div>
 
@@ -186,7 +187,7 @@ export function VaultExperience({
               .
               {claimable
                 ? " The clock has reached zero; the vault stands open for them alone."
-                : " If nobody mints before the clock runs out, half the vault is theirs."}
+                : " If nobody mints before the clock runs out, this prize is theirs."}
             </p>
           </div>
 
@@ -215,7 +216,7 @@ export function VaultExperience({
                 : `The clock has reached zero. Only the keyholder${
                     vault.lastMinter ? ` (${shortenAddress(vault.lastMinter)})` : ""
                   } can open the vault. A new mint would start a new round instead.`
-              : `Withdrawal unlocks when the clock reaches zero. Amount claimable then: ${formatEth(vault.prizeEth / 2, 2)}. The other half stays in the vault for the next round.`}
+              : `Withdrawal unlocks when the clock reaches zero. Amount claimable then: ${formatEth(vault.prizeEth, 2)}. As much again stays in the vault for the next round.`}
           </p>
           {!isReady && (claimable || isKeyholder) ? (
             <WalletStatusCard

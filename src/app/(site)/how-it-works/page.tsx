@@ -67,6 +67,21 @@ export default async function HowItWorksPage() {
             creates a unique seed that becomes six artworks, and every mint feeds an ETH vault that pays the last minter
             standing. This page explains the whole system — and how to verify every claim yourself.
           </p>
+          <nav aria-label="In this guide" className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
+            {[
+              ["#what-is-minted", "What is minted"],
+              ["#seed-to-art", "Seed to art"],
+              ["#vault-game", "The Vault game"],
+              ["#mint-price", "Mint price"],
+              ["#immutable-rules", "Why the rules can't change"],
+              ["#utility", "What you can do"],
+              ["#verify", "Verify it yourself"]
+            ].map(([href, label]) => (
+              <a key={href} href={href} className="eyebrow transition-colors hover:text-foreground">
+                {label}
+              </a>
+            ))}
+          </nav>
         </div>
       </div>
 

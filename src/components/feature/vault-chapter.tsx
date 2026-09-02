@@ -48,7 +48,7 @@ export function VaultChapter({ vault, recentMints, keyholderTokenId }: VaultChap
     return () => window.clearInterval(timer);
   }, []);
 
-  const elapsedSeconds = Math.floor((nowMs - vault.readAtMs) / 1000);
+  const elapsedSeconds = Math.max(0, Math.floor((nowMs - vault.readAtMs) / 1000));
   const remaining = Math.max(0, vault.secondsUntilWithdrawal - elapsedSeconds);
   const claimable = remaining <= 0;
   const parts = splitDuration(remaining);
@@ -76,8 +76,8 @@ export function VaultChapter({ vault, recentMints, keyholderTokenId }: VaultChap
             <span className="font-mono text-lg uppercase tracking-[0.2em] text-muted-foreground">ETH</span>
           </p>
           <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-            Every mint since 2021 paid into this pool; the creators took nothing. Half of it goes to whoever holds the
-            key when the clock reaches zero.
+            Every mint since 2021 paid into the contract; the creators took nothing. This is the half that goes to
+            whoever holds the key when the clock reaches zero.
             {prizeRatio ? ` Today that is about ${prizeRatio}× the price of one mint.` : ""}
           </p>
         </div>
@@ -136,7 +136,7 @@ export function VaultChapter({ vault, recentMints, keyholderTokenId }: VaultChap
                 .
                 {claimable
                   ? " The clock has reached zero; the vault stands open for them."
-                  : " If nobody mints before the clock runs out, half the vault is theirs."}
+                  : " If nobody mints before the clock runs out, this prize is theirs."}
               </p>
             </>
           ) : (

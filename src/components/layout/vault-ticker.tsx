@@ -41,7 +41,8 @@ export function VaultTicker({ className }: { className?: string }) {
     return null;
   }
 
-  const elapsedSeconds = Math.floor((nowMs - vault.readAtMs) / 1000);
+  // Clamp so a client clock behind the server never adds time to the countdown.
+  const elapsedSeconds = Math.max(0, Math.floor((nowMs - vault.readAtMs) / 1000));
   const remaining = vault.secondsUntilWithdrawal - elapsedSeconds;
   const claimable = remaining <= 0;
 

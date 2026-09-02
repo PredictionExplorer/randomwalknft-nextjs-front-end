@@ -87,7 +87,7 @@ describe("VaultExperience", () => {
     renderVault();
 
     expect(screen.getByTestId("vault-prize")).toHaveTextContent("40.63");
-    expect(screen.getByText(/half of it — 20.32 ETH/i)).toBeInTheDocument();
+    expect(screen.getByText(/half of everything the contract holds/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: walletStatus.address })).toHaveAttribute(
       "href",
       `/gallery?address=${walletStatus.address}`

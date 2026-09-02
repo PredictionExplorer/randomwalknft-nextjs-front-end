@@ -37,11 +37,12 @@ export default defineConfig({
         "src/instrumentation-client.ts"
       ],
       // Ratchet: raised as untested surfaces gain coverage; never lowered.
+      // Whole-`src` coverage. Ratchet these up as the suite grows; never down.
       thresholds: {
-        statements: 55,
-        branches: 45,
-        functions: 52,
-        lines: 55
+        statements: 88,
+        branches: 80,
+        functions: 86,
+        lines: 89
       }
     }
   }

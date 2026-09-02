@@ -10,8 +10,8 @@ import { NftGrid } from "@/components/nft/nft-grid";
 import { nftAbi } from "@/generated/wagmi";
 import { getRatingOrder } from "@/lib/api/public";
 import { PAGE_SIZE } from "@/lib/config";
+import { resolveGalleryPage } from "@/lib/gallery-page";
 import { getAppConfig } from "@/lib/server/app-config";
-import { getDescendingTokenPage, paginateItems } from "@/lib/pagination";
 import { buildCollectionSearchParams, parseCollectionQueryState } from "@/lib/query-state";
 import { createAssetUrls, shortenAddress } from "@/lib/utils";
 import { getPublicClient } from "@/lib/web3/public-client";
@@ -62,70 +62,29 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
   const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const resolvedSearchParams = await searchParams;
   const state = parseCollectionQueryState(resolvedSearchParams);
-  const { address, sortBy, query, page: requestedPage, view } = state;
+  const { address, sortBy, query, view } = state;
 
-  let tokenIds: number[] = [];
-  let totalSupply = 0;
-  let pageData = {
-    items: [] as number[],
-    totalItems: 0,
-    totalPages: 1,
-    page: 1
-  };
-  if (address) {
-    const walletTokens = (await getPublicClient().readContract({
-      address: NFT_ADDRESS,
-      abi: nftAbi,
-      functionName: "walletOfOwner",
-      args: [address as `0x${string}`]
-    })) as bigint[];
-    tokenIds = walletTokens.map((tokenId) => Number(tokenId));
-  } else {
-    totalSupply = Number(
-      await getPublicClient().readContract({
-        address: NFT_ADDRESS,
-        abi: nftAbi,
-        functionName: "totalSupply"
-      })
-    );
-    if (sortBy === "tokenId" && query === undefined) {
-      pageData = getDescendingTokenPage(totalSupply, requestedPage, PAGE_SIZE);
-    } else {
-      tokenIds = Array.from({ length: totalSupply }, (_, index) => index).reverse();
-    }
-  }
-
-  if (sortBy === "beauty") {
-    const ratingOrder = await getRatingOrder();
-    tokenIds = address ? ratingOrder.filter((id) => tokenIds.includes(id)).reverse() : [...ratingOrder].reverse();
-  } else if (address) {
-    tokenIds.sort((left, right) => right - left);
-  }
-
-  if (query !== undefined) {
-    if (!address && sortBy === "tokenId") {
-      pageData = {
-        items: query < totalSupply ? [query] : [],
-        totalItems: query < totalSupply ? 1 : 0,
-        totalPages: 1,
-        page: 1
-      };
-      tokenIds = [];
-    } else if (pageData.items.length) {
-      pageData = {
-        items: pageData.items.includes(query) ? [query] : [],
-        totalItems: pageData.items.includes(query) ? 1 : 0,
-        totalPages: 1,
-        page: 1
-      };
-    } else {
-      tokenIds = tokenIds.filter((id) => id === query);
-    }
-  }
-
-  if (tokenIds.length) {
-    pageData = paginateItems(tokenIds, requestedPage, PAGE_SIZE);
-  }
+  const client = getPublicClient();
+  const [walletTokens, totalSupply, ratingOrder] = await Promise.all([
+    address
+      ? client.readContract({
+          address: NFT_ADDRESS,
+          abi: nftAbi,
+          functionName: "walletOfOwner",
+          args: [address as `0x${string}`]
+        })
+      : Promise.resolve([] as readonly bigint[]),
+    address
+      ? Promise.resolve(0)
+      : client.readContract({ address: NFT_ADDRESS, abi: nftAbi, functionName: "totalSupply" }).then(Number),
+    sortBy === "beauty" ? getRatingOrder() : Promise.resolve([] as number[])
+  ]);
+  const pageData = resolveGalleryPage({
+    state,
+    totalSupply,
+    walletTokenIds: walletTokens.map((tokenId) => Number(tokenId)),
+    ratingOrder
+  });
 
   const pagerParams = buildCollectionSearchParams({
     ...state,

@@ -109,7 +109,7 @@ export function MintPanel({ initialVault }: MintPanelProps) {
 
   const isSaleOpen = !saleSeconds || Number(saleSeconds) <= 0 || countdownCompleted;
   const mintPriceEth = mintPrice != null ? Number(formatEther(mintPrice)) : (initialVault?.mintPriceEth ?? 0);
-  const prizeShareEth = withdrawalAmount ? Number(formatEther(withdrawalAmount)) : (initialVault?.prizeEth ?? 0) / 2;
+  const prizeShareEth = withdrawalAmount ? Number(formatEther(withdrawalAmount)) : (initialVault?.prizeEth ?? 0);
   const ratio = mintPriceEth > 0 ? Math.round(prizeShareEth / mintPriceEth) : null;
 
   const handleMint = async () => {

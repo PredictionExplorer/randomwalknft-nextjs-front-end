@@ -44,7 +44,8 @@ export function MyNftsView() {
    */
   const awaitingWalletOfOwner = Boolean(address) && !readFailed && data === undefined;
 
-  const ids = (data ?? []).map((value) => Number(value)).reverse();
+  // Newest work first, matching the public wall for the same wallet.
+  const ids = (data ?? []).map((value) => Number(value)).sort((left, right) => right - left);
 
   return (
     <PageShell className="space-y-10 py-12">
