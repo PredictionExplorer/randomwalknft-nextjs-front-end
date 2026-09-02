@@ -6,35 +6,38 @@ import { ContractsProvider } from "@/components/providers/contracts-context";
 import type { VaultState } from "@/lib/types";
 
 const { NFT_ADDRESS, ADDRESS, reads, walletStatus, publicClient, sendTransaction, receipt, push, toast } = vi.hoisted(
-  () => ({
-    NFT_ADDRESS: "0x895a6F444BE4ba9d124F61DF736605792B35D66b" as const,
-    ADDRESS: "0x1234567890abcdef1234567890abcdef12345678",
-    reads: {
+  () => {
+    const reads: Record<"getMintPrice" | "withdrawalAmount" | "timeUntilSale", bigint | undefined> = {
       getMintPrice: 90_500_000_000_000_000n,
       withdrawalAmount: 40_680_000_000_000_000_000n,
       timeUntilSale: 0n
-    },
-    walletStatus: {
-      address: "0x1234567890abcdef1234567890abcdef12345678",
-      canTransact: true,
-      isConnected: true,
-      isReady: true,
-      isWalletClientFetching: false,
-      chain: { id: 42161 },
-      isWrongNetwork: false,
-      refetchWalletClient: vi.fn(),
-      walletClient: { sendTransaction: vi.fn() }
-    },
-    publicClient: {
-      readContract: vi.fn(),
-      simulateContract: vi.fn(),
-      estimateFeesPerGas: vi.fn()
-    },
-    sendTransaction: vi.fn(),
-    receipt: { isSuccess: false },
-    push: vi.fn(),
-    toast: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() }
-  })
+    };
+    return {
+      NFT_ADDRESS: "0x895a6F444BE4ba9d124F61DF736605792B35D66b" as const,
+      ADDRESS: "0x1234567890abcdef1234567890abcdef12345678",
+      reads,
+      walletStatus: {
+        address: "0x1234567890abcdef1234567890abcdef12345678",
+        canTransact: true,
+        isConnected: true,
+        isReady: true,
+        isWalletClientFetching: false,
+        chain: { id: 42161 },
+        isWrongNetwork: false,
+        refetchWalletClient: vi.fn(),
+        walletClient: { sendTransaction: vi.fn() }
+      },
+      publicClient: {
+        readContract: vi.fn(),
+        simulateContract: vi.fn(),
+        estimateFeesPerGas: vi.fn()
+      },
+      sendTransaction: vi.fn(),
+      receipt: { isSuccess: false },
+      push: vi.fn(),
+      toast: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() }
+    };
+  }
 );
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: vi.fn(), refresh: vi.fn() }) }));

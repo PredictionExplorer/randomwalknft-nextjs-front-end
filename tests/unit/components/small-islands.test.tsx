@@ -12,14 +12,13 @@ import { WingProvider } from "@/components/providers/wing-provider";
 import { AccountSheet } from "@/components/wallet/account-sheet";
 import { server } from "../../setup/msw/server";
 
-const { toast, connection, disconnectMutate } = vi.hoisted(() => ({
-  toast: { success: vi.fn(), error: vi.fn() },
-  connection: {
+const { toast, connection, disconnectMutate } = vi.hoisted(() => {
+  const connection: { address: string | undefined; connector: { name: string } } = {
     address: "0x1234567890abcdef1234567890abcdef12345678",
     connector: { name: "MetaMask" }
-  },
-  disconnectMutate: vi.fn()
-}));
+  };
+  return { toast: { success: vi.fn(), error: vi.fn() }, connection, disconnectMutate: vi.fn() };
+});
 vi.mock("sonner", () => ({ toast }));
 vi.mock("wagmi", () => ({
   useConnection: () => connection,
