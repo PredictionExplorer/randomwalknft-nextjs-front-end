@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getBaseConfig } from "@/lib/config";
+import { getSiteConfig } from "@/lib/config";
 
 /**
  * AI crawler fleet (2026): training collectors, answer-engine search indexers,
@@ -41,7 +41,7 @@ const AI_CRAWLERS = [
 const DISALLOWED_PATHS = ["/api/", "/my-nfts"];
 
 export default function robots(): MetadataRoute.Robots {
-  const { SITE_URL } = getBaseConfig();
+  const { SITE_URL } = getSiteConfig();
   return {
     rules: [
       {

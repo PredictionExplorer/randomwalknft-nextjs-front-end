@@ -7,8 +7,6 @@ import { isFetchConnectionError } from "@/lib/api/backend-errors";
 import { fetchBeautyComparePairIds, fetchRankingSignChallenge, getVoteCount, submitBeautyVote } from "@/lib/api/public";
 import { checkRateLimit, clientKey, rateLimitResponse } from "@/lib/server/rate-limit";
 
-export const dynamic = "force-dynamic";
-
 const voteSchema = z.object({
   firstId: z.number().int().nonnegative(),
   secondId: z.number().int().nonnegative(),

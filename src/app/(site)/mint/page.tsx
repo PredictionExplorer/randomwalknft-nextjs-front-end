@@ -1,23 +1,18 @@
 import type { Metadata } from "next";
-import { unstable_noStore as noStore } from "next/cache";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ExternalLink } from "@/components/common/external-link";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
+import { FeaturedRail, FeaturedRailSkeleton } from "@/components/feature/featured-rail";
 import { MintPanel } from "@/components/feature/mint-panel";
-import { HoverVideoCard } from "@/components/nft/hover-video-card";
 import { Button } from "@/components/ui/button";
-import { getRandomMintedTokenIds, getVaultState } from "@/lib/api/public";
+import { getVaultState } from "@/lib/api/public";
 import { COSMIC_SIGNATURE_URL } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 import { arbiscanContractUrl } from "@/lib/utils";
-
-/** The featured rail must be resampled on every visit, including client navigations. */
-export const dynamic = "force-dynamic";
-
-const FEATURED_RAIL_COUNT = 8;
 
 export const metadata: Metadata = {
   title: "Mint a new work — and take the vault key",
@@ -47,9 +42,7 @@ const steps = [
 ];
 
 export default async function MintPage() {
-  noStore();
-  const { NFT_ADDRESS } = await getAppConfig();
-  const [featuredIds, vault] = await Promise.all([getRandomMintedTokenIds(FEATURED_RAIL_COUNT), getVaultState()]);
+  const [{ NFT_ADDRESS }, vault] = await Promise.all([getAppConfig(), getVaultState()]);
 
   return (
     <PageShell className="space-y-14 py-12">
@@ -67,11 +60,9 @@ export default async function MintPage() {
 
         <div className="space-y-4">
           <p className="eyebrow">Recently drawn by chance</p>
-          <div className="grid grid-cols-2 gap-3" data-testid="mint-featured-rail">
-            {featuredIds.map((id) => (
-              <HoverVideoCard key={id} id={id} />
-            ))}
-          </div>
+          <Suspense fallback={<FeaturedRailSkeleton />}>
+            <FeaturedRail />
+          </Suspense>
           <p className="text-xs leading-6 text-muted-foreground">
             Eight works from the collection, resampled on every visit. Yours will look like none of them.
           </p>

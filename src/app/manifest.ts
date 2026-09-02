@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 
-import { getBaseConfig } from "@/lib/config";
+import { getSiteConfig } from "@/lib/config";
 
 export default function manifest(): MetadataRoute.Manifest {
-  const { SITE_DESCRIPTION, SITE_NAME } = getBaseConfig();
+  const { SITE_DESCRIPTION, SITE_NAME } = getSiteConfig();
   return {
     name: SITE_NAME,
     short_name: "RWNFT",

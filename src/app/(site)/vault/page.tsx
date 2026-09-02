@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ExternalLink } from "@/components/common/external-link";
@@ -8,10 +9,9 @@ import { VaultExperience } from "@/components/feature/vault-experience";
 import { nftAbi } from "@/generated/wagmi";
 import { getVaultState } from "@/lib/api/public";
 import { getAppConfig } from "@/lib/server/app-config";
+import { yearsSinceLaunch } from "@/lib/time";
 import { arbiscanContractUrl } from "@/lib/utils";
 import { getPublicClient } from "@/lib/web3/public-client";
-
-export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "The Vault — the prize pool that pays the last minter",
@@ -25,7 +25,11 @@ export const metadata: Metadata = {
   }
 };
 
+/** The keyholder's newest work; cached with the vault so the chain is read once per refresh. */
 async function getKeyholderLatestTokenId(lastMinter: string | undefined): Promise<number | undefined> {
+  "use cache";
+  cacheLife({ stale: 15, revalidate: 15, expire: 120 });
+  cacheTag("vault");
   if (!lastMinter) {
     return undefined;
   }
@@ -51,7 +55,7 @@ export default async function VaultPage() {
   const vault = await getVaultState();
   const keyholderTokenId = await getKeyholderLatestTokenId(vault?.lastMinter);
 
-  const launchedYearsAgo = new Date().getUTCFullYear() - 2021;
+  const launchedYearsAgo = yearsSinceLaunch(vault?.readAtMs ?? Date.UTC(2026, 0, 1));
   const ratio =
     vault?.mintPriceEth && vault.mintPriceEth > 0 ? Math.round(vault.prizeEth / vault.mintPriceEth) : undefined;
 

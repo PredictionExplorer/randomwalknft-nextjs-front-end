@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, connection } from "next/server";
 
 import { getVaultState } from "@/lib/api/public";
 import { AXIOM_ZERO_MARKETPLACE_URL, CONTRACTS_GITHUB_URL, COSMIC_SIGNATURE_URL } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 
 export async function GET() {
+  await connection();
   const { NFT_ADDRESS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } = await getAppConfig();
   const vault = await getVaultState().catch(() => null);
   const asOf = new Date().toISOString().slice(0, 10);

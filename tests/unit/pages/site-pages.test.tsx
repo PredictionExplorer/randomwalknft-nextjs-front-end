@@ -46,7 +46,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
   usePathname: () => "/"
 }));
-vi.mock("next/cache", () => ({ unstable_noStore: () => undefined }));
 vi.mock("node:crypto", async () => {
   const actual = await vi.importActual<typeof NodeCrypto>("node:crypto");
   return { ...actual, randomUUID: () => "visit-key" };
@@ -89,6 +88,7 @@ const stats: HomepageStats = {
   mintedCount: 4097,
   mintPrice: 0.0905,
   featuredTokenIds: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  featuredCards: [10, 11, 12],
   beautyTopIds: [1, 3, 5, 7, 9, 11, 13, 15],
   newestIds: [4096, 4095, 4094, 4093, 4092, 4091, 4090, 4089],
   vault
@@ -211,36 +211,54 @@ describe("site pages", () => {
     expect(screen.getByText(/live vault data is temporarily unavailable/i)).toBeInTheDocument();
   });
 
-  it("mint page renders the ticket desk and the featured rail", async () => {
+  it("mint page renders the ticket desk with the featured rail streamed in", async () => {
     const { default: MintPage } = await import("@/app/(site)/mint/page");
-    renderPage(await MintPage());
+    const { FeaturedRail } = await import("@/components/feature/featured-rail");
+    const { unmount } = renderPage(await MintPage());
     expect(screen.getByRole("heading", { level: 1, name: /add a walk nobody has seen/i })).toBeInTheDocument();
     expect(screen.getByTestId("mint-panel")).toBeInTheDocument();
+    // The rail is a request-time island; the shell shows its skeleton.
+    expect(document.querySelector("[aria-busy]")).toBeInTheDocument();
+    unmount();
+
+    renderPage(await FeaturedRail());
     expect(screen.getByTestId("mint-featured-rail").querySelectorAll("a")).toHaveLength(8);
   });
 
   it("atelier page seeds the studio from a valid ?seed and ignores garbage", async () => {
     const { default: AtelierPage } = await import("@/app/(site)/atelier/page");
+    const { StudioFromUrl } = await import("@/components/feature/studio-from-url");
     const seed = "0x" + "cd".repeat(32);
-    const { unmount } = renderPage(await AtelierPage({ searchParams: Promise.resolve({ seed }) }));
+    const { unmount: unmountPage } = renderPage(AtelierPage({ searchParams: Promise.resolve({ seed }) }));
+    expect(screen.getByRole("heading", { level: 1, name: /draw a walk from any seed/i })).toBeInTheDocument();
+    unmountPage();
+
+    const { unmount } = renderPage(await StudioFromUrl({ searchParams: Promise.resolve({ seed }) }));
     expect(screen.getByLabelText(/seed or text/i)).toHaveValue(seed);
     unmount();
 
-    renderPage(await AtelierPage({ searchParams: Promise.resolve({ seed: "nonsense" }) }));
+    renderPage(await StudioFromUrl({ searchParams: Promise.resolve({ seed: "nonsense" }) }));
     expect(screen.getByLabelText(/seed or text/i)).toHaveValue("");
   });
 
   it("random rooms hang a work and link to the other room", async () => {
     const { default: RandomImagePage } = await import("@/app/(site)/random/page");
-    const { unmount } = renderPage(await RandomImagePage());
-    expect(screen.getByTestId("random-image")).toBeInTheDocument();
+    const { RandomRoom, ScreeningRoom } = await import("@/components/feature/random-room");
+    const { unmount } = renderPage(RandomImagePage());
     expect(screen.getByRole("link", { name: /prefer the films/i })).toHaveAttribute("href", "/random-video");
     unmount();
 
+    const { unmount: unmountRoom } = renderPage(await RandomRoom());
+    expect(screen.getByTestId("random-image")).toBeInTheDocument();
+    unmountRoom();
+
     const { default: RandomVideoPage } = await import("@/app/(site)/random-video/page");
-    renderPage(await RandomVideoPage());
-    expect(screen.getByTestId("random-video")).toBeInTheDocument();
+    const { unmount: unmountVideoPage } = renderPage(RandomVideoPage());
     expect(screen.getByRole("link", { name: /prefer the stills/i })).toHaveAttribute("href", "/random");
+    unmountVideoPage();
+
+    renderPage(await ScreeningRoom());
+    expect(screen.getByTestId("random-video")).toBeInTheDocument();
   });
 
   it("content pages render their headings and structured data", async () => {

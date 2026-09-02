@@ -27,26 +27,16 @@ function normalizeAndValidateEthAddress(label: string, raw: string): `0x${string
 }
 
 /**
- * RandomWalk NFT address loaded from the Go API, kept for the lifetime of this Node
- * process (one `next dev` / `next start` / serverless instance). The address is immutable
- * per network, so the first successful response is cached; failures are not.
+ * GET /api/randomwalk/contracts through the shared client (rotation failover + timeout).
+ * Callers cache the result (see `getAppConfig`); this stays a plain fetch so failures
+ * are never retained.
  */
-let rwalkContractsProcessCache: RwalkContractAddresses | null = null;
-
-/** GET /api/randomwalk/contracts through the shared client (rotation failover + timeout). */
 export async function fetchRwalkContractsFromApi(): Promise<RwalkContractAddresses> {
-  if (rwalkContractsProcessCache) {
-    return rwalkContractsProcessCache;
-  }
-
   const isLocal = getCurrentNetworkName() === "local";
   const parsed = await fetchRwalk(
     "contracts",
     isLocal ? { cache: "no-store" } : { revalidate: 300 },
     apiResponseSchema
   );
-  const NFT_ADDRESS = normalizeAndValidateEthAddress("randomwalk_addr", parsed.randomwalk_addr);
-
-  rwalkContractsProcessCache = { NFT_ADDRESS };
-  return rwalkContractsProcessCache;
+  return { NFT_ADDRESS: normalizeAndValidateEthAddress("randomwalk_addr", parsed.randomwalk_addr) };
 }

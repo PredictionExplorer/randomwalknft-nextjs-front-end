@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { JsonLd } from "@/components/common/json-ld";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
-import { AtelierStudio } from "@/components/feature/atelier-studio";
+import { StudioFromUrl } from "@/components/feature/studio-from-url";
 import { Button } from "@/components/ui/button";
-import { getBaseConfig } from "@/lib/config";
-import { isSeedHex } from "@/lib/walk/walk-engine";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getSiteConfig } from "@/lib/config";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -38,11 +39,8 @@ const notes = [
   }
 ];
 
-export default async function AtelierPage({ searchParams }: { searchParams: SearchParams }) {
-  const { SITE_NAME, SITE_URL } = getBaseConfig();
-  const params = await searchParams;
-  const rawSeed = typeof params.seed === "string" ? params.seed : undefined;
-  const initialSeed = rawSeed && isSeedHex(rawSeed) ? rawSeed : undefined;
+export default function AtelierPage({ searchParams }: { searchParams: SearchParams }) {
+  const { SITE_NAME, SITE_URL } = getSiteConfig();
 
   return (
     <PageShell className="space-y-12 py-16">
@@ -66,7 +64,9 @@ export default async function AtelierPage({ searchParams }: { searchParams: Sear
         description="The generator that made every work in the collection, running live in your browser. Paste a seed, type anything, or roll the dice."
       />
 
-      <AtelierStudio initialSeed={initialSeed} />
+      <Suspense fallback={<Skeleton className="aspect-[1.6/1] w-full" />}>
+        <StudioFromUrl searchParams={searchParams} />
+      </Suspense>
 
       <section className="grid gap-6 border-t border-border pt-10 md:grid-cols-3" aria-label="About the Atelier">
         {notes.map((note) => (

@@ -11,7 +11,7 @@ import { Provenance } from "@/components/detail/provenance";
 import { ShareActions } from "@/components/detail/share-actions";
 import { TokenNav } from "@/components/detail/token-nav";
 import { getRatingOrder, getTokenDetailOrFallback, getVaultState } from "@/lib/api/public";
-import { getBaseConfig } from "@/lib/config";
+import { getSiteConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 import { tokenDescription, tokenJsonLd, tokenTitle } from "@/lib/seo/token-metadata";
 import type { AssetTheme, AssetVariant } from "@/lib/types";
@@ -22,7 +22,7 @@ type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { SITE_NAME } = getBaseConfig();
+  const { SITE_NAME } = getSiteConfig();
   const { id } = await params;
   const tokenId = Number(id);
 
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 export default async function DetailPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
-  const { SITE_NAME, SITE_URL } = getBaseConfig();
+  const { SITE_NAME, SITE_URL } = getSiteConfig();
   const { NFT_ADDRESS } = await getAppConfig();
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   const tokenId = Number(id);

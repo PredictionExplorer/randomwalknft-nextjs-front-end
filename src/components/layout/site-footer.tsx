@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CurrentYear } from "@/components/common/current-year";
 import { ExternalLink } from "@/components/common/external-link";
 import { PageShell } from "@/components/common/page-shell";
 import { AXIOM_ZERO_MARKETPLACE_URL, COSMIC_SIGNATURE_URL } from "@/lib/config";
@@ -21,7 +22,10 @@ export function SiteFooter() {
             A generative art collection on Arbitrum, running since 2021. Every work is drawn by chance from an on-chain
             seed, released CC0, and backed by an immutable contract whose vault rewards the last minter.
           </p>
-          <p className="eyebrow">© 2021–{new Date().getUTCFullYear()} · CC0 artworks · verified contract</p>
+          <p className="eyebrow">
+            © 2021–
+            <CurrentYear /> · CC0 artworks · verified contract
+          </p>
         </div>
         <div className="space-y-3">
           <p className="eyebrow text-foreground">Navigate</p>

@@ -33,11 +33,15 @@ function resolveSiteUrl(snap: Record<RequiredEnvKey, string | undefined>): strin
   return normalizeOrigin(req(snap, "NEXT_PUBLIC_SITE_URL"));
 }
 
-/** Site + API URLs. Backend origin is env; RandomWalk API + asset bases are derived. */
-export type BaseEnvConfig = {
+/** Static site identity: safe to read during prerendering (no clock, no rotation). */
+export type SiteConfig = {
   SITE_URL: string;
   SITE_NAME: string;
   SITE_DESCRIPTION: string;
+};
+
+/** Site + API URLs. Backend origin is env; RandomWalk API + asset bases are derived. */
+export type BaseEnvConfig = SiteConfig & {
   API_BASE_URL: string;
   RWALK_BASE_URL: string;
   ASSET_BASE_URL: string;
@@ -54,16 +58,23 @@ export type AppConfig = BaseEnvConfig & {
  * server rotation (`server-rotation.ts`), so it can change between calls — per clock hour, or
  * immediately after a failover.
  */
-export function getBaseConfig(): BaseEnvConfig {
+export function getSiteConfig(): SiteConfig {
   const snap = getPublicEnvSnapshot();
   if (getMissingEnvKeys().length > 0) {
     throw new Error("ENV_NOT_CONFIGURED");
   }
-  const origin = normalizeOrigin(getApiBase());
   return {
     SITE_URL: resolveSiteUrl(snap),
     SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME?.trim() || DEFAULT_SITE_NAME,
-    SITE_DESCRIPTION: process.env.NEXT_PUBLIC_SITE_DESCRIPTION?.trim() || DEFAULT_SITE_DESCRIPTION,
+    SITE_DESCRIPTION: process.env.NEXT_PUBLIC_SITE_DESCRIPTION?.trim() || DEFAULT_SITE_DESCRIPTION
+  };
+}
+
+export function getBaseConfig(): BaseEnvConfig {
+  const site = getSiteConfig();
+  const origin = normalizeOrigin(getApiBase());
+  return {
+    ...site,
     API_BASE_URL: origin,
     RWALK_BASE_URL: `${origin}${BACKEND_RANDOMWALK_API_PREFIX}`,
     ASSET_BASE_URL: `${origin}${BACKEND_ASSET_PATH}`

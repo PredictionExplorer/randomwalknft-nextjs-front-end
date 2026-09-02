@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 import { Toaster } from "sonner";
-import { type State, WagmiProvider } from "wagmi";
+import { WagmiProvider } from "wagmi";
 
 import type { ContractsContextValue } from "@/components/providers/contracts-context";
 import { ContractsProvider } from "@/components/providers/contracts-context";
@@ -18,12 +18,11 @@ import type { Wing } from "@/lib/wing";
 
 type AppProvidersProps = {
   children: React.ReactNode;
-  initialState?: State | undefined;
   initialWing: Wing;
   contracts: ContractsContextValue;
 };
 
-export function AppProviders({ children, initialState, initialWing, contracts }: AppProvidersProps) {
+export function AppProviders({ children, initialWing, contracts }: AppProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -41,7 +40,8 @@ export function AppProviders({ children, initialState, initialWing, contracts }:
     <WingProvider initialWing={initialWing}>
       <MotionProvider>
         <ContractsProvider value={contracts}>
-          <WagmiProvider config={getWagmiConfig()} initialState={initialState}>
+          {/* No server-side wallet state: the client reconnects from wagmi's cookie storage. */}
+          <WagmiProvider config={getWagmiConfig()}>
             <QueryClientProvider client={queryClient}>
               <WalletProvider>
                 <WalletLifecycleBridge />

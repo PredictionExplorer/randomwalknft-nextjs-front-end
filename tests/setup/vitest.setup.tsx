@@ -52,6 +52,21 @@ if (typeof window !== "undefined" && typeof window.ResizeObserver !== "function"
   Object.defineProperty(window, "ResizeObserver", { writable: true, value: ResizeObserverStub });
 }
 
+// Cache Components APIs need the Next runtime; in unit tests they are inert annotations.
+vi.mock("next/cache", () => ({
+  cacheLife: () => undefined,
+  cacheTag: () => undefined,
+  revalidateTag: vi.fn(),
+  revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
+  unstable_noStore: () => undefined
+}));
+
+vi.mock("next/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next/server")>();
+  return { ...actual, connection: () => Promise.resolve() };
+});
+
 vi.mock("next/image", () => ({
   default: ({
     fill: _fill,

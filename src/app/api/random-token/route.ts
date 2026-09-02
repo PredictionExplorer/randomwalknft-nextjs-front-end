@@ -6,8 +6,6 @@ import { getAppConfig } from "@/lib/server/app-config";
 import { checkRateLimit, clientKey, rateLimitResponse } from "@/lib/server/rate-limit";
 import { getPublicClient } from "@/lib/web3/public-client";
 
-export const dynamic = "force-dynamic";
-
 const excludeSchema = z.coerce.number().int().nonnegative().optional();
 const POLICY = { limit: 120, windowMs: 60_000 };
 

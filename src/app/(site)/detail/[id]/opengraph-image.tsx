@@ -11,8 +11,6 @@ export const size = {
 export const contentType = "image/png";
 
 /** The artwork never changes and names change rarely; cache cards for a day. */
-export const revalidate = 86_400;
-
 /**
  * Composed share card per token: the artwork beside a museum label, instead of
  * a raw small thumbnail. The thumb is inlined as a data URL so a slow asset

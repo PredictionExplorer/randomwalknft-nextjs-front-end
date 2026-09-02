@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
-import { randomUUID } from "node:crypto";
-import { unstable_noStore as noStore } from "next/cache";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
-import { RandomImageExperience } from "@/components/feature/random-image-experience";
-import { getRandomMintedTokenIds } from "@/lib/api/public";
-import { FEATURED_TOKEN_FALLBACK_ID } from "@/lib/featured-tokens";
-
-/** Client navigations must not reuse a cached RSC payload with a stale random token. */
-export const dynamic = "force-dynamic";
+import { RandomRoom } from "@/components/feature/random-room";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
   title: "A random work",
@@ -25,12 +20,7 @@ export const metadata: Metadata = {
   }
 };
 
-export default async function RandomImagePage() {
-  noStore();
-  const [initialTokenId = FEATURED_TOKEN_FALLBACK_ID] = await getRandomMintedTokenIds(1);
-  // New key every server render so the client tree remounts on each visit (avoids stale hook state).
-  const visitKey = randomUUID();
-
+export default function RandomImagePage() {
   return (
     <PageShell className="space-y-8 py-12">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -52,7 +42,9 @@ export default async function RandomImagePage() {
           Prefer the films? →
         </Link>
       </div>
-      <RandomImageExperience key={visitKey} initialTokenId={initialTokenId} />
+      <Suspense fallback={<Skeleton className="aspect-[1.6/1] w-full" />}>
+        <RandomRoom />
+      </Suspense>
     </PageShell>
   );
 }

@@ -83,7 +83,10 @@ export type RecentMint = {
 export type HomepageStats = {
   mintedCount: number;
   mintPrice?: number | undefined;
+  /** Today's deterministic exhibition: the same works for every visitor until UTC midnight. */
   featuredTokenIds: number[];
+  /** The three exhibition works that open the day's rail (first is the poster). */
+  featuredCards: number[];
   /** Top token ids by community beauty score (best first). */
   beautyTopIds: number[];
   /** Newest token ids (most recent mint first). */

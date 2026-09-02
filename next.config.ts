@@ -81,6 +81,7 @@ const nextConfig: NextConfig = {
    * is importable from `react` directly.
    */
   reactCompiler: true,
+  cacheComponents: true,
   redirects() {
     return Promise.resolve([
       {

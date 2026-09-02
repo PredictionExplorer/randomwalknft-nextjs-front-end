@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getBaseConfig } from "@/lib/config";
+import { getSiteConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 import { nftAbi } from "@/generated/wagmi";
 import { createAssetUrls } from "@/lib/utils";
@@ -30,7 +30,7 @@ const staticRoutes: SitemapEntry[] = [
 const RECENT_TOKEN_WINDOW = 200;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { SITE_URL } = getBaseConfig();
+  const { SITE_URL } = getSiteConfig();
 
   // No lastModified on purpose: stamping "now" on every entry on every request
   // teaches crawlers to ignore the site's freshness signals entirely.

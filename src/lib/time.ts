@@ -54,3 +54,8 @@ export function formatRelativeTime(thenMs: number, nowMs: number = Date.now()): 
   if (months < 12) return `${plural(months, "month")} ago`;
   return `${plural(Math.floor(days / 365), "year")} ago`;
 }
+
+/** Whole years since the collection launched (October 2021), from a known timestamp rather than the clock. */
+export function yearsSinceLaunch(nowMs: number): number {
+  return Math.max(0, new Date(nowMs).getUTCFullYear() - 2021);
+}

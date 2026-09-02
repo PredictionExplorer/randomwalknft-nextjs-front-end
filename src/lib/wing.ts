@@ -31,17 +31,3 @@ export function wingForEdition(edition: AssetTheme): Wing {
 export function oppositeWing(wing: Wing): Wing {
   return wing === "dark" ? "light" : "dark";
 }
-
-/** Reads the wing from a raw `Cookie` header without pulling in a cookie parser. */
-export function wingFromCookieHeader(cookieHeader: string | null | undefined): Wing {
-  if (!cookieHeader) {
-    return DEFAULT_WING;
-  }
-  for (const part of cookieHeader.split(";")) {
-    const [rawName, ...rest] = part.split("=");
-    if (rawName?.trim() === WING_COOKIE) {
-      return parseWing(decodeURIComponent(rest.join("=").trim()));
-    }
-  }
-  return DEFAULT_WING;
-}

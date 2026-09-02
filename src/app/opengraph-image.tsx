@@ -1,7 +1,8 @@
+import { connection } from "next/server";
 import { ImageResponse } from "next/og";
 
 import { getVaultState } from "@/lib/api/public";
-import { getBaseConfig } from "@/lib/config";
+import { getSiteConfig } from "@/lib/config";
 
 export const size = {
   width: 1200,
@@ -12,7 +13,9 @@ export const contentType = "image/png";
 
 /** Every shared link doubles as a billboard for the live game state. */
 export default async function OpenGraphImage() {
-  const { SITE_NAME } = getBaseConfig();
+  // Rendered per request so the vault figures on the card are current.
+  await connection();
+  const { SITE_NAME } = getSiteConfig();
   const vault = await getVaultState().catch(() => null);
   const days = vault ? Math.max(0, Math.floor(vault.secondsUntilWithdrawal / 86_400)) : null;
   const hours = vault ? Math.max(0, Math.floor((vault.secondsUntilWithdrawal % 86_400) / 3_600)) : null;

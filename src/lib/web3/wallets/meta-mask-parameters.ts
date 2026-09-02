@@ -1,6 +1,6 @@
 import type { MetaMaskParameters } from "wagmi/connectors";
 
-import { getBaseConfig } from "@/lib/config";
+import { getSiteConfig } from "@/lib/config";
 
 /**
  * Options for wagmi's `metaMask` connector (backed by `@metamask/connect-evm`).
@@ -8,7 +8,7 @@ import { getBaseConfig } from "@/lib/config";
  * desktop visitors without the extension, instead of MetaMask's stock overlay.
  */
 export function getMetaMaskParameters(): MetaMaskParameters {
-  const { SITE_NAME, SITE_URL } = getBaseConfig();
+  const { SITE_NAME, SITE_URL } = getSiteConfig();
 
   return {
     dapp: {

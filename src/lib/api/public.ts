@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { cacheLife, cacheTag } from "next/cache";
 import { formatEther } from "viem";
 import { z } from "zod";
 
@@ -10,7 +10,12 @@ import { REVALIDATE_LONG, REVALIDATE_MEDIUM, REVALIDATE_SHORT } from "@/lib/conf
 import { getAppConfig } from "@/lib/server/app-config";
 
 import { nftAbi } from "@/generated/wagmi";
-import { dailyFeaturedTokenIds, getUtcDayKey, sampleDistinctIntegers } from "@/lib/featured-tokens";
+import {
+  dailyFeaturedTokenIds,
+  getUtcDayKey,
+  sampleDistinctIntegers,
+  selectFeaturedTokensForDisplay
+} from "@/lib/featured-tokens";
 import type { HomepageStats, Nft, RecentMint, VaultState } from "@/lib/types";
 import { createAssetUrls } from "@/lib/utils";
 import { getPublicClient } from "@/lib/web3/public-client";
@@ -81,9 +86,13 @@ async function getPendingTokenDetail(tokenId: number): Promise<Nft | null> {
   }
 }
 
-export const getTokenDetail = cache(async (tokenId: number): Promise<Nft> => {
+/** Indexed token detail, cached a few minutes and tagged per token for targeted revalidation. */
+export async function getTokenDetail(tokenId: number): Promise<Nft> {
+  "use cache";
+  cacheLife({ stale: REVALIDATE_SHORT, revalidate: REVALIDATE_MEDIUM, expire: 3_600 });
+  cacheTag("tokens", `token-${tokenId}`);
   return fetchTokenDetail(tokenId);
-});
+}
 
 export async function getTokenDetailOrFallback(
   tokenId: number,
@@ -96,14 +105,19 @@ export async function getTokenDetailOrFallback(
   }
 }
 
-export const getTokenInfo = cache(async (tokenId: number) => {
+export async function getTokenInfo(tokenId: number) {
+  "use cache";
+  cacheLife({ stale: 30, revalidate: REVALIDATE_SHORT, expire: 600 });
+  cacheTag("tokens", `token-${tokenId}`);
   return fetchRwalk(`tokens/info/${tokenId}`, { revalidate: REVALIDATE_SHORT }, tokenInfoSchema);
-});
+}
 
 /**
  * Unique random token ids sampled from the minted supply, fresh on every call. Reads totalSupply
  * from the chain (like /api/random-token) because the backend explore/random endpoint returns a
  * constant list. Returns an empty array when the supply read fails so callers degrade gracefully.
+ * Deliberately not cached: callers that want per-visit randomness must run at request time
+ * (`await connection()` inside a Suspense boundary).
  */
 export async function getRandomMintedTokenIds(count: number): Promise<number[]> {
   try {
@@ -122,20 +136,8 @@ export async function getRandomMintedTokenIds(count: number): Promise<number[]> 
   }
 }
 
-let homepageFeaturedCache: { dayKey: string; tokenIds: number[] } | null = null;
-
 function getHomepageFeaturedTokenIds(totalSupply: number, dayKey = getUtcDayKey()): number[] {
-  if (homepageFeaturedCache?.dayKey === dayKey) {
-    return [...homepageFeaturedCache.tokenIds];
-  }
-
-  const tokenIds = dailyFeaturedTokenIds(totalSupply, { dayKey });
-
-  if (totalSupply > 0) {
-    homepageFeaturedCache = { dayKey, tokenIds };
-  }
-
-  return [...tokenIds];
+  return dailyFeaturedTokenIds(totalSupply, { dayKey });
 }
 
 /**
@@ -145,8 +147,8 @@ function getHomepageFeaturedTokenIds(totalSupply: number, dayKey = getUtcDayKey(
  * client re-derives the ticking countdown from `readAtMs`, so a memoized
  * snapshot stays accurate.
  */
-const VAULT_STATE_TTL_MS = 15_000;
-let vaultStateMemo: { state: VaultState; expiresAtMs: number } | null = null;
+/** Seconds a vault read is served before the next background refresh. */
+const VAULT_STATE_REVALIDATE_SECONDS = 15;
 
 type VaultReads = {
   supply: bigint;
@@ -211,10 +213,10 @@ async function readVaultFromChain(): Promise<VaultReads | null> {
  * Live Vault game state from the NFT contract (prize pool, countdown, leader).
  * Returns null only when the core supply read fails (e.g. RPC down).
  */
-export const getVaultState = cache(async (): Promise<VaultState | null> => {
-  if (vaultStateMemo && vaultStateMemo.expiresAtMs > Date.now()) {
-    return vaultStateMemo.state;
-  }
+export async function getVaultState(): Promise<VaultState | null> {
+  "use cache";
+  cacheLife({ stale: VAULT_STATE_REVALIDATE_SECONDS, revalidate: VAULT_STATE_REVALIDATE_SECONDS, expire: 120 });
+  cacheTag("vault");
 
   try {
     const reads = await readVaultFromChain();
@@ -237,12 +239,11 @@ export const getVaultState = cache(async (): Promise<VaultState | null> => {
       readAtMs: Date.now()
     };
 
-    vaultStateMemo = { state, expiresAtMs: state.readAtMs + VAULT_STATE_TTL_MS };
     return state;
   } catch {
     return null;
   }
-});
+}
 
 const WALL_ROW_COUNT = 8;
 
@@ -250,7 +251,10 @@ const WALL_ROW_COUNT = 8;
  * The newest works with who minted them and when — the "recent acquisitions" feed.
  * Each token costs two cached upstream reads; the count is kept small on purpose.
  */
-export const getRecentMints = cache(async (count: number): Promise<RecentMint[]> => {
+export async function getRecentMints(count: number): Promise<RecentMint[]> {
+  "use cache";
+  cacheLife({ stale: 30, revalidate: REVALIDATE_SHORT, expire: 600 });
+  cacheTag("vault", "tokens");
   const vault = await getVaultState();
   const supply = vault?.mintedCount ?? 0;
   const ids = Array.from({ length: Math.min(count, supply) }, (_, index) => supply - 1 - index);
@@ -271,13 +275,18 @@ export const getRecentMints = cache(async (count: number): Promise<RecentMint[]>
   );
 
   return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
-});
+}
 
-export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
+export async function getHomepageStats(): Promise<HomepageStats> {
+  "use cache";
+  cacheLife({ stale: 30, revalidate: REVALIDATE_SHORT, expire: 600 });
+  cacheTag("vault", "ranking");
   const [vault, ratingOrderResult] = await Promise.all([getVaultState(), getRatingOrder().catch(() => [] as number[])]);
 
   const mintedCount = vault?.mintedCount ?? 0;
   const featuredTokenIds = getHomepageFeaturedTokenIds(mintedCount);
+  // The daily list is already hash-ordered, so its head is the day's poster set.
+  const { featuredCards } = selectFeaturedTokensForDisplay(featuredTokenIds);
 
   // rating_order returns worst-first (gallery reverses it for display), so the best sit at the end.
   const beautyTopIds = ratingOrderResult.slice(-WALL_ROW_COUNT).reverse();
@@ -290,15 +299,19 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     mintedCount,
     mintPrice: vault?.mintPriceEth,
     featuredTokenIds,
+    featuredCards,
     beautyTopIds,
     newestIds,
     vault
   };
-});
+}
 
-export const getRandomPair = cache(async () => {
+/** The API's rotating "random" list; a fresh pair every minute is plenty for the salon teaser. */
+export async function getRandomPair() {
+  "use cache";
+  cacheLife({ stale: 30, revalidate: REVALIDATE_SHORT, expire: 600 });
   return fetchApi("api/randomwalk/random", { revalidate: REVALIDATE_SHORT }, tokenIdListSchema);
-});
+}
 
 const beautyPairIdsSchema = z.object({
   token_ids: z.array(z.number()),
@@ -322,15 +335,19 @@ export async function fetchBeautyComparePairIds(
   return fetchApi(`api/randomwalk/ranking/beauty-pair-ids${suffix}`, { cache: "no-store" }, beautyPairIdsSchema);
 }
 
-/** Cached per-request only; fetch is no-store so /compare refetches show an up-to-date total after each vote. */
-export const getVoteCount = cache(async () => {
+/** Uncached: /compare refetches must show an up-to-date total after each vote. */
+export async function getVoteCount() {
   const response = await fetchApi("api/randomwalk/vote_count", { cache: "no-store" }, voteCountSchema);
   return response.total_count;
-});
+}
 
-export const getRatingOrder = cache(async () => {
+/** Worst-first beauty order for the whole collection; changes slowly as votes land. */
+export async function getRatingOrder() {
+  "use cache";
+  cacheLife({ stale: REVALIDATE_MEDIUM, revalidate: REVALIDATE_LONG, expire: 7_200 });
+  cacheTag("ranking");
   return fetchApi("api/randomwalk/rating_order", { revalidate: REVALIDATE_LONG }, tokenIdListSchema);
-});
+}
 
 const rankingSignChallengeSchema = z.object({
   nonce: z.string().min(1)

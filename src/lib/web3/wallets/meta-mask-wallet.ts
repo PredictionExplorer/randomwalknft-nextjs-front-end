@@ -23,13 +23,32 @@ export const META_MASK_CONNECTOR_ID = "metaMaskSDK";
  * - A local session marker gates `isAuthorized()`, so anonymous visitors never
  *   load the SDK just to probe for a session that cannot exist.
  */
+/** Upper bound on SDK initialisation before reconnection moves on to other wallets. */
+const PROVIDER_TIMEOUT_MS = 8_000;
+
 export function metaMaskWallet(): CreateConnectorFn {
   return createConnector((config) => {
     const { rdns: _claimedRdns, ...connector } = metaMask(getMetaMaskParameters())(config);
+    let connecting = false;
 
     return {
       ...connector,
+      /**
+       * wagmi's reconnect awaits every connector's provider in turn. Without a
+       * session marker there is nothing to reconnect, so skip SDK initialisation
+       * entirely; with one, never let a stalled SDK block the other connectors.
+       */
+      async getProvider(parameters) {
+        if (!connecting && !hasMetaMaskSessionMarker()) {
+          return undefined;
+        }
+        return Promise.race([
+          connector.getProvider(parameters),
+          new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), PROVIDER_TIMEOUT_MS))
+        ]);
+      },
       async connect(parameters) {
+        connecting = true;
         try {
           const connection = await connector.connect(parameters);
           markMetaMaskSessionAuthorized();
@@ -41,6 +60,8 @@ export function metaMaskWallet(): CreateConnectorFn {
             recovery: false
           });
           throw error;
+        } finally {
+          connecting = false;
         }
       },
       async disconnect() {

@@ -41,6 +41,7 @@ type Wrapped = {
   connect: (parameters?: unknown) => Promise<unknown>;
   disconnect: () => Promise<void>;
   isAuthorized: () => Promise<boolean>;
+  getProvider: (parameters?: unknown) => Promise<unknown>;
 };
 
 function createWrapped(): Wrapped {
@@ -105,5 +106,38 @@ describe("metaMaskWallet", () => {
 
     await expect(createWrapped().isAuthorized()).resolves.toBe(false);
     expect(hasMetaMaskSessionMarker()).toBe(false);
+  });
+
+  it("skips SDK initialisation on reconnect when no MetaMask session exists", async () => {
+    const wrapped = createWrapped();
+    await expect(wrapped.getProvider()).resolves.toBeUndefined();
+    expect(baseConnector.getProvider).not.toHaveBeenCalled();
+  });
+
+  it("initialises the SDK while a connect is in flight or a session marker exists", async () => {
+    const provider = { request: vi.fn() };
+    baseConnector.getProvider.mockResolvedValue(provider);
+    const wrapped = createWrapped();
+
+    baseConnector.connect.mockImplementation(async () => {
+      // wagmi's connect() asks for the provider while connecting.
+      await expect(wrapped.getProvider()).resolves.toBe(provider);
+      return { accounts: ["0x1"], chainId: 42161 };
+    });
+    await wrapped.connect();
+    expect(hasMetaMaskSessionMarker()).toBe(true);
+    await expect(wrapped.getProvider()).resolves.toBe(provider);
+  });
+
+  it("never lets a stalled SDK block the other connectors", async () => {
+    vi.useFakeTimers();
+    markMetaMaskSessionAuthorized();
+    baseConnector.getProvider.mockReturnValue(new Promise(() => undefined));
+    const wrapped = createWrapped();
+
+    const pending = wrapped.getProvider();
+    await vi.advanceTimersByTimeAsync(8_100);
+    await expect(pending).resolves.toBeUndefined();
+    vi.useRealTimers();
   });
 });

@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
-import { randomUUID } from "node:crypto";
-import { unstable_noStore as noStore } from "next/cache";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
-import { RandomVideoExperience } from "@/components/feature/random-video-experience";
-import { getRandomMintedTokenIds } from "@/lib/api/public";
-import { FEATURED_TOKEN_FALLBACK_ID } from "@/lib/featured-tokens";
-
-/** Same as /random: client navigations must remount so useRandomTokenHistory refetches /api/random-token. */
-export const dynamic = "force-dynamic";
+import { ScreeningRoom } from "@/components/feature/random-room";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
   title: "The screening room",
@@ -25,11 +20,7 @@ export const metadata: Metadata = {
   }
 };
 
-export default async function RandomVideoPage() {
-  noStore();
-  const [initialTokenId = FEATURED_TOKEN_FALLBACK_ID] = await getRandomMintedTokenIds(1);
-  const visitKey = randomUUID();
-
+export default function RandomVideoPage() {
   return (
     <PageShell className="space-y-8 py-12">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -51,7 +42,9 @@ export default async function RandomVideoPage() {
           Prefer the stills? →
         </Link>
       </div>
-      <RandomVideoExperience key={visitKey} initialTokenId={initialTokenId} />
+      <Suspense fallback={<Skeleton className="aspect-[1.6/1] w-full" />}>
+        <ScreeningRoom />
+      </Suspense>
     </PageShell>
   );
 }

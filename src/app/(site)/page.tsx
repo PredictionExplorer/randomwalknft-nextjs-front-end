@@ -11,17 +11,15 @@ import { HoverVideoCard } from "@/components/nft/hover-video-card";
 import { NftCard } from "@/components/nft/nft-card";
 import { Button } from "@/components/ui/button";
 import { getHomepageStats, getRandomPair, getRatingOrder, getRecentMints } from "@/lib/api/public";
-import { getBaseConfig } from "@/lib/config";
+import { getSiteConfig } from "@/lib/config";
 import { faqItems } from "@/lib/content/faq";
 import { homepageAnnex, homepageCharter } from "@/lib/content/homepage";
-import { selectFeaturedTokens } from "@/lib/featured-tokens";
 import { getAppConfig } from "@/lib/server/app-config";
+import { yearsSinceLaunch } from "@/lib/time";
 import { arbiscanContractUrl, formatEth } from "@/lib/utils";
 
-export const revalidate = 60;
-
 export function generateMetadata(): Metadata {
-  const { SITE_URL } = getBaseConfig();
+  const { SITE_URL } = getSiteConfig();
   return {
     title: {
       absolute: "Random Walk NFT — generative art drawn by chance, on Arbitrum since 2021"
@@ -83,12 +81,13 @@ export default async function HomePage() {
     getRecentMints(RECENT_MINTS).catch(() => []),
     getRandomPair().catch(() => [] as number[])
   ]);
-  const { featuredCards } = selectFeaturedTokens(stats.featuredTokenIds);
+  const { featuredCards } = stats;
   const vault = stats.vault;
   const salonPair: [number, number] | null = pair.length >= 2 ? [pair[0]!, pair[1]!] : null;
   const exhibitionIds = stats.featuredTokenIds.filter((id) => !featuredCards.includes(id)).slice(0, 8);
   const newestId = stats.mintedCount > 0 ? stats.mintedCount - 1 : undefined;
-  const launchedYearsAgo = new Date().getUTCFullYear() - 2021;
+  // Prerender-safe: derive "years running" from the cached read time, not the clock.
+  const launchedYearsAgo = yearsSinceLaunch(vault?.readAtMs ?? Date.UTC(2026, 0, 1));
 
   return (
     <div>

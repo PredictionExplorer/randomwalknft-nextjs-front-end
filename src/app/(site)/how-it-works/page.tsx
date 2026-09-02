@@ -8,11 +8,10 @@ import { PageShell } from "@/components/common/page-shell";
 import { AtelierStudio } from "@/components/feature/atelier-studio";
 import { Button } from "@/components/ui/button";
 import { getVaultState } from "@/lib/api/public";
-import { COSMIC_SIGNATURE_URL, CONTRACTS_GITHUB_URL, getBaseConfig } from "@/lib/config";
+import { COSMIC_SIGNATURE_URL, CONTRACTS_GITHUB_URL, getSiteConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
+import { yearsSinceLaunch } from "@/lib/time";
 import { arbiscanContractUrl } from "@/lib/utils";
-
-export const revalidate = 300;
 
 const PAGE_TITLE = "How Random Walk NFT works — the art, the algorithm, and the Vault game";
 const PAGE_DESCRIPTION =
@@ -31,9 +30,9 @@ export const metadata: Metadata = {
 
 export default async function HowItWorksPage() {
   const { NFT_ADDRESS, SITE_NAME, SITE_URL } = await getAppConfig();
-  const { SITE_DESCRIPTION } = getBaseConfig();
+  const { SITE_DESCRIPTION } = getSiteConfig();
   const vault = await getVaultState();
-  const launchedYearsAgo = new Date().getUTCFullYear() - 2021;
+  const launchedYearsAgo = yearsSinceLaunch(vault?.readAtMs ?? Date.UTC(2026, 0, 1));
   const ratio =
     vault?.mintPriceEth && vault.mintPriceEth > 0 ? Math.round(vault.prizeEth / vault.mintPriceEth) : undefined;
 
@@ -46,7 +45,7 @@ export default async function HowItWorksPage() {
           headline: PAGE_TITLE,
           description: PAGE_DESCRIPTION,
           url: `${SITE_URL}/how-it-works`,
-          dateModified: new Date().toISOString(),
+          dateModified: new Date(vault?.readAtMs ?? Date.UTC(2026, 0, 1)).toISOString(),
           author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
           publisher: {
             "@type": "Organization",
