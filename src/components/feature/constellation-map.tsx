@@ -44,6 +44,9 @@ export function ConstellationMap({ count, beautyOrder, newestId, featuredIds = [
   const [hovered, setHovered] = useState<ConstellationPoint | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
+  /** The static field of dots, rendered once per size/layout/wing and blitted every frame. */
+  const fieldRef = useRef<{ key: string; canvas: HTMLCanvasElement } | null>(null);
+
   const draw = useEffectEvent((hoveredId: number | null, pulse: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -52,30 +55,43 @@ export function ConstellationMap({ count, beautyOrder, newestId, featuredIds = [
 
     const dpr = window.devicePixelRatio || 1;
     const size = canvas.clientWidth;
+    if (size === 0) return;
     if (canvas.width !== size * dpr) {
       canvas.width = size * dpr;
       canvas.height = size * dpr;
     }
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    context.clearRect(0, 0, size, size);
 
     const light = edition === "white";
-    const dot = light ? "rgba(17,17,16,0.55)" : "rgba(242,239,233,0.55)";
     const radius = Math.max(0.9, size / 1100);
     const centre = size / 2;
     const scale = (size / 2) * 0.94;
-    const featured = new Set(featuredIds);
-    const beautyTop = new Set(beautyOrder.slice(-8));
 
-    context.fillStyle = dot;
-    for (const point of pointsRef.current) {
-      const px = centre + point.x * scale;
-      const py = centre + point.y * scale;
-      context.beginPath();
-      context.arc(px, py, radius, 0, Math.PI * 2);
-      context.fill();
+    // Thousands of arcs are expensive; paint them once into an offscreen layer.
+    const fieldKey = `${size}:${dpr}:${layout}:${edition}:${pointsRef.current.length}`;
+    if (fieldRef.current?.key !== fieldKey) {
+      const field = document.createElement("canvas");
+      field.width = size * dpr;
+      field.height = size * dpr;
+      const fieldContext = field.getContext("2d");
+      if (fieldContext) {
+        fieldContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+        fieldContext.fillStyle = light ? "rgba(17,17,16,0.55)" : "rgba(242,239,233,0.55)";
+        for (const point of pointsRef.current) {
+          fieldContext.beginPath();
+          fieldContext.arc(centre + point.x * scale, centre + point.y * scale, radius, 0, Math.PI * 2);
+          fieldContext.fill();
+        }
+      }
+      fieldRef.current = { key: fieldKey, canvas: field };
     }
 
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(fieldRef.current.canvas, 0, 0);
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const featured = new Set(featuredIds);
+    const beautyTop = new Set(beautyOrder.slice(-8));
     const ring = (id: number, stroke: string, extra: number) => {
       const point = pointsRef.current[id];
       if (!point) return;
@@ -102,26 +118,40 @@ export function ConstellationMap({ count, beautyOrder, newestId, featuredIds = [
     draw(null, 0);
   }, [count, layout, beautyOrder]);
 
-  // Redraw on resize and wing change; pulse the newest work unless motion is reduced.
+  // Redraw on resize and wing change. The brass pulse only runs while the map is on screen,
+  // at a gentle frame rate, unless motion is reduced.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     let frame = 0;
+    let visible = false;
+    let lastPaint = 0;
     const started = performance.now();
     const observer = new ResizeObserver(() => draw(hovered?.id ?? null, 0));
     observer.observe(canvas);
-    if (!reducedMotion) {
-      const tick = (now: number) => {
+
+    const tick = (now: number) => {
+      if (now - lastPaint >= 66) {
+        lastPaint = now;
         const pulse = (Math.sin((now - started) / 900) + 1) / 2;
         draw(hovered?.id ?? null, pulse);
+      }
+      if (visible) frame = window.requestAnimationFrame(tick);
+    };
+    const intersection = new IntersectionObserver(([entry]) => {
+      visible = Boolean(entry?.isIntersecting) && !reducedMotion;
+      window.cancelAnimationFrame(frame);
+      if (visible) {
         frame = window.requestAnimationFrame(tick);
-      };
-      frame = window.requestAnimationFrame(tick);
-    } else {
-      draw(hovered?.id ?? null, 0);
-    }
+      } else {
+        draw(hovered?.id ?? null, 0);
+      }
+    });
+    intersection.observe(canvas);
+
     return () => {
       observer.disconnect();
+      intersection.disconnect();
       window.cancelAnimationFrame(frame);
     };
   }, [edition, hovered, reducedMotion]);

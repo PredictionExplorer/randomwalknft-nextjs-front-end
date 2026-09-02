@@ -1,27 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
-import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
+
+import { goto, settled } from "./fixtures/navigation";
 
 const axiomZeroMarketplaceUrl = "https://www.axiomzero.market/random-walk";
 const expectedCanonicalOrigin = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://randomwalknft.com").replace(/\/+$/, "");
-
-/**
- * Navigate and wait for React's streaming to finish: late Suspense content arrives in
- * hidden `<div>`s at the end of <body> before being swapped into place, and strict
- * locators would briefly see it twice.
- */
-async function settled(page: Page) {
-  await page.waitForFunction(
-    () =>
-      document.documentElement.dataset.hydrated === "true" &&
-      Array.from(document.querySelectorAll("body > div[hidden]")).every((node) => node.childElementCount === 0)
-  );
-}
-
-async function goto(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
-  await settled(page);
-}
 
 test("home page opens with the masthead, live facts, and the first chapter", async ({ page }) => {
   await goto(page, "/");

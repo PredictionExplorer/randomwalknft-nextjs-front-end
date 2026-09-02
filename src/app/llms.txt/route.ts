@@ -55,18 +55,23 @@ ${liveFacts}
 
 Random Walk NFTs have live utility in Cosmic Signature (${COSMIC_SIGNATURE_URL}), an on-chain art protocol on Arbitrum by the same team. Holders can anchor a Random Walk NFT there (without selling it) to become eligible for Stellar Selection rewards of 1,000 CST plus a Cosmic Signature NFT, or attach an unused token to one ETH gesture for a one-time 50% discount.
 
+## How the art is made (verifiable in the browser)
+
+The seed is hashed with SHA3-256 into a stream of bits. Every two bits become one lattice step (right, left, down, up); the walk runs until it spans a 1.6:1 canvas. Three more bit streams drift the red, green and blue channels at every step, so shape and palette come from the same randomness. The homepage draws a walk live as you scroll, and the Atelier (${SITE_URL}/atelier) runs the same algorithm from any real seed or any typed text. Every token has two editions: the same walk on a black or a white background (the site's "dark wing" and "light wing").
+
 ## Pages
 
-- Home (museum overview + live vault state): ${SITE_URL}/
+- Home (the Walk, a scroll-driven story of how a work is born, plus the collection map and live vault): ${SITE_URL}/
 - How It Works (full explainer: art, algorithm, game): ${SITE_URL}/how-it-works
-- Gallery (full collection, sortable by beauty score): ${SITE_URL}/gallery
-- Mint (create a new NFT and take the vault key): ${SITE_URL}/mint
-- The Vault (live prize, countdown, keyholder, withdrawal): ${SITE_URL}/vault
-- Beauty Contest (community voting): ${SITE_URL}/compare
+- Gallery (every work, newest first or by beauty rank; wallet walls via ?address=): ${SITE_URL}/gallery
+- Token pages (still, both films, live redraw from seed, provenance): ${SITE_URL}/detail/<id>
+- The Atelier (run the generator from any seed or text): ${SITE_URL}/atelier
+- Mint (create a new work and take the vault key): ${SITE_URL}/mint
+- The Vault (live prize, clock, keyholder, withdrawal): ${SITE_URL}/vault
+- The Salon / Beauty Contest (signed community votes): ${SITE_URL}/compare
 - Open Source (full generator source + IPFS): ${SITE_URL}/code
 - FAQ: ${SITE_URL}/faq
-- Random Image Viewer: ${SITE_URL}/random
-- Random Video Viewer: ${SITE_URL}/random-video
+- A random work / the screening room: ${SITE_URL}/random and ${SITE_URL}/random-video
 - Marketplace (external, Axiom Zero): ${AXIOM_ZERO_MARKETPLACE_URL}
 
 ## Extended Information

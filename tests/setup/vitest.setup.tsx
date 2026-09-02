@@ -53,6 +53,28 @@ if (typeof window !== "undefined" && typeof window.ResizeObserver !== "function"
 }
 
 // Cache Components APIs need the Next runtime; in unit tests they are inert annotations.
+// jsdom has no IntersectionObserver either; report everything as on screen at once.
+if (typeof window !== "undefined" && typeof window.IntersectionObserver !== "function") {
+  class IntersectionObserverStub {
+    private readonly callback: IntersectionObserverCallback;
+    constructor(callback: IntersectionObserverCallback) {
+      this.callback = callback;
+    }
+    observe(target: Element) {
+      this.callback(
+        [{ target, isIntersecting: true, intersectionRatio: 1 } as IntersectionObserverEntry],
+        this as unknown as IntersectionObserver
+      );
+    }
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  }
+  Object.defineProperty(window, "IntersectionObserver", { writable: true, value: IntersectionObserverStub });
+}
+
 vi.mock("next/cache", () => ({
   cacheLife: () => undefined,
   cacheTag: () => undefined,

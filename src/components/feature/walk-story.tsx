@@ -4,7 +4,7 @@ import Link from "next/link";
 import { RefreshCw } from "lucide-react";
 import { useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import * as m from "motion/react-m";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
 
 import { WalkCanvas, type WalkCanvasHandle } from "@/components/feature/walk-canvas";
 import { useWingEdition } from "@/components/providers/wing-provider";
@@ -17,6 +17,22 @@ import type { GeneratedWalk } from "@/lib/walk/walk-engine";
 import { sampleChannel, stepBits } from "@/lib/walk/walk-painter";
 
 const SEED_CHARS = 66; // "0x" + 64 hex digits
+const SMALL_SCREEN = "(max-width: 640px)";
+
+function subscribeToSmallScreen(onChange: () => void) {
+  const query = window.matchMedia(SMALL_SCREEN);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+/** Phones get a lighter walk (fewer steps to hash and paint); the server assumes desktop. */
+function useStoryResolution() {
+  return useSyncExternalStore(
+    subscribeToSmallScreen,
+    () => (window.matchMedia(SMALL_SCREEN).matches ? 220 : 300),
+    () => 300
+  );
+}
 const BITS_WINDOW = 10;
 const CHANNEL_COLORS = ["#ff6b6b", "#7bd88f", "#6ea8ff"] as const;
 
@@ -74,6 +90,7 @@ export function WalkStory({ mintedCount }: WalkStoryProps) {
   const stageSize = useRef({ width: 0, height: 0 });
   const edition = useWingEdition();
   const reducedMotion = useReducedMotion() ?? false;
+  const vert = useStoryResolution();
 
   const [drawKey, setDrawKey] = useState(0);
   const [walk, setWalk] = useState<GeneratedWalk | null>(null);
@@ -208,7 +225,7 @@ export function WalkStory({ mintedCount }: WalkStoryProps) {
                 <WalkCanvas
                   key={drawKey}
                   drawKey={drawKey}
-                  vert={300}
+                  vert={vert}
                   durationMs={0}
                   background={edition}
                   handle={canvasHandle}

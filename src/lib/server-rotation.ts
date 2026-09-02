@@ -132,12 +132,13 @@ export const getRotatedRpcUrl = (): string => pickServer(getRpcBaseUrls(), Date.
  * `fallback()` transport, so requests prefer the rotation pick and fail over
  * to the remaining servers automatically.
  */
-export function getRpcUrlsInRotationOrder(now: number = Date.now()): string[] {
+export function getRpcUrlsInRotationOrder(now: number | null = Date.now()): string[] {
   const urls = getRpcBaseUrls();
   if (urls.length === 0) {
     return [];
   }
-  const start = hourlySlot(urls.length, now);
+  // `null` asks for the configured order without consulting the clock (prerendering).
+  const start = now === null ? 0 : hourlySlot(urls.length, now);
   return urls.map((_, i) => urls[(start + i) % urls.length] ?? "").filter(Boolean);
 }
 

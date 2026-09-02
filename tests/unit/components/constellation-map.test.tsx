@@ -52,11 +52,14 @@ describe("ConstellationMap", () => {
     );
   }
 
-  it("draws every work as a point and rings the highlighted ones", () => {
+  it("draws every work as a point once into an offscreen field, then rings the highlighted ones", () => {
     renderMap(200);
-    const context = fake.contexts[0]!;
-    // 200 dots + rings for the 4 beauty leaders, 1 featured, newest (2 rings).
-    expect(context.calls.filter((call) => call === "arc").length).toBeGreaterThanOrEqual(207);
+    // The first context belongs to the visible canvas: it blits the field and draws rings only
+    // (4 beauty leaders, 1 featured, 2 for the newest). The second is the offscreen field of 200 dots.
+    const [visible, field] = fake.contexts;
+    expect(visible!.calls).toContain("drawImage");
+    expect(visible!.calls.filter((call) => call === "arc").length).toBe(7);
+    expect(field!.calls.filter((call) => call === "arc").length).toBe(200);
     expect(
       screen.getByRole("img", { name: /constellation of 200 random walk works arranged by mint order/i })
     ).toBeInTheDocument();

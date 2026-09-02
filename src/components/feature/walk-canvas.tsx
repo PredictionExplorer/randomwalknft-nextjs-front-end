@@ -83,9 +83,9 @@ export function WalkCanvas({
 
     let cancelled = false;
     let frameId = 0;
+    let idleId = 0;
 
-    // Defer generation one tick so the canvas paints its background first.
-    const startId = window.setTimeout(() => {
+    const start = () => {
       if (cancelled) {
         return;
       }
@@ -131,12 +131,23 @@ export function WalkCanvas({
         }
       };
       frameId = window.requestAnimationFrame(tick);
+    };
+
+    // Generating a walk hashes hundreds of thousands of steps; keep it off the
+    // hydration critical path by waiting for an idle moment (bounded to ~300ms).
+    const startId = window.setTimeout(() => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(start, { timeout: 300 });
+      } else {
+        start();
+      }
     }, 30);
 
     return () => {
       cancelled = true;
       painterRef.current = null;
       window.clearTimeout(startId);
+      if (idleId && "cancelIdleCallback" in window) window.cancelIdleCallback(idleId);
       window.cancelAnimationFrame(frameId);
     };
   }, [seed, drawKey, vert, background, durationMs, controlled]);

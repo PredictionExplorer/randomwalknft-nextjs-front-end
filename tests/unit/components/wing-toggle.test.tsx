@@ -41,7 +41,19 @@ describe("WingToggle", () => {
     expect(trackEvent).toHaveBeenCalledWith("wing_changed", { wing: "light" });
   });
 
-  it("starts in the wing the server rendered", () => {
+  it("starts in the wing the pre-paint bootstrap wrote onto <html>", () => {
+    document.documentElement.dataset.wing = "light";
+    render(
+      <WingProvider initialWing="dark">
+        <WingToggle />
+      </WingProvider>
+    );
+
+    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("falls back to the given wing when the document carries none", () => {
+    delete document.documentElement.dataset.wing;
     render(
       <WingProvider initialWing="light">
         <WingToggle />

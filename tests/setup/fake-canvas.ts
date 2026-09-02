@@ -45,6 +45,9 @@ export function installFakeCanvas() {
     stroke() {
       this.calls.push("stroke");
     }
+    drawImage() {
+      this.calls.push("drawImage");
+    }
   }
 
   const getContext = vi.fn(function getContext(this: HTMLCanvasElement) {

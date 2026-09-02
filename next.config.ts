@@ -82,6 +82,13 @@ const nextConfig: NextConfig = {
    */
   reactCompiler: true,
   cacheComponents: true,
+  /**
+   * Crawlers and answer engines that do not run JavaScript get blocking (non-streamed)
+   * metadata: Next's default list plus the major search and AI crawlers, and Lighthouse
+   * so budgets measure what those crawlers see.
+   */
+  htmlLimitedBots:
+    /Mediapartners-Google|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Googlebot|Google-InspectionTool|Chrome-Lighthouse|GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|anthropic-ai|PerplexityBot|Bytespider|CCBot|Amazonbot|meta-externalagent/i,
   redirects() {
     return Promise.resolve([
       {

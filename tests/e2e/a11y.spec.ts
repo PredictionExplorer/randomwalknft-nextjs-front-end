@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
 import { installMockWallet } from "./fixtures/mock-wallet";
+import { goto } from "./fixtures/navigation";
 
 const ROUTES = [
   "/",
@@ -17,15 +18,6 @@ const ROUTES = [
   "/how-it-works",
   "/code"
 ];
-
-async function goto(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(
-    () =>
-      document.documentElement.dataset.hydrated === "true" &&
-      Array.from(document.querySelectorAll("body > div[hidden]")).every((node) => node.childElementCount === 0)
-  );
-}
 
 async function expectNoViolations(page: Page) {
   const results = await new AxeBuilder({ page })

@@ -79,8 +79,11 @@ export function getRpcHttpUrl(): string {
  * `fallback()` transport so requests prefer the rotation pick and automatically fail over
  * to the remaining servers.
  */
-export function getRpcHttpUrls(): string[] {
-  const ordered = getRpcUrlsInRotationOrder();
+export function getRpcHttpUrls(options: { rotate?: boolean } = {}): string[] {
+  // Browsers rotate hourly; server renders default to the configured order so prerendering
+  // never consults the clock. Server-side data reads opt back in with `{ rotate: true }`.
+  const rotate = options.rotate ?? typeof window !== "undefined";
+  const ordered = getRpcUrlsInRotationOrder(rotate ? Date.now() : null);
   if (ordered.length > 0) {
     return ordered;
   }
@@ -99,10 +102,11 @@ export function getExplorerBaseUrl(): string {
 /**
  * Chain used by viem + wagmi. Id and name come from the `NEXT_PUBLIC_NETWORK` preset, not from env.
  * The object is memoized per RPC rotation order, so the same reference is returned within an hour
- * (stable for React/wagmi) and a fresh one once the hourly pick moves.
+ * (stable for React/wagmi) and a fresh one once the hourly pick moves. Rotation is on in the
+ * browser and off during server rendering unless `{ rotate: true }` is passed (data reads).
  */
-export function getConfiguredEvmChain(): Chain {
-  const rpcs = getRpcHttpUrls();
+export function getConfiguredEvmChain(options: { rotate?: boolean } = {}): Chain {
+  const rpcs = getRpcHttpUrls(options);
   const rpcKey = rpcs.join("|");
   if (cachedChain && cachedChainRpcKey === rpcKey) {
     return cachedChain;

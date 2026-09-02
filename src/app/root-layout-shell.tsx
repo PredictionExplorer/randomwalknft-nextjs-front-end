@@ -1,32 +1,51 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { cookies } from "next/headers";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
-import { Suspense } from "react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { AppProviders } from "@/components/providers/app-providers";
 import { getSiteConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
-import { DEFAULT_WING, parseWing, WING_COOKIE } from "@/lib/wing";
+import { DEFAULT_WING, WING_COOKIE } from "@/lib/wing";
 
 import "@/app/globals.css";
 
+/**
+ * Fonts use `font-display: fallback`: a ~100ms block, then the system fallback (with
+ * next/font's size-adjusted metrics, so nothing shifts) unless the web font arrives
+ * within about three seconds. On slow first visits the page therefore paints once and
+ * stays put, instead of re-painting its largest text when the font finally lands.
+ * Geist ships as files in the `geist` package; loading them here (rather than via its
+ * prebuilt exports) is what lets us choose the display strategy and a single mono weight.
+ */
+const geistSans = localFont({
+  src: "../../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
+  weight: "100 900",
+  variable: "--font-geist-sans",
+  display: "fallback"
+});
+
+const geistMono = localFont({
+  src: "../../node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.woff2",
+  weight: "400",
+  variable: "--font-geist-mono",
+  display: "fallback"
+});
+
+// Display face only in roman: nothing on the site sets italic, so the italic file stays unshipped.
 const instrumentSerif = localFont({
-  src: [
-    { path: "../../public/fonts/InstrumentSerif-Regular.woff2", weight: "400", style: "normal" },
-    { path: "../../public/fonts/InstrumentSerif-Italic.woff2", weight: "400", style: "italic" }
-  ],
+  src: "../../public/fonts/InstrumentSerif-Regular.woff2",
+  weight: "400",
+  style: "normal",
   variable: "--font-instrument-serif",
-  display: "swap"
+  display: "fallback"
 });
 
 /**
  * Runs before first paint and sets `data-wing` from the cookie, so the prerendered
  * shell (always the dark wing) never flashes for light-wing visitors. React leaves
- * the attribute alone thanks to `suppressHydrationWarning` on <html>.
+ * the attribute alone thanks to `suppressHydrationWarning` on <html>, and the
+ * WingProvider reads it back once hydrated.
  */
 const WING_BOOTSTRAP = `(function(){try{var m=document.cookie.match(/(?:^|; )${WING_COOKIE}=(light|dark)(?:;|$)/);if(m){document.documentElement.dataset.wing=m[1]}}catch(e){}})();`;
 
@@ -63,44 +82,28 @@ export function buildRootMetadata(): Metadata {
 }
 
 /**
- * Everything that needs the request (the wing cookie) lives here, under a Suspense
- * boundary, so the document shell above it can be prerendered. Wallet state is not
- * read on the server: the client reconnects from wagmi's cookie storage itself.
+ * Nothing here reads the request: the wing comes from the cookie on the client,
+ * wallet state is reconnected from wagmi's cookie storage on the client, and the
+ * contract addresses are cached for hours. That keeps the whole document shell
+ * prerenderable, so the first paint never waits on the server.
  */
-async function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [cookieStore, { API_BASE_URL, NFT_ADDRESS }] = await Promise.all([cookies(), getAppConfig()]);
-  const wing = parseWing(cookieStore.get(WING_COOKIE)?.value);
+export async function RootLayoutShell({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { API_BASE_URL, NFT_ADDRESS } = await getAppConfig();
 
-  return (
-    <>
-      {/* Artwork thumbs, films, and API data all come from this origin. */}
-      <link rel="preconnect" href={API_BASE_URL} />
-      <link rel="dns-prefetch" href={API_BASE_URL} />
-      <AppProviders initialWing={wing} contracts={{ NFT_ADDRESS }}>
-        <div className="flex min-h-screen flex-col">
-          <SiteHeader />
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
-        </div>
-      </AppProviders>
-    </>
-  );
-}
-
-export function RootLayoutShell({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
       data-wing={DEFAULT_WING}
       // Tells Next to suspend smooth scrolling while it restores position on route changes.
       data-scroll-behavior="smooth"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${instrumentSerif.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable}`}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: WING_BOOTSTRAP }} />
+        {/* Artwork thumbs, films, and API data all come from this origin. */}
+        <link rel="preconnect" href={API_BASE_URL} />
+        <link rel="dns-prefetch" href={API_BASE_URL} />
       </head>
       <body>
         <a
@@ -109,9 +112,15 @@ export function RootLayoutShell({ children }: Readonly<{ children: React.ReactNo
         >
           Skip to content
         </a>
-        <Suspense fallback={null}>
-          <AppShell>{children}</AppShell>
-        </Suspense>
+        <AppProviders contracts={{ NFT_ADDRESS }}>
+          <div className="flex min-h-screen flex-col">
+            <SiteHeader />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <SiteFooter />
+          </div>
+        </AppProviders>
       </body>
     </html>
   );

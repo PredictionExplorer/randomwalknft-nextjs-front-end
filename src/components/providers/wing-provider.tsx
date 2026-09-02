@@ -1,10 +1,18 @@
 "use client";
 
-import { createContext, use, useState } from "react";
+import { createContext, use, useState, useSyncExternalStore } from "react";
 
 import { trackEvent } from "@/lib/analytics";
 import type { AssetTheme } from "@/lib/types";
-import { DEFAULT_WING, editionForWing, oppositeWing, type Wing, WING_COOKIE, WING_COOKIE_MAX_AGE } from "@/lib/wing";
+import {
+  DEFAULT_WING,
+  editionForWing,
+  oppositeWing,
+  parseWing,
+  type Wing,
+  WING_COOKIE,
+  WING_COOKIE_MAX_AGE
+} from "@/lib/wing";
 
 type WingContextValue = {
   wing: Wing;
@@ -21,15 +29,33 @@ function persistWing(wing: Wing) {
   document.cookie = `${WING_COOKIE}=${wing}; Path=/; Max-Age=${WING_COOKIE_MAX_AGE}; SameSite=Lax`;
 }
 
+const subscribeToNothing = () => () => undefined;
+
 /**
- * The server renders `<html data-wing>` from the cookie, so there is no flash; this
- * provider only has to keep the attribute, the cookie, and React state in step.
+ * The document shell is prerendered in the default wing and an inline script in
+ * <head> applies the visitor's cookie to `<html data-wing>` before first paint, so
+ * the colour tokens never flash. This provider picks that attribute up as soon as
+ * React hydrates (server snapshot = default, so hydration stays consistent) and
+ * keeps the attribute, the cookie, and React state in step afterwards.
  */
-export function WingProvider({ initialWing, children }: { initialWing: Wing; children: React.ReactNode }) {
-  const [wing, setWingState] = useState<Wing>(initialWing);
+export function WingProvider({
+  initialWing = DEFAULT_WING,
+  children
+}: {
+  initialWing?: Wing | undefined;
+  children: React.ReactNode;
+}) {
+  // The attribute is always present in the real document; `initialWing` covers renders without one.
+  const bootstrapWing = useSyncExternalStore(
+    subscribeToNothing,
+    () => parseWing(document.documentElement.dataset.wing ?? initialWing),
+    () => initialWing
+  );
+  const [chosenWing, setChosenWing] = useState<Wing | null>(null);
+  const wing = chosenWing ?? bootstrapWing;
 
   const setWing = (next: Wing) => {
-    setWingState(next);
+    setChosenWing(next);
     persistWing(next);
     trackEvent("wing_changed", { wing: next });
   };

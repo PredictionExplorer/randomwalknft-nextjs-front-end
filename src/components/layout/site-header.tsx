@@ -4,7 +4,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, Wallet } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import { PageShell } from "@/components/common/page-shell";
 import { ConnectWalletButton } from "@/components/layout/connect-wallet-button";
@@ -74,8 +74,96 @@ function WalletButtonPlaceholder() {
 const navLinkClass =
   "font-mono text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground";
 
+/**
+ * Desktop navigation. Reads the pathname for the active state, which is URL data the
+ * static shell cannot know; the Suspense fallback renders the same links unlit.
+ */
+function PrimaryNav({ pathname }: { pathname: string | null }) {
+  return (
+    <nav className="hidden flex-1 items-center justify-center gap-7 lg:flex" aria-label="Primary">
+      {navItems.map((item) => {
+        const itemIsExternal = isExternalHref(item.href);
+        const isActive =
+          (!itemIsExternal && pathname === item.href) ||
+          ("children" in item ? item.children.some((child) => pathname === child.href) : false);
+
+        if ("children" in item) {
+          return (
+            <DropdownMenu key={item.title}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(navLinkClass, "inline-flex items-center gap-1", isActive && "text-foreground")}
+                >
+                  {item.title}
+                  <ChevronDown className="h-3 w-3" aria-hidden />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center">
+                {item.children.map((child) => (
+                  <DropdownMenuItem key={child.href} asChild>
+                    <HeaderNavLink href={child.href}>{child.title}</HeaderNavLink>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        }
+
+        return (
+          <HeaderNavLink key={item.title} href={item.href} className={cn(navLinkClass, isActive && "text-foreground")}>
+            {item.title}
+          </HeaderNavLink>
+        );
+      })}
+    </nav>
+  );
+}
+
+function ActivePrimaryNav() {
+  return <PrimaryNav pathname={usePathname()} />;
+}
+
+function MobileNavLinks({ pathname, onNavigate }: { pathname: string | null; onNavigate: () => void }) {
+  return (
+    <nav className="space-y-5 pt-10" aria-label="Mobile">
+      {navItems.map((item) => (
+        <div key={item.title} className="space-y-2">
+          <HeaderNavLink
+            href={item.href}
+            onNavigate={onNavigate}
+            className={cn(
+              "block font-display text-2xl",
+              pathname === item.href ? "text-foreground" : "text-foreground/80"
+            )}
+          >
+            {item.title}
+          </HeaderNavLink>
+          {"children" in item ? (
+            <div className="space-y-1.5 pl-4">
+              {item.children.map((child) => (
+                <HeaderNavLink
+                  key={child.href}
+                  href={child.href}
+                  onNavigate={onNavigate}
+                  className="block text-sm text-muted-foreground"
+                >
+                  {child.title}
+                </HeaderNavLink>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+function ActiveMobileNavLinks({ onNavigate }: { onNavigate: () => void }) {
+  return <MobileNavLinks pathname={usePathname()} onNavigate={onNavigate} />;
+}
+
 export function SiteHeader() {
-  const pathname = usePathname();
   const mounted = useMounted();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const closeMobileNav = () => setMobileNavOpen(false);
@@ -90,47 +178,9 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="hidden flex-1 items-center justify-center gap-7 lg:flex" aria-label="Primary">
-          {navItems.map((item) => {
-            const itemIsExternal = isExternalHref(item.href);
-            const isActive =
-              (!itemIsExternal && pathname === item.href) ||
-              ("children" in item ? item.children.some((child) => pathname === child.href) : false);
-
-            if ("children" in item) {
-              return (
-                <DropdownMenu key={item.title}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className={cn(navLinkClass, "inline-flex items-center gap-1", isActive && "text-foreground")}
-                    >
-                      {item.title}
-                      <ChevronDown className="h-3 w-3" aria-hidden />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center">
-                    {item.children.map((child) => (
-                      <DropdownMenuItem key={child.href} asChild>
-                        <HeaderNavLink href={child.href}>{child.title}</HeaderNavLink>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              );
-            }
-
-            return (
-              <HeaderNavLink
-                key={item.title}
-                href={item.href}
-                className={cn(navLinkClass, isActive && "text-foreground")}
-              >
-                {item.title}
-              </HeaderNavLink>
-            );
-          })}
-        </nav>
+        <Suspense fallback={<PrimaryNav pathname={null} />}>
+          <ActivePrimaryNav />
+        </Suspense>
 
         <div className="ml-auto hidden items-center gap-3 lg:flex">
           <VaultTicker />
@@ -148,36 +198,9 @@ export function SiteHeader() {
             </SheetTrigger>
             <SheetContent side="right">
               <SheetTitle className="sr-only">Navigation menu</SheetTitle>
-              <nav className="space-y-5 pt-10" aria-label="Mobile">
-                {navItems.map((item) => (
-                  <div key={item.title} className="space-y-2">
-                    <HeaderNavLink
-                      href={item.href}
-                      onNavigate={closeMobileNav}
-                      className={cn(
-                        "block font-display text-2xl",
-                        pathname === item.href ? "text-foreground" : "text-foreground/80"
-                      )}
-                    >
-                      {item.title}
-                    </HeaderNavLink>
-                    {"children" in item ? (
-                      <div className="space-y-1.5 pl-4">
-                        {item.children.map((child) => (
-                          <HeaderNavLink
-                            key={child.href}
-                            href={child.href}
-                            onNavigate={closeMobileNav}
-                            className="block text-sm text-muted-foreground"
-                          >
-                            {child.title}
-                          </HeaderNavLink>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-              </nav>
+              <Suspense fallback={<MobileNavLinks pathname={null} onNavigate={closeMobileNav} />}>
+                <ActiveMobileNavLinks onNavigate={closeMobileNav} />
+              </Suspense>
               <div className="mt-auto space-y-3">
                 <WingToggle className="w-full justify-center" />
                 <Link href="/my-nfts" onClick={closeMobileNav} className={cn(navLinkClass, "block")}>

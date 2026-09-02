@@ -7,8 +7,8 @@ import { getRpcHttpUrls } from "@/lib/web3/evm-chain";
  * (see `server-rotation.ts`), with viem's `fallback()` failing over to the next server
  * when a request errors. Plain `http()` when only one server is configured.
  */
-export function getRpcTransport() {
-  const urls = getRpcHttpUrls();
+export function getRpcTransport(options: { rotate?: boolean } = {}) {
+  const urls = getRpcHttpUrls(options);
   if (urls.length === 1) {
     return http(urls[0]);
   }

@@ -13,10 +13,11 @@ let cachedChain: Chain | undefined;
  * the transport it happened to create at import time.
  */
 export function getPublicClient(): PublicClient {
-  const chain = getConfiguredEvmChain();
+  // Data reads run inside cached functions or route handlers, where the clock is fine.
+  const chain = getConfiguredEvmChain({ rotate: true });
   if (!cachedClient || cachedChain !== chain) {
     cachedChain = chain;
-    cachedClient = createPublicClient({ chain, transport: getRpcTransport() });
+    cachedClient = createPublicClient({ chain, transport: getRpcTransport({ rotate: true }) });
   }
   return cachedClient;
 }

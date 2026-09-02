@@ -30,7 +30,8 @@ export function VaultTicker({ className }: { className?: string }) {
     staleTime: 30_000,
     retry: 1
   });
-  const [nowMs, setNowMs] = useState(() => Date.now());
+  // `null` until the first tick: the server render must not consult the clock.
+  const [nowMs, setNowMs] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNowMs(Date.now()), 1000);
@@ -42,7 +43,7 @@ export function VaultTicker({ className }: { className?: string }) {
   }
 
   // Clamp so a client clock behind the server never adds time to the countdown.
-  const elapsedSeconds = Math.max(0, Math.floor((nowMs - vault.readAtMs) / 1000));
+  const elapsedSeconds = nowMs === null ? 0 : Math.max(0, Math.floor((nowMs - vault.readAtMs) / 1000));
   const remaining = vault.secondsUntilWithdrawal - elapsedSeconds;
   const claimable = remaining <= 0;
 

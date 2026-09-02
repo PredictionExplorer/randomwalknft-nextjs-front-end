@@ -9,7 +9,7 @@ import { WagmiProvider } from "wagmi";
 import type { ContractsContextValue } from "@/components/providers/contracts-context";
 import { ContractsProvider } from "@/components/providers/contracts-context";
 import { MotionProvider } from "@/components/providers/motion-provider";
-import { WingProvider } from "@/components/providers/wing-provider";
+import { useWing, WingProvider } from "@/components/providers/wing-provider";
 import { HydrationMarker } from "@/components/providers/hydration-marker";
 import { WalletLifecycleBridge } from "@/components/wallet/wallet-lifecycle-bridge";
 import { WalletProvider } from "@/components/wallet/wallet-provider";
@@ -18,9 +18,16 @@ import type { Wing } from "@/lib/wing";
 
 type AppProvidersProps = {
   children: React.ReactNode;
-  initialWing: Wing;
+  /** Wing to assume until the client reads the cookie (tests and previews pass it). */
+  initialWing?: Wing;
   contracts: ContractsContextValue;
 };
+
+/** Toasts follow the wing so they never look pasted on from the other one. */
+function WingAwareToaster() {
+  const { wing } = useWing();
+  return <Toaster position="top-right" theme={wing === "light" ? "light" : "dark"} richColors />;
+}
 
 export function AppProviders({ children, initialWing, contracts }: AppProvidersProps) {
   const [queryClient] = useState(
@@ -48,7 +55,7 @@ export function AppProviders({ children, initialWing, contracts }: AppProvidersP
                 <HydrationMarker />
                 {children}
               </WalletProvider>
-              <Toaster position="top-right" theme={initialWing === "light" ? "light" : "dark"} richColors />
+              <WingAwareToaster />
               {process.env.NODE_ENV === "development" ? <ReactQueryDevtools initialIsOpen={false} /> : null}
             </QueryClientProvider>
           </WagmiProvider>

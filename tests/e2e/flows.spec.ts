@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 
 import { isLiveUpstream, resetMockState, setMockState, waitForVault } from "./fixtures/mock-upstream";
 import { installMockWallet, TEST_ACCOUNT } from "./fixtures/mock-wallet";
+import { goto } from "./fixtures/navigation";
 
 /** The mock wallet answers every eth_sendTransaction with this hash. */
 const WALLET_TX_HASH = `0x${"22".repeat(32)}`;
@@ -11,15 +12,6 @@ const ARBITRUM_ONE = "0xa4b1";
 // These flows mutate the shared mock world; run them one at a time and restore it.
 test.describe.configure({ mode: "serial" });
 test.skip(isLiveUpstream, "transaction flows need the deterministic mock upstream");
-
-async function goto(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(
-    () =>
-      document.documentElement.dataset.hydrated === "true" &&
-      Array.from(document.querySelectorAll("body > div[hidden]")).every((node) => node.childElementCount === 0)
-  );
-}
 
 async function connectWallet(page: Page) {
   await page
