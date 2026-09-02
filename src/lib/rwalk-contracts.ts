@@ -2,19 +2,16 @@ import "server-only";
 
 import { z } from "zod";
 
-import { isFetchConnectionError, rethrowAsBackendUnavailableIfConnectionFailed } from "@/lib/api/backend-errors";
-import { getApiBase, markServerDown } from "@/lib/server-rotation";
+import { fetchRwalk } from "@/lib/api/client";
 import { getCurrentNetworkName } from "@/lib/web3/evm-chain";
 
 const apiResponseSchema = z.object({
   status: z.number(),
-  marketplace_addr: z.string(),
   randomwalk_addr: z.string()
 });
 
 export type RwalkContractAddresses = {
   NFT_ADDRESS: `0x${string}`;
-  MARKET_ADDRESS: `0x${string}`;
 };
 
 const ETH_ADDR_RE = /^0x[a-fA-F0-9]{40}$/;
@@ -30,62 +27,26 @@ function normalizeAndValidateEthAddress(label: string, raw: string): `0x${string
 }
 
 /**
- * RandomWalk contract addresses loaded from the Go API, kept for the lifetime of this Node
- * process (one `next dev` / `next start` / serverless instance). First successful response is cached;
- * failures are not cached.
+ * RandomWalk NFT address loaded from the Go API, kept for the lifetime of this Node
+ * process (one `next dev` / `next start` / serverless instance). The address is immutable
+ * per network, so the first successful response is cached; failures are not.
  */
 let rwalkContractsProcessCache: RwalkContractAddresses | null = null;
 
-/**
- * Fetches GET /api/randomwalk/contracts, validates non-empty addresses, caches in memory for the
- * process. Retries transient connection errors a few times.
- */
+/** GET /api/randomwalk/contracts through the shared client (rotation failover + timeout). */
 export async function fetchRwalkContractsFromApi(): Promise<RwalkContractAddresses> {
   if (rwalkContractsProcessCache) {
     return rwalkContractsProcessCache;
   }
 
   const isLocal = getCurrentNetworkName() === "local";
-  const init: RequestInit = isLocal ? { cache: "no-store" } : { next: { revalidate: 300 } };
-
-  let res: Response | undefined;
-  const maxAttempts = 3;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    // Re-picked per attempt: after markServerDown the rotation serves the next server.
-    const api = getApiBase();
-    if (!api) {
-      throw new Error(
-        "NEXT_PUBLIC_API_BASE_URL (or NEXT_PUBLIC_API_URLS) is required to load contract addresses from the API"
-      );
-    }
-    const url = `${api}/api/randomwalk/contracts`; // must match BACKEND_RANDOMWALK_API_PREFIX in config
-    try {
-      res = await fetch(url, init);
-      break;
-    } catch (e) {
-      const connectionError = isFetchConnectionError(e);
-      if (connectionError) {
-        markServerDown(api);
-      }
-      const last = attempt === maxAttempts - 1;
-      if (last || !connectionError) {
-        rethrowAsBackendUnavailableIfConnectionFailed(e);
-      }
-      await new Promise((r) => setTimeout(r, 150 * (attempt + 1)));
-    }
-  }
-  if (!res) {
-    throw new Error("Failed to fetch contract addresses");
-  }
-  if (!res.ok) {
-    throw new Error(`Failed to load /api/randomwalk/contracts: ${res.status} ${res.statusText}`);
-  }
-
-  const json: unknown = await res.json();
-  const parsed = apiResponseSchema.parse(json);
+  const parsed = await fetchRwalk(
+    "contracts",
+    isLocal ? { cache: "no-store" } : { revalidate: 300 },
+    apiResponseSchema
+  );
   const NFT_ADDRESS = normalizeAndValidateEthAddress("randomwalk_addr", parsed.randomwalk_addr);
-  const MARKET_ADDRESS = normalizeAndValidateEthAddress("marketplace_addr", parsed.marketplace_addr);
 
-  rwalkContractsProcessCache = { NFT_ADDRESS, MARKET_ADDRESS };
+  rwalkContractsProcessCache = { NFT_ADDRESS };
   return rwalkContractsProcessCache;
 }

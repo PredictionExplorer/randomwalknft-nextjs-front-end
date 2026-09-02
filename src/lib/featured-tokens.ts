@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createHash } from "node:crypto";
 
 export const FEATURED_TOKEN_FALLBACK_ID = 1;
@@ -42,6 +44,36 @@ export function sampleFeaturedTokenIds(
   }
 
   return pool.slice(0, limit);
+}
+
+/**
+ * `count` distinct integers in `[0, upperBound)` without materializing the range
+ * (Floyd's algorithm), so sampling from a growing supply stays O(count).
+ */
+export function sampleDistinctIntegers(
+  upperBound: number,
+  count: number,
+  random: RandomSource = Math.random
+): number[] {
+  const bound = Number.isSafeInteger(upperBound) ? Math.max(0, upperBound) : 0;
+  const limit = Math.min(normalizeCount(count), bound);
+  if (limit === 0) {
+    return [];
+  }
+
+  const chosen = new Set<number>();
+  for (let index = bound - limit; index < bound; index += 1) {
+    const candidate = randomIndex(index + 1, random);
+    chosen.add(chosen.has(candidate) ? index : candidate);
+  }
+
+  // Shuffle so the order is not biased toward the tail of the range.
+  const result = Array.from(chosen);
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomIndex(index + 1, random);
+    [result[index], result[swapIndex]] = [result[swapIndex]!, result[index]!];
+  }
+  return result;
 }
 
 export function selectFeaturedTokens(

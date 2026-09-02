@@ -14,7 +14,7 @@ import { getAppConfig } from "@/lib/server/app-config";
 import { getDescendingTokenPage, paginateItems } from "@/lib/pagination";
 import { buildCollectionSearchParams, parseCollectionQueryState } from "@/lib/query-state";
 import { createAssetUrls } from "@/lib/utils";
-import { publicClient } from "@/lib/web3/public-client";
+import { getPublicClient } from "@/lib/web3/public-client";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -73,7 +73,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
     page: 1
   };
   if (address) {
-    const walletTokens = (await publicClient.readContract({
+    const walletTokens = (await getPublicClient().readContract({
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "walletOfOwner",
@@ -82,7 +82,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
     tokenIds = walletTokens.map((tokenId) => Number(tokenId));
   } else {
     totalSupply = Number(
-      await publicClient.readContract({
+      await getPublicClient().readContract({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: "totalSupply"

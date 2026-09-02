@@ -47,6 +47,7 @@ import { VaultExperience } from "@/components/feature/vault-experience";
 function buildVault(overrides: Partial<VaultState> = {}): VaultState {
   return {
     prizeEth: 40.63,
+    prizeWei: "40630000000000000000",
     secondsUntilWithdrawal: 0,
     lastMinter: walletStatus.address,
     mintPriceEth: 0.0904,

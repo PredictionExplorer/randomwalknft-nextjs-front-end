@@ -7,7 +7,7 @@ const { readContract } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/web3/public-client", () => ({
-  publicClient: { readContract }
+  getPublicClient: () => ({ readContract })
 }));
 
 function mockTotalSupply(totalSupply: bigint) {

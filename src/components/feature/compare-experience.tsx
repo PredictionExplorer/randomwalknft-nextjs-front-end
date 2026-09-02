@@ -93,7 +93,10 @@ export function CompareExperience() {
       getComparePair({
         ...(voter ? { voter } : {}),
         skipPairFilter: relaxPairFilter
-      })
+      }),
+    // Each pair ships a one-time signing nonce; a cached pair would sign with a spent nonce.
+    staleTime: 0,
+    gcTime: 0
   });
 
   const voteMutation = useMutation({

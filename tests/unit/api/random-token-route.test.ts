@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const readContract = vi.fn();
 
 vi.mock("@/lib/web3/public-client", () => ({
-  publicClient: { readContract }
+  getPublicClient: () => ({ readContract })
 }));
 
 describe("random-token route", () => {

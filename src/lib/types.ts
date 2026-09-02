@@ -30,7 +30,6 @@ export type Nft = {
   name: string;
   owner: string;
   seed: string;
-  rating: number;
   assets: NftAssetUrls;
   tokenHistory: NftHistoryRecord[];
   mintedAt?: string | undefined;
@@ -46,18 +45,23 @@ export type CollectionQueryState = {
 };
 
 /**
- * Live state of the Vault game, read from the NFT contract in one multicall.
- * `readAtMs` lets clients tick countdowns locally without hydration drift.
+ * Live state of the Vault game, read from the NFT contract (one Multicall3 round-trip
+ * where available). `readAtMs` lets clients tick countdowns locally without hydration drift.
+ * ETH values are provided both as display-friendly numbers and as exact wei strings.
  */
 export type VaultState = {
-  /** ETH claimable by the last minter (half the pool), in ether. */
+  /** ETH claimable by the last minter (half the pool), in ether, for display. */
   prizeEth: number;
+  /** Exact claimable amount in wei (decimal string; JSON-safe). */
+  prizeWei: string;
   /** Seconds until the last minter may withdraw (0 when claimable now). */
   secondsUntilWithdrawal: number;
   /** Address of the current leader (last minter); undefined before first mint. */
   lastMinter?: string | undefined;
-  /** Current mint price in ether. */
+  /** Current mint price in ether, for display. */
   mintPriceEth?: number | undefined;
+  /** Exact mint price in wei (decimal string). */
+  mintPriceWei?: string | undefined;
   /** Total tokens minted. */
   mintedCount: number;
   /** Number of times the vault has ever been claimed. */

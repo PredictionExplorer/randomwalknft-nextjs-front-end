@@ -12,7 +12,7 @@ import {
   submitBeautyVote
 } from "@/lib/api/public";
 import { getBaseConfig } from "@/lib/config";
-import { publicClient } from "@/lib/web3/public-client";
+import { getPublicClient } from "@/lib/web3/public-client";
 import { server } from "../../setup/msw/server";
 
 const { API_BASE_URL, RWALK_BASE_URL } = getBaseConfig();
@@ -56,8 +56,8 @@ describe("getTokenDetail", () => {
           error: "",
           TokenInfo: {
             TokenId: 5,
-            CurOwnerAddr: "0xowner",
-            SeedHex: "0xseed",
+            CurOwnerAddr: "0x00000000000000000000000000000000000000aa",
+            SeedHex: "0xbeef",
             CurName: "Token Five",
             LastPrice: 0,
             TotalVolume: 0,
@@ -74,7 +74,7 @@ describe("getTokenDetail", () => {
                 BlockNum: 100,
                 TimeStamp: 1700000000,
                 DateTime: "2023-11-14T00:00:00Z",
-                OwnerAddr: "0xowner"
+                OwnerAddr: "0x00000000000000000000000000000000000000aa"
               }
             }
           ]
@@ -86,9 +86,8 @@ describe("getTokenDetail", () => {
 
     expect(nft.id).toBe(5);
     expect(nft.name).toBe("Token Five");
-    expect(nft.owner).toBe("0xowner");
-    expect(nft.seed).toBe("0xseed");
-    expect(nft.rating).toBe(0);
+    expect(nft.owner).toBe("0x00000000000000000000000000000000000000aa");
+    expect(nft.seed).toBe("0xbeef");
     expect(nft.tokenHistory).toHaveLength(1);
     expect(nft.tokenHistory[0]?.recordType).toBe(1);
     expect(nft.mintedAt).toBe("2023-11-14T00:00:00Z");
@@ -96,7 +95,7 @@ describe("getTokenDetail", () => {
   });
 
   it("falls back to on-chain token data when the token API has not indexed a fresh mint yet", async () => {
-    const readContractMock = vi.spyOn(publicClient, "readContract");
+    const readContractMock = vi.spyOn(getPublicClient(), "readContract");
     readContractMock.mockResolvedValueOnce("0xowner").mockResolvedValueOnce("0xseed").mockResolvedValueOnce("");
 
     server.use(

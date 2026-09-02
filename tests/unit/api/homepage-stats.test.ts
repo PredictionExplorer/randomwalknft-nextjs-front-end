@@ -12,7 +12,7 @@ const { readContract } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/web3/public-client", () => ({
-  publicClient: { readContract }
+  getPublicClient: () => ({ readContract })
 }));
 
 function mockHomepageContracts(totalSupply: bigint, mintPrice = 10_000_000_000_000_000n) {

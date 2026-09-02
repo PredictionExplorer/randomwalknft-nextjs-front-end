@@ -21,7 +21,11 @@ type NetworkPreset = {
   /** Used when `NEXT_PUBLIC_RPC_URL` is unset (same pattern as CosmicGame). */
   defaultRpcUrl: string;
   defaultExplorerUrl: string;
+  /** Canonical Multicall3 deployment, when the network has one (lets viem batch reads). */
+  multicall3?: `0x${string}`;
 };
+
+const MULTICALL3_ADDRESS = "0xcA11bde05977b3631167028862bE2a173976CA11" as const;
 
 const NETWORK_PRESETS: Record<NetworkName, NetworkPreset> = {
   local: {
@@ -34,17 +38,21 @@ const NETWORK_PRESETS: Record<NetworkName, NetworkPreset> = {
     chainId: 421614,
     name: "Arbitrum Sepolia",
     defaultRpcUrl: "https://sepolia-rollup.arbitrum.io/rpc",
-    defaultExplorerUrl: "https://sepolia.arbiscan.io"
+    defaultExplorerUrl: "https://sepolia.arbiscan.io",
+    multicall3: MULTICALL3_ADDRESS
   },
   mainnet: {
     chainId: 42161,
     name: "Arbitrum One",
     defaultRpcUrl: "https://arb1.arbitrum.io/rpc",
-    defaultExplorerUrl: "https://arbiscan.io"
+    defaultExplorerUrl: "https://arbiscan.io",
+    multicall3: MULTICALL3_ADDRESS
   }
 };
 
 let cachedChain: Chain | null = null;
+/** RPC order the cached chain was built with; a rotation change invalidates it. */
+let cachedChainRpcKey: string | null = null;
 
 export function getCurrentNetworkName(): NetworkName {
   const n = (process.env.NEXT_PUBLIC_NETWORK || "local").toLowerCase();
@@ -90,14 +98,17 @@ export function getExplorerBaseUrl(): string {
 
 /**
  * Chain used by viem + wagmi. Id and name come from the `NEXT_PUBLIC_NETWORK` preset, not from env.
+ * The object is memoized per RPC rotation order, so the same reference is returned within an hour
+ * (stable for React/wagmi) and a fresh one once the hourly pick moves.
  */
 export function getConfiguredEvmChain(): Chain {
-  if (cachedChain) {
+  const rpcs = getRpcHttpUrls();
+  const rpcKey = rpcs.join("|");
+  if (cachedChain && cachedChainRpcKey === rpcKey) {
     return cachedChain;
   }
   const net = getCurrentNetworkName();
   const preset = NETWORK_PRESETS[net];
-  const rpcs = getRpcHttpUrls();
   const explorer = getExplorerBaseUrl();
 
   cachedChain = defineChain({
@@ -109,8 +120,10 @@ export function getConfiguredEvmChain(): Chain {
     },
     blockExplorers: {
       default: { name: "Explorer", url: explorer }
-    }
+    },
+    ...(preset.multicall3 ? { contracts: { multicall3: { address: preset.multicall3 } } } : {})
   });
+  cachedChainRpcKey = rpcKey;
   return cachedChain;
 }
 

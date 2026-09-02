@@ -12,7 +12,8 @@ function isAllowedFile(path: string) {
 }
 
 function createImagePlaceholder(fileName: string, includeBody: boolean) {
-  const match = /^(\d{6})_(black|white)_(thumb\.jpg|\.png)$/.exec(fileName);
+  // Stills only (`000001_black.png`, `000001_black_thumb.jpg`); films have no placeholder.
+  const match = /^(\d{6})_(black|white)(?:_thumb\.jpg|\.png)$/.exec(fileName);
 
   if (!match) {
     return null;

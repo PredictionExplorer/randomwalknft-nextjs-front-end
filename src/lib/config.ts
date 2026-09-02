@@ -45,7 +45,6 @@ export type BaseEnvConfig = {
 
 export type AppConfig = BaseEnvConfig & {
   NFT_ADDRESS: `0x${string}`;
-  MARKET_ADDRESS: `0x${string}`;
 };
 
 /**

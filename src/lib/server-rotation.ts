@@ -73,8 +73,10 @@ const logSelection = (label: string, url: string): void => {
     return;
   }
   lastLoggedSelection.set(label, url);
-  // eslint-disable-next-line no-console -- deliberate operational visibility of the active server.
-  console.log(`[serverRotation] using ${label} = ${url}`);
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console -- deliberate operational visibility of the active server in dev.
+    console.log(`[serverRotation] using ${label} = ${url}`);
+  }
 };
 
 const hourlySlot = (count: number, now: number): number =>

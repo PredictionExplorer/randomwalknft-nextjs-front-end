@@ -10,7 +10,7 @@ import { nftAbi } from "@/generated/wagmi";
 import { getVaultState } from "@/lib/api/public";
 import { getAppConfig } from "@/lib/server/app-config";
 import { arbiscanContractUrl } from "@/lib/utils";
-import { publicClient } from "@/lib/web3/public-client";
+import { getPublicClient } from "@/lib/web3/public-client";
 
 export const revalidate = 60;
 
@@ -32,7 +32,7 @@ async function getKeyholderLatestTokenId(lastMinter: string | undefined): Promis
   }
   try {
     const { NFT_ADDRESS } = await getAppConfig();
-    const owned = (await publicClient.readContract({
+    const owned = (await getPublicClient().readContract({
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "walletOfOwner",

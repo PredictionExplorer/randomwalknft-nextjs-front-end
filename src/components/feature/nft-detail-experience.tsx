@@ -480,10 +480,6 @@ export function NftDetailExperience({ nft, message, initialTheme, initialMedia }
                   {shortenAddress(owner, 6)}
                 </a>
               </div>
-              <div>
-                <span className="block text-xs uppercase tracking-[0.24em]">Beauty score</span>
-                <span>{isPendingMetadata ? "Processing" : nft.rating.toFixed(2)}</span>
-              </div>
               <div className="min-w-0 sm:col-span-2">
                 <span className="block text-xs uppercase tracking-[0.24em]">Seed</span>
                 <button
