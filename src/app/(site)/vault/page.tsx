@@ -5,7 +5,6 @@ import { ExternalLink } from "@/components/common/external-link";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { VaultExperience } from "@/components/feature/vault-experience";
-import { Card, CardContent } from "@/components/ui/card";
 import { nftAbi } from "@/generated/wagmi";
 import { getVaultState } from "@/lib/api/public";
 import { getAppConfig } from "@/lib/server/app-config";
@@ -57,41 +56,44 @@ export default async function VaultPage() {
     vault?.mintPriceEth && vault.mintPriceEth > 0 ? Math.round(vault.prizeEth / vault.mintPriceEth) : undefined;
 
   return (
-    <PageShell className="space-y-10 py-16">
+    <PageShell className="space-y-12 py-12">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "The Vault" }]} />
       <PageHeading
-        eyebrow="The game inside the museum"
-        title={[{ text: "THE" }, { text: "VAULT", tone: "secondary" }]}
-        description="The Vault is the prize pool inside the Random Walk NFT smart contract. Every mint adds ETH to it. If 30 days pass without a new mint, the most recent minter — the keyholder — can withdraw half of everything inside. Any new mint resets the clock and takes the key."
+        eyebrow="The clock room"
+        title="The Vault"
+        description="Every mint pays into a vault inside the contract. The most recent minter holds the only key. If 30 days pass without a new mint, the keyholder may withdraw half of everything inside — and any new mint resets the clock and takes the key."
       />
 
       {vault ? (
         <VaultExperience initialVault={vault} keyholderTokenId={keyholderTokenId} />
       ) : (
-        <Card>
-          <CardContent className="p-6 text-sm leading-7 text-muted-foreground">
-            Live vault data is temporarily unavailable. The rules still apply on-chain: every mint feeds the pool, and
-            the last minter can withdraw half of it after 30 days without a new mint. Check the contract directly on{" "}
-            <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="text-secondary">
-              Arbiscan
-            </ExternalLink>
-            .
-          </CardContent>
-        </Card>
+        <p className="rounded-md border border-border p-6 text-sm leading-7 text-muted-foreground">
+          Live vault data is temporarily unavailable. The rules still apply on-chain: every mint feeds the pool, and the
+          last minter can withdraw half of it after 30 days without a new mint. Check the contract directly on{" "}
+          <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="text-foreground">
+            Arbiscan
+          </ExternalLink>
+          .
+        </p>
       )}
 
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-[0.08em]">How does the Vault game work?</h2>
-        <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-          All ETH paid for minting goes into the contract — the creators take nothing. The mint price rises about 0.1%
-          with every mint, so the pool compounds as the collection grows.
-          {ratio && vault
-            ? ` Today the prize is ${vault.prizeEth.toFixed(2)} ETH, roughly ${ratio}x the current mint price of ${vault.mintPriceEth?.toFixed(4)} ETH.`
-            : ""}{" "}
-          When a withdrawal happens, only half the pool leaves; the other half seeds the next round, so the game never
-          truly ends.
-        </p>
-        <div className="grid gap-4 md:grid-cols-3">
+      <section className="space-y-8 border-t border-border pt-12" aria-labelledby="vault-rules-heading">
+        <div className="space-y-3">
+          <p className="eyebrow text-accent">The rules</p>
+          <h2 id="vault-rules-heading" className="font-display text-3xl sm:text-4xl">
+            How does the Vault game work?
+          </h2>
+          <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
+            All ETH paid for minting goes into the contract — the creators take nothing. The mint price rises about 0.1%
+            with every mint, so the pool compounds as the collection grows.
+            {ratio && vault
+              ? ` Today the prize is ${vault.prizeEth.toFixed(2)} ETH, roughly ${ratio}× the current mint price of ${vault.mintPriceEth?.toFixed(4)} ETH.`
+              : ""}{" "}
+            When a withdrawal happens, only half the pool leaves; the other half seeds the next round, so the game never
+            truly ends.
+          </p>
+        </div>
+        <div className="grid gap-px overflow-hidden rounded-md border border-border bg-border md:grid-cols-3">
           {[
             {
               title: "Who holds the key",
@@ -106,18 +108,19 @@ export default async function VaultPage() {
               body: "The contract is immutable, with no admin keys and no creator fees. Nobody — including the creators — can alter the rules or take ETH out any other way."
             }
           ].map((item) => (
-            <Card key={item.title}>
-              <CardContent className="space-y-3 p-5">
-                <p className="text-lg font-semibold">{item.title}</p>
-                <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
-              </CardContent>
-            </Card>
+            <article key={item.title} className="space-y-3 bg-background p-6">
+              <h3 className="font-display text-2xl">{item.title}</h3>
+              <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
+            </article>
           ))}
         </div>
       </section>
 
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.08em]">Has the Vault ever been opened?</h2>
+      <section className="space-y-4 border-t border-border pt-12" aria-labelledby="vault-history-heading">
+        <p className="eyebrow text-accent">The record</p>
+        <h2 id="vault-history-heading" className="font-display text-3xl sm:text-4xl">
+          Has the Vault ever been opened?
+        </h2>
         <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
           {vault
             ? vault.numWithdrawals === 0
@@ -125,7 +128,7 @@ export default async function VaultPage() {
               : `The vault has been opened ${vault.numWithdrawals} time${vault.numWithdrawals === 1 ? "" : "s"} since launch in 2021. Each time, half the pool was claimed and the game continued with the remainder.`
             : "The withdrawal history is recorded permanently on-chain and can be verified on Arbiscan."}{" "}
           Every rule described here is enforced by the verified contract at{" "}
-          <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="break-all text-secondary">
+          <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="break-all font-mono text-xs text-foreground">
             {NFT_ADDRESS}
           </ExternalLink>
           .

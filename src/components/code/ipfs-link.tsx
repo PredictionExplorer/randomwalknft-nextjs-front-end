@@ -29,7 +29,7 @@ export function IpfsLink({ uri, gatewayUrl }: { uri: string; gatewayUrl: string 
     <span className="inline-flex items-center gap-2">
       <ExternalLink
         href={gatewayUrl}
-        className="font-mono text-sm text-secondary underline underline-offset-4 hover:text-secondary/80"
+        className="font-mono text-sm text-foreground underline decoration-border-strong underline-offset-4 hover:text-accent"
       >
         {display}
       </ExternalLink>

@@ -19,7 +19,8 @@ const { connection, disconnectMutate, walletUi } = vi.hoisted(() => ({
 
 vi.mock("wagmi", () => ({
   useConnection: () => connection,
-  useDisconnect: () => ({ mutate: disconnectMutate })
+  useDisconnect: () => ({ mutate: disconnectMutate }),
+  useWalletClient: () => ({ data: undefined, error: null, isFetching: false, refetch: vi.fn() })
 }));
 
 vi.mock("@/components/wallet/wallet-provider", () => ({

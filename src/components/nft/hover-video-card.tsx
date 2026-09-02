@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import { ArtworkTransition } from "@/components/common/view-transition";
 import { useArtworkAssets } from "@/lib/use-artwork-assets";
-import { formatId } from "@/lib/utils";
+import { cn, formatId } from "@/lib/utils";
 
 /**
  * Wall card: a still that comes alive on hover/focus by playing the token's
@@ -72,10 +72,15 @@ export function HoverVideoCard({
             <source src={assets.singleVideo} type="video/mp4" />
           </video>
         ) : null}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
-          <p className="font-mono text-xs text-white/90">{label ?? formatId(id)}</p>
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t to-transparent p-3 pt-8",
+            assets.edition === "black" ? "from-black/70 text-white" : "from-white/80 text-black"
+          )}
+        >
+          <p className="font-mono text-xs opacity-90">{label ?? formatId(id)}</p>
           {sublabel ? (
-            <p className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-white/60">{sublabel}</p>
+            <p className="font-mono text-[0.6rem] uppercase tracking-[0.18em] opacity-60">{sublabel}</p>
           ) : null}
         </div>
       </div>

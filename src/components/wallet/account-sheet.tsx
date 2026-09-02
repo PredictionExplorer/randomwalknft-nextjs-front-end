@@ -33,7 +33,7 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
           {connector ? ` via ${connector.name}` : ""}.
         </DialogDescription>
 
-        <div className="mt-5 rounded-2xl border border-border/70 bg-card/60 p-4">
+        <div className="mt-5 rounded-md border border-border bg-surface p-4">
           <p className="text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground">Address</p>
           <p className="mt-1 break-all font-mono text-sm text-foreground" title={address}>
             {address}

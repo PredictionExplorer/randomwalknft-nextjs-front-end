@@ -1,3 +1,5 @@
+import { isAddress } from "viem";
+
 import type { CollectionQueryState, CollectionViewMode } from "@/lib/types";
 
 function parsePositiveInteger(value: string | string[] | undefined) {
@@ -20,7 +22,9 @@ export function parseCollectionQueryState(
   const view = searchParams.view === "compact" ? "compact" : "gallery";
   const page = Math.max(parsePositiveInteger(searchParams.page) ?? 1, 1);
   const query = parsePositiveInteger(searchParams.query);
-  const address = typeof searchParams.address === "string" ? searchParams.address : undefined;
+  // Only a well-formed address may reach the chain read; anything else is ignored.
+  const address =
+    typeof searchParams.address === "string" && isAddress(searchParams.address) ? searchParams.address : undefined;
 
   return {
     address,

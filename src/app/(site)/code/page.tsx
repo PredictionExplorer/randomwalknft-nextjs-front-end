@@ -5,7 +5,6 @@ import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { CodeArtifactCard } from "@/components/code/code-artifact-card";
 import { IpfsLink } from "@/components/code/ipfs-link";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generatorFiles } from "@/lib/content/generation-code";
 
@@ -23,43 +22,41 @@ export const metadata: Metadata = {
 
 export default function CodePage() {
   return (
-    <PageShell className="space-y-10 py-16">
+    <PageShell className="space-y-10 py-12">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Open Source" }]} />
       <PageHeading
         eyebrow="Fully verifiable"
-        title={[{ text: "OPEN" }, { text: "SOURCE", tone: "secondary" }]}
+        title="Open source, end to end."
         description="Every Random Walk NFT can be independently verified. The complete source code, dependencies, and reproduction steps are published here — nothing is hidden."
       />
 
-      <Card className="bg-card/70">
-        <CardContent className="grid gap-5 p-6 md:grid-cols-3">
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-secondary">1. Set up your environment</p>
-            <p className="text-sm leading-7 text-muted-foreground">
-              The generator requires a system-level image library. The Guide tab below walks you through installing it
-              on Ubuntu or any compatible system.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-secondary">2. Install dependencies</p>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Install the pinned library versions listed in the Dependencies tab to ensure your output matches exactly.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-secondary">3. Generate your artwork</p>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Run the generator with any token number. It fetches the seed from Arbitrum and renders both the black and
-              white image and video variants.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-px overflow-hidden rounded-md border border-border bg-border md:grid-cols-3">
+        <div className="space-y-2 bg-background p-6">
+          <p className="eyebrow">1. Set up your environment</p>
+          <p className="text-sm leading-7 text-muted-foreground">
+            The generator requires a system-level image library. The Guide tab below walks you through installing it on
+            Ubuntu or any compatible system.
+          </p>
+        </div>
+        <div className="space-y-2 bg-background p-6">
+          <p className="eyebrow">2. Install dependencies</p>
+          <p className="text-sm leading-7 text-muted-foreground">
+            Install the pinned library versions listed in the Dependencies tab to ensure your output matches exactly.
+          </p>
+        </div>
+        <div className="space-y-2 bg-background p-6">
+          <p className="eyebrow">3. Generate your artwork</p>
+          <p className="text-sm leading-7 text-muted-foreground">
+            Run the generator with any token number. It fetches the seed from Arbitrum and renders both the black and
+            white image and video variants.
+          </p>
+        </div>
+      </div>
 
-      <Card className="bg-card/70">
-        <CardContent className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="rounded-md border border-accent/40 bg-accent-soft p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Permanent IPFS backup</p>
+            <p className="eyebrow text-accent">Permanent IPFS backup</p>
             <p className="text-sm leading-7 text-muted-foreground">
               All generation code and files shown on this page are also stored on IPFS. If this website ever becomes
               unavailable, you can retrieve everything from IPFS and recreate the artwork from scratch.
@@ -69,8 +66,8 @@ export default function CodePage() {
             uri="ipfs://QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W"
             gatewayUrl="https://ipfs.io/ipfs/QmP7Z8VbQLpytzXnceeAAc4D5tX39XVzoEeUZwEK8aPk8W"
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Tabs defaultValue="guide">
         <TabsList>

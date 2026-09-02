@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AlertTriangle, ChevronDown, ExternalLink as ExternalLinkIcon, LogOut, Wallet } from "lucide-react";
-import { useConnection, useDisconnect } from "wagmi";
+import { useDisconnect } from "wagmi";
 
 import { ExternalLink } from "@/components/common/external-link";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { useWalletUi } from "@/components/wallet/wallet-provider";
 import { trackEvent } from "@/lib/analytics";
 import { arbiscanAddressUrl, shortenAddress } from "@/lib/utils";
 import { getChainDisplayName, getConfiguredEvmChain } from "@/lib/web3/evm-chain";
+import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 
 type ConnectWalletButtonProps = {
   /** Runs before the connect dialog opens (e.g. to close a mobile navigation sheet). */
@@ -23,7 +24,8 @@ type ConnectWalletButtonProps = {
 };
 
 export function ConnectWalletButton({ onBeforeOpen }: ConnectWalletButtonProps) {
-  const { address, chain, chainId, isConnected } = useConnection();
+  // Hydration-safe: reports disconnected until mounted, like the server HTML.
+  const { address, chain, chainId, isConnected } = useWalletStatus();
   const disconnect = useDisconnect();
   const { openAccountModal, openChainModal, openConnectModal } = useWalletUi();
 

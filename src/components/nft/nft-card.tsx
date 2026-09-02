@@ -98,7 +98,12 @@ export function NftCard({
             <source src={assets.singleVideo} type="video/mp4" />
           </video>
         ) : null}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t to-transparent",
+            assets.edition === "black" ? "from-black/60" : "from-white/70"
+          )}
+        />
         <div
           className={cn(
             "pointer-events-none absolute flex items-center gap-2",

@@ -1,27 +1,29 @@
 "use client";
 
-import Link from "next/link";
 import type { Route } from "next";
+import Link from "next/link";
+import { KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { usePublicClient, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { toast } from "sonner";
+import { usePublicClient, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 import { NftCard } from "@/components/nft/nft-card";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
-import { trackEvent } from "@/lib/analytics";
 import { useContracts } from "@/components/providers/contracts-context";
+import { Button } from "@/components/ui/button";
+import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { nftAbi } from "@/generated/wagmi";
-import { splitDuration } from "@/lib/time";
+import { trackEvent } from "@/lib/analytics";
+import { describeDuration, formatRelativeTime, splitDuration } from "@/lib/time";
 import type { VaultState } from "@/lib/types";
-import { formatEth, formatId, shortenAddress } from "@/lib/utils";
+import { cn, formatEth, shortenAddress } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
-import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
-import { showWalletError } from "@/lib/web3/wallet-toast";
-import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { getChainDisplayName } from "@/lib/web3/evm-chain";
+import { prepareContractWrite } from "@/lib/web3/transaction-preflight";
+import { useWalletStatus } from "@/lib/web3/use-wallet-status";
+import { showWalletError } from "@/lib/web3/wallet-toast";
+
+const ROUND_SECONDS = 30 * 24 * 60 * 60;
 
 async function fetchVaultState(): Promise<VaultState> {
   const response = await fetch("/api/vault");
@@ -31,7 +33,30 @@ async function fetchVaultState(): Promise<VaultState> {
   return (await response.json()) as VaultState;
 }
 
-/** Live vault room: big clock, prize, keyholder spotlight, dethrone CTA, withdraw flow. */
+/** A thin brass arc that empties as the 30 days run out. */
+function ClockRing({ fraction, claimable }: { fraction: number; claimable: boolean }) {
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  return (
+    <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
+      <circle cx="50" cy="50" r={radius} fill="none" stroke="var(--border)" strokeWidth="1" />
+      <circle
+        cx="50"
+        cy="50"
+        r={radius}
+        fill="none"
+        stroke="var(--accent)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={circumference * (1 - fraction)}
+        className={cn("transition-[stroke-dashoffset] duration-1000 ease-linear", claimable && "animate-pulse-soft")}
+      />
+    </svg>
+  );
+}
+
+/** The clock room: the whole 30-day round as one instrument, plus the keyholder and the claim. */
 export function VaultExperience({
   initialVault,
   keyholderTokenId
@@ -70,7 +95,9 @@ export function VaultExperience({
   const remaining = Math.max(0, vault.secondsUntilWithdrawal - elapsedSeconds);
   const claimable = remaining <= 0;
   const parts = splitDuration(remaining);
+  const roundFraction = Math.min(1, remaining / ROUND_SECONDS);
   const isKeyholder = address != null && address.toLowerCase() === vault.lastMinter?.toLowerCase();
+  const ratio = vault.mintPriceEth && vault.mintPriceEth > 0 ? Math.round(vault.prizeEth / vault.mintPriceEth) : null;
 
   const handleWithdraw = async () => {
     try {
@@ -100,133 +127,120 @@ export function VaultExperience({
   };
 
   return (
-    <div className="space-y-10">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
-        <Card className="overflow-hidden border-secondary/30 bg-gradient-to-b from-secondary/10 to-background/60">
-          <CardContent className="space-y-8 p-6 sm:p-8">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Inside the vault</p>
-                <p
-                  className="mt-2 text-5xl font-semibold tabular-nums text-secondary sm:text-6xl"
-                  data-testid="vault-prize"
-                >
-                  {vault.prizeEth.toFixed(2)} ETH
-                </p>
-              </div>
-              <p className="max-w-[16rem] text-sm leading-6 text-muted-foreground">
-                Half of every mint ever paid. Claimable by the keyholder when the clock reaches zero.
-              </p>
-            </div>
+    <div className="space-y-12" data-testid="vault-room">
+      {/* The instrument */}
+      <div className="grid gap-10 border-y border-border py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center">
+        <div className="relative mx-auto aspect-square w-full max-w-[26rem]">
+          <ClockRing fraction={roundFraction} claimable={claimable} />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <p className="eyebrow text-accent">{claimable ? "The vault is open" : "Opens in"}</p>
+            <p className="sr-only">
+              {claimable
+                ? "The withdrawal window is open now."
+                : `${describeDuration(remaining)} remain until the withdrawal window opens.`}
+            </p>
+            <p className="font-display mt-2 text-6xl leading-none tabular-nums sm:text-7xl" aria-hidden>
+              {String(parts.days).padStart(2, "0")}
+              <span className="text-2xl text-muted-foreground sm:text-3xl">d</span>
+            </p>
+            <p className="mt-2 font-mono text-lg tabular-nums text-muted-foreground sm:text-xl" aria-hidden>
+              {[parts.hours, parts.minutes, parts.seconds].map((value) => String(value).padStart(2, "0")).join(":")}
+            </p>
+            <p className="mt-4 max-w-[14rem] font-mono text-[0.6rem] uppercase leading-5 tracking-[0.18em] text-muted-foreground">
+              Every mint resets the clock to 30 days
+            </p>
+          </div>
+        </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                {claimable ? "The vault is open" : "The vault opens in"}
-              </p>
-              <p className="sr-only">
-                {claimable
-                  ? "The withdrawal window is open now."
-                  : `About ${parts.days} days and ${parts.hours} hours remain until the withdrawal window opens.`}
-              </p>
-              {/* The per-second digits are decorative for screen readers; the summary above is stable. */}
-              <div className="mt-3 grid grid-cols-4 gap-3" aria-hidden>
-                {Object.entries(parts).map(([label, value]) => (
-                  <div key={label} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-center">
-                    <p className="text-3xl font-semibold tabular-nums text-foreground sm:text-4xl">
-                      {String(value).padStart(2, "0")}
-                    </p>
-                    <p className="mt-1 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground">{label}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Every new mint resets this clock to 30 days and hands the key to the new minter.
-              </p>
-            </div>
+        <div className="space-y-8">
+          <div>
+            <p className="eyebrow">Inside the vault</p>
+            <p className="font-display mt-2 text-7xl leading-none tabular-nums sm:text-8xl" data-testid="vault-prize">
+              {vault.prizeEth.toFixed(2)}
+              <span className="ml-3 font-mono text-lg uppercase tracking-[0.2em] text-muted-foreground">ETH</span>
+            </p>
+            <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">
+              Half of it — {formatEth(vault.prizeEth / 2, 2)} — goes to the keyholder when the clock reaches zero. The
+              other half seeds the next round.{ratio ? ` The prize is about ${ratio}× the price of one mint.` : ""}
+            </p>
+          </div>
 
-            {!claimable ? (
-              <div className="flex flex-wrap items-center gap-4">
-                <Button asChild size="lg">
-                  <Link href="/mint">
-                    Take the key — mint
-                    {vault.mintPriceEth != null ? ` for ${vault.mintPriceEth.toFixed(4)} ETH` : ""}
-                  </Link>
-                </Button>
-                {vault.mintPriceEth != null && vault.mintPriceEth > 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    The prize is {(vault.prizeEth / vault.mintPriceEth).toFixed(0)}x the current mint price.
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+          <div className="space-y-3 rounded-md border border-accent/40 bg-accent-soft p-5">
+            <p className="eyebrow text-accent">The keyholder</p>
+            {vault.lastMinter ? (
+              <Link
+                href={`/gallery?address=${vault.lastMinter}` as Route}
+                className="block break-all font-mono text-sm text-foreground transition-colors hover:text-accent"
+              >
+                {vault.lastMinter}
+              </Link>
+            ) : (
+              <p className="text-sm text-muted-foreground">No minter recorded yet.</p>
+            )}
+            <p className="text-sm leading-6 text-muted-foreground">
+              {isKeyholder ? "That is you. " : ""}
+              Holds the only key
+              {vault.lastMintAtMs
+                ? ` since ${formatRelativeTime(vault.lastMintAtMs, nowMs).replace(" ago", "")} ago`
+                : ""}
+              .
+              {claimable
+                ? " The clock has reached zero; the vault stands open for them alone."
+                : " If nobody mints before the clock runs out, half the vault is theirs."}
+            </p>
+          </div>
 
-        <Card className="bg-card/70">
-          <CardContent className="space-y-5 p-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">The keyholder</p>
-              {vault.lastMinter ? (
-                <Link
-                  href={`/gallery?address=${vault.lastMinter}` as Route}
-                  className="mt-2 inline-block break-all font-mono text-sm text-secondary transition hover:text-primary"
-                >
-                  {vault.lastMinter}
+          {!claimable ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <Button asChild size="lg" variant="accent">
+                <Link href="/mint">
+                  <KeyRound className="h-4 w-4" aria-hidden />
+                  Take the key{vault.mintPriceEth != null ? ` · ${vault.mintPriceEth.toFixed(4)} ETH` : ""}
                 </Link>
-              ) : (
-                <p className="mt-2 text-sm text-muted-foreground">No minter recorded yet.</p>
-              )}
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                The most recent minter holds the only key. If nobody mints before the clock runs out, the vault opens
-                for them alone.
-              </p>
+              </Button>
+              <p className="text-sm text-muted-foreground">Minting hands you the key and restarts the clock.</p>
             </div>
-            {keyholderTokenId != null ? (
-              <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Their latest work</p>
-                <NftCard
-                  id={keyholderTokenId}
-                  href={`/detail/${keyholderTokenId}`}
-                  label={formatId(keyholderTokenId)}
-                  compact
-                />
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+          ) : null}
+        </div>
       </div>
 
-      {!isReady && (claimable || isKeyholder) ? (
-        <WalletStatusCard
-          disconnectedTitle="Wallet required"
-          disconnectedBody="Connect your wallet to check if you hold the key. Only the most recent minter can open the vault."
-          wrongNetworkBody={`Switch to ${getChainDisplayName()} to check eligibility and withdraw.`}
-        />
-      ) : null}
-
-      <Card>
-        <CardContent className="space-y-5 p-6">
-          <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
+      {/* The claim */}
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="space-y-4">
+          <p className="eyebrow">Opening the vault</p>
+          <p className="max-w-xl text-sm leading-7 text-muted-foreground">
             {claimable
               ? isKeyholder
                 ? "The clock has reached zero and you hold the key. Withdraw to claim your prize — half the vault stays behind for the next round."
                 : `The clock has reached zero. Only the keyholder${
                     vault.lastMinter ? ` (${shortenAddress(vault.lastMinter)})` : ""
                   } can open the vault. A new mint would start a new round instead.`
-              : `Withdrawal unlocks when the clock reaches zero. Amount claimable today: ${formatEth(
-                  vault.prizeEth,
-                  2
-                )}. The other half stays in the vault for the next round.`}
+              : `Withdrawal unlocks when the clock reaches zero. Amount claimable then: ${formatEth(vault.prizeEth / 2, 2)}. The other half stays in the vault for the next round.`}
           </p>
+          {!isReady && (claimable || isKeyholder) ? (
+            <WalletStatusCard
+              disconnectedTitle="Wallet required"
+              disconnectedBody="Connect your wallet to check if you hold the key. Only the most recent minter can open the vault."
+              wrongNetworkBody={`Switch to ${getChainDisplayName()} to check eligibility and withdraw.`}
+            />
+          ) : null}
           <Button
             onClick={handleWithdraw}
             disabled={isPending || isConfirming || !canTransact || !claimable}
+            variant="accent"
             data-testid="vault-withdraw"
           >
-            {isPending ? "Submitting..." : isConfirming ? "Confirming..." : "Open the vault"}
+            {isPending ? "Submitting…" : isConfirming ? "Confirming…" : "Open the vault"}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+
+        {keyholderTokenId != null ? (
+          <div className="space-y-3">
+            <p className="eyebrow">The keyholder&apos;s newest work</p>
+            <NftCard id={keyholderTokenId} href={`/detail/${keyholderTokenId}`} />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

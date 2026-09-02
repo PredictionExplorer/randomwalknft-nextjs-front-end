@@ -86,7 +86,8 @@ describe("VaultExperience", () => {
   it("shows the live prize and keyholder", () => {
     renderVault();
 
-    expect(screen.getByTestId("vault-prize")).toHaveTextContent("40.63 ETH");
+    expect(screen.getByTestId("vault-prize")).toHaveTextContent("40.63");
+    expect(screen.getByText(/half of it — 20.32 ETH/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: walletStatus.address })).toHaveAttribute(
       "href",
       `/gallery?address=${walletStatus.address}`
@@ -105,7 +106,8 @@ describe("VaultExperience", () => {
     renderVault(buildVault({ secondsUntilWithdrawal: 86_400 }));
 
     expect(screen.getByTestId("vault-withdraw")).toBeDisabled();
-    expect(screen.getByText(/the vault opens in/i)).toBeInTheDocument();
+    expect(screen.getByText(/^opens in$/i)).toBeInTheDocument();
+    expect(screen.getByText(/about 1 day and 0 hours remain/i)).toBeInTheDocument();
   });
 
   it("preflights and submits the withdrawal once claimable and ready", async () => {

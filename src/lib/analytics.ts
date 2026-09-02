@@ -11,6 +11,7 @@ export type AnalyticsEvent =
   | "transaction_failed"
   | "wing_changed"
   | "atelier_draw"
+  | "beauty_vote"
   | "web_vital";
 
 export type AnalyticsPayload = Record<string, number | string | boolean | undefined>;

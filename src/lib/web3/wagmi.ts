@@ -24,10 +24,15 @@ export function createAppWagmiConfig(): Config {
 }
 
 /**
- * One config for both runtimes: the server uses it to deserialize wagmi's cookie
- * state during SSR, the browser drives connections with it.
+ * One config shape for both runtimes. The browser keeps a singleton so wallet
+ * state survives re-renders; the server builds a fresh config per call because
+ * wagmi's hydrate() mutates the store, and a shared instance would leak one
+ * request's connection status into the next visitor's HTML.
  */
 export function getWagmiConfig(): Config {
+  if (typeof window === "undefined") {
+    return createAppWagmiConfig();
+  }
   configSingleton ??= createAppWagmiConfig();
   return configSingleton;
 }

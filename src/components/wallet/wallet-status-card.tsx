@@ -34,10 +34,10 @@ export function WalletStatusCard({ disconnectedTitle, disconnectedBody, wrongNet
       : `Your wallet is connected on ${getChainDisplayName()} and ready for transactions.${localRpcNote}`;
 
   return (
-    <Card className="border-border/80 bg-background/60">
+    <Card className="border-border bg-surface">
       <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <div className="rounded-full border border-border/70 bg-accent/60 p-2 text-secondary">
+          <div className="rounded-md border border-accent/40 bg-accent-soft p-2 text-accent">
             <Icon className="h-5 w-5" aria-hidden />
           </div>
           <div className="space-y-1">

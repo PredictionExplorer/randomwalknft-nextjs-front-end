@@ -1,23 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useSignMessage } from "wagmi";
 import { z } from "zod";
 
-import { PageHeading } from "@/components/common/page-heading";
 import { NftCard } from "@/components/nft/nft-card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PageShell } from "@/components/common/page-shell";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
+import { useWalletUi } from "@/components/wallet/wallet-provider";
+import { trackEvent } from "@/lib/analytics";
+import { cn, formatId } from "@/lib/utils";
 import { buildBeautyVoteMessage } from "@/lib/web3/beauty-vote-message";
 import { getChainDisplayName, getConfiguredEvmChain } from "@/lib/web3/evm-chain";
-import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
+import { showWalletError } from "@/lib/web3/wallet-toast";
 
 const compareResponseSchema = z.object({
   tokenIds: z.array(z.number()),
@@ -78,11 +78,17 @@ async function submitVote(payload: {
   }
 }
 
+/**
+ * The salon: two works, one question. Votes are signed messages (no gas) and the
+ * ranking they build is the "most beautiful" room of the gallery.
+ */
 export function CompareExperience() {
   const queryClient = useQueryClient();
   const { address, canTransact, isConnected, isReady } = useWalletStatus();
+  const { openConnectModal } = useWalletUi();
   const signMessage = useSignMessage();
   const [relaxedVoter, setRelaxedVoter] = useState<string | null>(null);
+  const [judged, setJudged] = useState(0);
   const voter = isConnected && address ? address : undefined;
   const relaxPairFilter = voter !== undefined && relaxedVoter === voter;
 
@@ -133,7 +139,9 @@ export function CompareExperience() {
       });
     },
     onSuccess: async () => {
-      toast.success("Vote submitted.");
+      setJudged((count) => count + 1);
+      trackEvent("beauty_vote", { judged: judged + 1 });
+      toast.success("Vote recorded. Next pair.");
       setRelaxedVoter(null);
       await queryClient.invalidateQueries({ queryKey: ["compare-pair"] });
     },
@@ -147,45 +155,59 @@ export function CompareExperience() {
     }
   });
 
-  if (pairQuery.isPending || !pairQuery.data) {
-    return (
-      <PageShell className="space-y-8 py-16">
-        <PageHeading title={[{ text: "WHICH" }, { text: "NFT", tone: "primary" }, { text: "IS MORE BEAUTIFUL?" }]} />
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-4">
-            <Skeleton className="aspect-square w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <div className="space-y-4">
-            <Skeleton className="aspect-square w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </div>
-      </PageShell>
-    );
-  }
-
-  const [firstId, secondId] = pairQuery.data.tokenIds;
-  if (firstId === undefined || secondId === undefined) {
-    return null;
-  }
-
-  const pairExhausted = pairQuery.data.pairExhausted === true;
+  const pair = pairQuery.data;
+  const [firstId, secondId] = pair?.tokenIds ?? [];
+  const pairExhausted = pair?.pairExhausted === true;
   const votingBlocked = pairExhausted && isConnected;
+  const busy = voteMutation.isPending || pairQuery.isFetching;
+
+  function pick(winner: number) {
+    if (!pair || firstId === undefined || secondId === undefined) return;
+    if (!isConnected) {
+      trackEvent("wallet_connect_attempt", { mode: "salon" });
+      openConnectModal();
+      return;
+    }
+    if (!canTransact || votingBlocked || busy) return;
+    voteMutation.mutate({ firstId, secondId, winner, signNonce: pair.signNonce });
+  }
+
+  // ← picks the left work, → the right one; S skips the pair.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const typing =
+        event.target instanceof Element && event.target.closest("input, textarea, select, [role=dialog]") !== null;
+      if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key === "ArrowLeft" && firstId !== undefined) pick(firstId);
+      else if (event.key === "ArrowRight" && secondId !== undefined) pick(secondId);
+      else if ((event.key === "s" || event.key === "S") && !busy) void pairQuery.refetch();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
   return (
-    <PageShell className="space-y-8 py-16">
-      <PageHeading title={[{ text: "WHICH" }, { text: "NFT", tone: "primary" }, { text: "IS MORE BEAUTIFUL?" }]} />
+    <div className="space-y-10" data-testid="salon">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-3">
+          <p className="eyebrow text-accent">The salon</p>
+          <h1 className="font-display text-5xl leading-none sm:text-6xl">Which is more beautiful?</h1>
+          <p className="max-w-xl text-pretty text-base leading-7 text-muted-foreground">
+            Two works, one question. Your answer is a signed message — no gas, no transaction — and every answer moves
+            the collection&apos;s beauty ranking.
+          </p>
+        </div>
+        <dl className="grid grid-cols-2 gap-x-8 font-mono text-xs sm:text-right" data-testid="salon-tally">
+          <dt className="eyebrow row-start-2">Votes cast</dt>
+          <dd className="row-start-1 text-lg tabular-nums text-foreground">
+            {pair ? pair.totalCount.toLocaleString() : "—"}
+          </dd>
+          <dt className="eyebrow row-start-2">Your session</dt>
+          <dd className="row-start-1 text-lg tabular-nums text-foreground">{judged}</dd>
+        </dl>
+      </div>
 
-      <Badge variant="secondary">{pairQuery.data.totalCount} votes</Badge>
-
-      {!isConnected || !address ? (
-        <p className="text-muted-foreground text-sm">
-          Connect your wallet to vote. You will be asked to sign a short message (no gas).
-        </p>
-      ) : null}
-
-      {!isReady ? (
+      {isConnected && !isReady ? (
         <WalletStatusCard
           disconnectedTitle="Wallet required"
           disconnectedBody={`Connect a wallet on ${getChainDisplayName()} to vote.`}
@@ -194,46 +216,76 @@ export function CompareExperience() {
       ) : null}
 
       {votingBlocked ? (
-        <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4 text-sm">
+        <div className="space-y-3 rounded-md border border-border p-4 text-sm">
           <p className="text-muted-foreground">
             We couldn&apos;t find a pair you haven&apos;t voted on yet (after many random draws). You can load a random
             pair anyway — voting will fail if you already chose between these two.
           </p>
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             size="sm"
             disabled={pairQuery.isFetching}
             onClick={() => setRelaxedVoter(voter ?? null)}
           >
-            {pairQuery.isFetching ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+            {pairQuery.isFetching ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : null}
             Show random pair anyway
           </Button>
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {[firstId, secondId].map((id) => (
-          <div key={id} className="space-y-4">
-            <NftCard id={id} href={`/detail/${id}`} />
-            <Button
-              className="w-full"
-              disabled={voteMutation.isPending || !canTransact || votingBlocked}
-              onClick={() =>
-                voteMutation.mutate({
-                  firstId,
-                  secondId,
-                  winner: id,
-                  signNonce: pairQuery.data.signNonce
-                })
-              }
-            >
-              {voteMutation.isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
-              Pick {id}
-            </Button>
-          </div>
-        ))}
+      {pairQuery.isPending || firstId === undefined || secondId === undefined ? (
+        <div className="grid gap-6 lg:grid-cols-[1fr_auto_1fr] lg:items-center" aria-busy>
+          <Skeleton className="aspect-[1.6/1] w-full" />
+          <span className="eyebrow text-center">or</span>
+          <Skeleton className="aspect-[1.6/1] w-full" />
+        </div>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[1fr_auto_1fr] lg:items-center" data-testid="salon-pair">
+          {[firstId, secondId].map((id, index) => (
+            <div key={id} className={cn("space-y-3", busy && "opacity-70")}>
+              <NftCard id={id} href={`/detail/${id}`} />
+              <Button
+                className="w-full"
+                size="lg"
+                variant={index === 0 ? "default" : "outline"}
+                disabled={(isConnected && !canTransact) || votingBlocked || busy}
+                onClick={() => pick(id)}
+                data-testid={`pick-${index === 0 ? "left" : "right"}`}
+              >
+                {voteMutation.isPending && voteMutation.variables?.winner === id ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
+                ) : null}
+                Pick {id}
+                <span className="sr-only"> ({formatId(id)})</span>
+                <kbd className="ml-2 hidden rounded-sm border border-current/30 px-1.5 font-mono text-[0.6rem] opacity-60 sm:inline">
+                  {index === 0 ? "←" : "→"}
+                </kbd>
+              </Button>
+            </div>
+          ))}
+          <span className="eyebrow order-first text-center lg:order-none">or</span>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
+        <p className="text-xs leading-6 text-muted-foreground">
+          {isConnected
+            ? "Signing is free: your wallet signs a short message naming the pair and your choice; nothing is sent on-chain."
+            : "Connect a wallet to vote. You will sign a short message — no gas, no transaction."}
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={busy}
+          onClick={() => void pairQuery.refetch()}
+          data-testid="skip-pair"
+        >
+          <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+          Skip this pair
+          <kbd className="ml-1 hidden font-mono text-[0.6rem] opacity-60 sm:inline">S</kbd>
+        </Button>
       </div>
-    </PageShell>
+    </div>
   );
 }

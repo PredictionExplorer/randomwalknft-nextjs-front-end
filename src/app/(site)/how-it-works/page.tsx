@@ -7,7 +7,6 @@ import { JsonLd } from "@/components/common/json-ld";
 import { PageShell } from "@/components/common/page-shell";
 import { AtelierStudio } from "@/components/feature/atelier-studio";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { getVaultState } from "@/lib/api/public";
 import { COSMIC_SIGNATURE_URL, CONTRACTS_GITHUB_URL, getBaseConfig } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
@@ -39,7 +38,7 @@ export default async function HowItWorksPage() {
     vault?.mintPriceEth && vault.mintPriceEth > 0 ? Math.round(vault.prizeEth / vault.mintPriceEth) : undefined;
 
   return (
-    <PageShell className="space-y-16 py-16">
+    <PageShell className="space-y-16 py-12">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -61,8 +60,8 @@ export default async function HowItWorksPage() {
       <div className="space-y-8">
         <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "How It Works" }]} />
         <div className="max-w-3xl space-y-5">
-          <p className="text-xs uppercase tracking-[0.32em] text-secondary/80">The full story</p>
-          <h1 className="text-4xl font-semibold tracking-[0.08em] sm:text-5xl">HOW RANDOM WALK NFT WORKS</h1>
+          <p className="eyebrow text-accent">The full story</p>
+          <h1 className="font-display text-5xl leading-none sm:text-6xl">How Random Walk NFT works</h1>
           <p className="text-lg leading-8 text-muted-foreground">
             Random Walk NFT is a generative art collection and an on-chain game, live on Arbitrum since 2021. Minting
             creates a unique seed that becomes six artworks, and every mint feeds an ETH vault that pays the last minter
@@ -72,7 +71,9 @@ export default async function HowItWorksPage() {
       </div>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">What exactly is minted?</h2>
+        <h2 id="what-is-minted" className="font-display scroll-mt-24 text-3xl sm:text-4xl">
+          What exactly is minted?
+        </h2>
         <p className="text-base leading-8 text-muted-foreground">
           When you mint, the contract records a fresh 32-byte seed against your token id — data that could not be known
           before the transaction confirmed. That seed is the artwork&apos;s DNA. From it, an open-source generator
@@ -84,7 +85,9 @@ export default async function HowItWorksPage() {
 
       <section className="grid items-start gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">How does a seed become art?</h2>
+          <h2 id="seed-to-art" className="font-display scroll-mt-24 text-3xl sm:text-4xl">
+            How does a seed become art?
+          </h2>
           <p className="text-base leading-8 text-muted-foreground">
             The generator hashes the seed with SHA3-256, over and over, producing an endless stream of random bits. Two
             bits at a time choose a direction — right, left, up, or down — and the path walks millions of steps until it
@@ -104,7 +107,9 @@ export default async function HowItWorksPage() {
       </section>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">How does the Vault game work?</h2>
+        <h2 id="vault-game" className="font-display scroll-mt-24 text-3xl sm:text-4xl">
+          How does the Vault game work?
+        </h2>
         <p className="text-base leading-8 text-muted-foreground">
           Every wei paid for minting goes into the contract — the creators take nothing. The most recent minter holds
           the vault&apos;s only key. If 30 days pass without a new mint, the keyholder may withdraw half of everything
@@ -121,13 +126,15 @@ export default async function HowItWorksPage() {
             ? `In ${launchedYearsAgo} years and ${vault.mintedCount.toLocaleString()} mints, the clock has never reached zero — the vault has never been opened.`
             : ""}
         </p>
-        <Button asChild variant="secondary">
+        <Button asChild variant="accent">
           <Link href="/vault">See the live vault</Link>
         </Button>
       </section>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">How does the mint price grow?</h2>
+        <h2 id="mint-price" className="font-display scroll-mt-24 text-3xl sm:text-4xl">
+          How does the mint price grow?
+        </h2>
         <p className="text-base leading-8 text-muted-foreground">
           The price increases about 0.1% with every mint — a factor of 1.001, which compounds to a doubling roughly
           every 693 mints. There is no supply cap; the rising price is the only limit. This curve is why the game must
@@ -137,8 +144,10 @@ export default async function HowItWorksPage() {
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">Why can&apos;t the rules change?</h2>
-        <div className="grid gap-4 md:grid-cols-2">
+        <h2 id="immutable-rules" className="font-display scroll-mt-24 text-3xl sm:text-4xl">
+          Why can&apos;t the rules change?
+        </h2>
+        <div className="grid gap-px overflow-hidden rounded-md border border-border bg-border md:grid-cols-2">
           {[
             {
               title: "Immutable contract",
@@ -157,34 +166,38 @@ export default async function HowItWorksPage() {
               body: "The generator is open source and pinned on IPFS. Anyone can regenerate every artwork from on-chain seeds, so the art survives even if this site disappears."
             }
           ].map((item) => (
-            <Card key={item.title}>
-              <CardContent className="space-y-2 p-5">
-                <p className="text-lg font-semibold">{item.title}</p>
-                <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
-              </CardContent>
-            </Card>
+            <article key={item.title} className="space-y-2 bg-background p-6">
+              <h3 className="font-display text-2xl">{item.title}</h3>
+              <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
+            </article>
           ))}
         </div>
       </section>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">
+        <h2 id="utility" className="font-display scroll-mt-24 text-3xl sm:text-4xl">
           What can you do with a Random Walk NFT?
         </h2>
         <p className="text-base leading-8 text-muted-foreground">
           Collect it, name it on-chain, vote in the{" "}
-          <Link href="/compare" className="text-secondary transition hover:text-primary">
+          <Link
+            href="/compare"
+            className="text-foreground underline decoration-border-strong underline-offset-4 transition-colors hover:text-accent"
+          >
             Beauty Contest
           </Link>
           , trade it on{" "}
           <ExternalLink
             href="https://www.axiomzero.market/random-walk"
-            className="text-secondary transition hover:text-primary"
+            className="text-foreground underline decoration-border-strong underline-offset-4 transition-colors hover:text-accent"
           >
             Axiom Zero
           </ExternalLink>
           , or play the Vault game by minting. Beyond this site, Random Walk NFTs have live utility in{" "}
-          <ExternalLink href={COSMIC_SIGNATURE_URL} className="text-secondary transition hover:text-primary">
+          <ExternalLink
+            href={COSMIC_SIGNATURE_URL}
+            className="text-foreground underline decoration-border-strong underline-offset-4 transition-colors hover:text-accent"
+          >
             Cosmic Signature
           </ExternalLink>
           , a related on-chain art protocol by the same team: anchor a token there — without selling it — to become
@@ -194,18 +207,23 @@ export default async function HowItWorksPage() {
       </section>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">How can I verify all of this myself?</h2>
+        <h2 id="verify" className="font-display scroll-mt-24 text-3xl sm:text-4xl">
+          How can I verify all of this myself?
+        </h2>
         <p className="text-base leading-8 text-muted-foreground">
           Don&apos;t trust this page — check it. The NFT contract is verified at{" "}
-          <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="break-all text-secondary">
+          <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="break-all font-mono text-xs text-foreground">
             {NFT_ADDRESS}
           </ExternalLink>{" "}
           on Arbiscan, where every rule described here is readable in the source. The contract repository is public on{" "}
-          <ExternalLink href={CONTRACTS_GITHUB_URL} className="text-secondary">
+          <ExternalLink
+            href={CONTRACTS_GITHUB_URL}
+            className="text-foreground underline decoration-border-strong underline-offset-4"
+          >
             GitHub
           </ExternalLink>
           , and the art generator — with pinned dependencies and instructions — is published on the{" "}
-          <Link href="/code" className="text-secondary">
+          <Link href="/code" className="text-foreground underline decoration-border-strong underline-offset-4">
             Open Source page
           </Link>{" "}
           and on IPFS. Live numbers on this page are read directly from the chain.

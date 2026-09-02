@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ExternalLink } from "@/components/common/external-link";
 import { JsonLd } from "@/components/common/json-ld";
 import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { homepageCharter } from "@/lib/content/homepage";
+import { Button } from "@/components/ui/button";
 import { faqItems } from "@/lib/content/faq";
+import { homepageCharter } from "@/lib/content/homepage";
 
 export const metadata: Metadata = {
-  title: "FAQ",
+  title: "Visitor's guide — frequently asked questions",
   description:
     "Frequently asked questions about Random Walk NFT — minting, the Vault game that pays the last minter, beauty scores, CC0 licensing, Cosmic Signature utility, and collecting on Axiom Zero.",
   alternates: { canonical: "/faq" },
   openGraph: {
-    title: "FAQ | Random Walk NFT",
+    title: "Visitor's guide | Random Walk NFT",
     description:
       "Frequently asked questions about Random Walk NFT — minting, the Vault game that pays the last minter, beauty scores, CC0 licensing, Cosmic Signature utility, and collecting on Axiom Zero."
   }
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function FaqPage() {
   return (
-    <PageShell className="space-y-10 py-16">
+    <PageShell className="space-y-12 py-12">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -35,59 +37,80 @@ export default function FaqPage() {
           }))
         }}
       />
-      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "FAQ" }]} />
+      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Visitor's guide" }]} />
       <PageHeading
-        eyebrow="Frequently asked questions"
-        title={[{ text: "FAQ", tone: "secondary" }]}
-        description="Everything you need to know about minting, collecting, Axiom Zero, and the economics behind Random Walk NFT."
+        eyebrow="Visitor's guide"
+        title="Questions, answered."
+        description="Everything you need to know about minting, collecting, the Vault, the salon, and the economics behind Random Walk NFT."
       />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <Accordion type="single" collapsible className="space-y-3">
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <Accordion type="single" collapsible className="border-t border-border" data-testid="faq-list">
           {faqItems.map((item) => (
             <AccordionItem value={item.summary} key={item.summary}>
-              <AccordionTrigger>{item.summary}</AccordionTrigger>
-              <AccordionContent>{item.detail}</AccordionContent>
+              <AccordionTrigger className="text-left text-base sm:text-lg">{item.summary}</AccordionTrigger>
+              <AccordionContent className="max-w-3xl text-sm leading-7 text-muted-foreground">
+                {item.detail}
+              </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
 
-        <Card className="h-fit">
-          <CardHeader>
-            <CardTitle>Still have questions?</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-            <p>Join the community — we are happy to help.</p>
-            <p>
+        <aside className="h-fit space-y-6 border-t border-border pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+          <div className="space-y-2">
+            <p className="eyebrow">Still have questions?</p>
+            <p className="text-sm leading-7 text-muted-foreground">
+              Join the community — collectors and the team are happy to help.
+            </p>
+            <p className="flex gap-4 text-sm">
               <ExternalLink
                 href="https://twitter.com/RandomWalkNFT"
-                className="text-secondary underline underline-offset-4"
+                className="text-foreground underline decoration-border-strong underline-offset-4"
               >
                 Twitter
               </ExternalLink>
-              {" · "}
               <ExternalLink
                 href="https://discord.gg/bGnPn96Qwt"
-                className="text-secondary underline underline-offset-4"
+                className="text-foreground underline decoration-border-strong underline-offset-4"
               >
                 Discord
               </ExternalLink>
             </p>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="space-y-2">
+            <p className="eyebrow">Go deeper</p>
+            <div className="flex flex-col gap-2">
+              <Button asChild variant="outline" size="sm" className="justify-start">
+                <Link href="/how-it-works">How it works, in full</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="justify-start">
+                <Link href="/atelier">Run the generator yourself</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="justify-start">
+                <Link href="/code">Read the source code</Link>
+              </Button>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {homepageCharter.map((item) => (
-          <Card key={item.title}>
-            <CardContent className="space-y-3 p-5">
-              <p className="text-xs uppercase tracking-[0.24em] text-secondary">{item.eyebrow}</p>
-              <h3 className="text-xl font-semibold">{item.title}</h3>
+      <section className="space-y-6 border-t border-border pt-10" aria-labelledby="faq-charter-heading">
+        <div className="space-y-2">
+          <p className="eyebrow text-accent">The charter</p>
+          <h2 id="faq-charter-heading" className="font-display text-3xl sm:text-4xl">
+            Standing guarantees
+          </h2>
+        </div>
+        <div className="grid gap-px overflow-hidden rounded-md border border-border bg-border md:grid-cols-2 lg:grid-cols-4">
+          {homepageCharter.map((item) => (
+            <article key={item.title} className="space-y-3 bg-background p-5">
+              <p className="eyebrow">{item.eyebrow}</p>
+              <h3 className="font-display text-xl">{item.title}</h3>
               <p className="text-sm leading-7 text-muted-foreground">{item.body}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </article>
+          ))}
+        </div>
+      </section>
     </PageShell>
   );
 }

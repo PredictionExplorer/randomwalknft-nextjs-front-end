@@ -1,67 +1,71 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { WalkCanvas } from "@/components/feature/walk-canvas";
+import { useWingEdition } from "@/components/providers/wing-provider";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { formatId } from "@/lib/utils";
 
 /**
  * Post-mint reveal: while the backend renders the full-resolution media, the
  * browser draws the new work live from its actual on-chain seed — the wait
- * becomes the unveiling.
+ * becomes the unveiling. A real dialog, so focus and Escape behave.
  */
 export function MintRevealTheater({ tokenId, seed, onView }: { tokenId: number; seed: string; onView: () => void }) {
   const [drawingDone, setDrawingDone] = useState(false);
-  const viewButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    // Move focus into the reveal so keyboard users land on the only action.
-    viewButtonRef.current?.focus();
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
+  const edition = useWingEdition();
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 overflow-y-auto bg-black/95 px-4 py-10 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Revealing your new work ${formatId(tokenId)}`}
-      data-testid="mint-reveal-theater"
-    >
-      <div className="text-center">
-        <p className="text-xs uppercase tracking-[0.32em] text-secondary">A new work enters the collection</p>
-        <p className="mt-2 font-mono text-3xl font-semibold text-white sm:text-4xl">{formatId(tokenId)}</p>
-      </div>
+    <Dialog open onOpenChange={(open) => (open ? undefined : onView())}>
+      <DialogContent
+        className="w-[min(96vw,64rem)] border-border p-0"
+        style={{ backgroundColor: edition === "white" ? "#ffffff" : "#000000" }}
+        data-testid="mint-reveal-theater"
+      >
+        <div className="p-6 text-center sm:p-8">
+          <DialogTitle className="eyebrow text-accent">A new work enters the collection</DialogTitle>
+          <p
+            className={`font-display mt-3 text-5xl leading-none sm:text-6xl ${edition === "white" ? "text-black" : "text-white"}`}
+          >
+            {formatId(tokenId)}
+          </p>
+        </div>
 
-      <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10 shadow-[0_0_80px_rgba(198,118,215,0.25)]">
         <WalkCanvas
           seed={seed}
           vert={300}
           durationMs={12_000}
+          background={edition}
           onComplete={() => setDrawingDone(true)}
           label={`Your new artwork ${formatId(tokenId)} drawing itself from its on-chain seed`}
         />
-      </div>
 
-      <p className="max-w-md text-center text-sm leading-6 text-white/60" aria-live="polite">
-        {drawingDone
-          ? "This walk was drawn live from your on-chain seed. The museum is rendering the full-resolution image and films — they appear on your work's page within minutes."
-          : "Drawing your walk live from its on-chain seed — the same algorithm that renders the final artwork."}
-      </p>
-
-      <Button
-        size="lg"
-        variant={drawingDone ? "secondary" : "outline"}
-        onClick={onView}
-        ref={viewButtonRef}
-        data-testid="mint-reveal-view"
-      >
-        {drawingDone ? "View your work in the collection" : "Skip to your work"}
-      </Button>
-    </div>
+        <div className="space-y-5 p-6 text-center sm:p-8">
+          <p
+            className={`break-all font-mono text-[0.65rem] ${edition === "white" ? "text-black/50" : "text-white/50"}`}
+          >
+            {seed}
+          </p>
+          <DialogDescription
+            className={`mx-auto max-w-md text-sm leading-6 ${edition === "white" ? "text-black/70" : "text-white/70"}`}
+            aria-live="polite"
+          >
+            {drawingDone
+              ? "This walk was drawn live from your on-chain seed. The museum is rendering the full-resolution image and films — they appear on your work's page within minutes."
+              : "Drawing your walk live from its on-chain seed — the same algorithm that renders the final artwork."}
+          </DialogDescription>
+          <Button
+            size="lg"
+            variant={drawingDone ? "accent" : "outline"}
+            onClick={onView}
+            data-testid="mint-reveal-view"
+          >
+            {drawingDone ? "View your work in the collection" : "Skip to your work"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

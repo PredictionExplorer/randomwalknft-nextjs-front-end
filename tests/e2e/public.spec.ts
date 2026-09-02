@@ -190,20 +190,32 @@ test("gallery renders a single page of NFTs and supports page navigation", async
   await expect(page.locator('a[href^="/detail/"]')).toHaveCount(24);
 });
 
-test("gallery beauty filter persists in the URL", async ({ page }) => {
+test("gallery rooms and hangings are plain links that persist in the URL", async ({ page }) => {
   await goto(page, "/gallery");
-  await page.getByLabel(/sort/i).selectOption("beauty");
-  await page.getByRole("button", { name: /apply/i }).click();
+  const toolbar = page.getByTestId("collection-toolbar");
+  await toolbar.getByRole("link", { name: /most beautiful/i }).click();
   await expect(page).toHaveURL(/sortBy=beauty/);
-  await expect(page.getByText(/Page 1 of/i)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /most beautiful/i })).toBeVisible();
+  await expect(page.getByTestId("gallery-count")).toContainText(/page 1 of/i);
+
+  await toolbar.getByRole("link", { name: /study hanging/i }).click();
+  await expect(page).toHaveURL(/view=compact/);
+  await expect(page).toHaveURL(/sortBy=beauty/);
 });
 
-test("gallery token search applies a query filter", async ({ page }) => {
+test("gallery jump-to-token applies a query filter", async ({ page }) => {
   await goto(page, "/gallery");
-  await page.getByLabel(/search token id/i).fill("1");
-  await page.getByRole("button", { name: /apply/i }).click();
+  await page.getByLabel(/jump to token number/i).fill("1");
+  await page.getByRole("button", { name: /jump to token/i }).click();
   await expect(page).toHaveURL(/query=1/);
   await expect(page.getByText(/Token #000001/i)).toBeVisible();
+  await expect(page.locator('a[href="/detail/1"]')).toHaveCount(1);
+});
+
+test("gallery ignores a malformed wallet address instead of failing", async ({ page }) => {
+  const response = await page.goto("/gallery?address=not-an-address", { waitUntil: "domcontentloaded" });
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1, name: /every walk, newest first/i })).toBeVisible();
 });
 
 test("marketplace route redirects to Axiom Zero", async ({ request }) => {
@@ -234,7 +246,11 @@ test("invalid NFT detail route returns not found", async ({ page }) => {
   await expect(page.getByText(/does not exist|not found|could not be found/i)).toBeVisible();
 });
 
-test("mint page renders heading", async ({ page }) => {
+test("mint page shows the ticket desk with a live price and a wallet prompt", async ({ page }) => {
   await goto(page, "/mint");
-  await expect(page.getByRole("heading", { name: /random walk|sale opens/i })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /add a walk nobody has seen/i })).toBeVisible();
+  await expect(page.getByTestId("mint-price")).toContainText(/ETH/);
+  await expect(page.getByTestId("mint-button")).toBeDisabled();
+  await expect(page.getByRole("button", { name: /connect wallet/i }).first()).toBeVisible();
+  await expect(page.getByTestId("mint-featured-rail").locator('a[href^="/detail/"]')).toHaveCount(8);
 });

@@ -151,7 +151,10 @@ export function ConnectModal({ open, onOpenChange, onConnected }: ConnectModalPr
         {!attempt && !mobile ? (
           <p className="mt-5 text-xs text-muted-foreground">
             New to wallets?{" "}
-            <ExternalLink href={METAMASK_DOWNLOAD_URL} className="text-secondary underline-offset-4 hover:underline">
+            <ExternalLink
+              href={METAMASK_DOWNLOAD_URL}
+              className="text-foreground underline decoration-border-strong underline-offset-4 hover:text-accent"
+            >
               Install MetaMask
             </ExternalLink>{" "}
             and refresh this page.
@@ -167,7 +170,7 @@ function WalletOptionButton({ option, onSelect }: { option: WalletOption; onSele
     <button
       type="button"
       onClick={onSelect}
-      className="flex w-full items-center gap-3 rounded-2xl border border-border/70 bg-card/60 p-3 text-left transition hover:border-secondary/60 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex w-full items-center gap-3 rounded-md border border-border bg-card p-3 text-left transition-colors hover:border-border-strong hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/95">
         {option.iconUrl ? (
@@ -205,7 +208,7 @@ function AttemptPanel({
       {attempt.status === "pending" ? (
         attempt.qrUri ? (
           <div className="space-y-3">
-            <div className="mx-auto w-56 overflow-hidden rounded-2xl bg-white p-2">
+            <div className="mx-auto w-56 overflow-hidden rounded-md bg-white p-2">
               <QrCode
                 value={attempt.qrUri}
                 label="Scan with the MetaMask mobile app to connect"
@@ -217,8 +220,8 @@ function AttemptPanel({
             </p>
           </div>
         ) : (
-          <div className="flex items-center gap-3 rounded-2xl border border-border/70 p-4 text-sm text-muted-foreground">
-            <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-secondary" aria-hidden />
+          <div className="flex items-center gap-3 rounded-md border border-border p-4 text-sm text-muted-foreground">
+            <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-accent" aria-hidden />
             <span role="status">Waiting for {attempt.option.label}…</span>
           </div>
         )
@@ -231,7 +234,7 @@ function AttemptPanel({
       {stalled && mobile && isMetaMask ? (
         <a
           href={metaMaskDappLink(window.location)}
-          className="block text-center text-sm font-medium text-secondary underline-offset-4 hover:underline"
+          className="block text-center text-sm font-medium text-foreground underline decoration-border-strong underline-offset-4 hover:text-accent"
         >
           Open this page in MetaMask
         </a>

@@ -3,13 +3,13 @@
 import { describe, expect, it } from "vitest";
 
 describe("wagmi config", () => {
-  it("can be created in a server (node) environment for cookie hydration", async () => {
+  it("builds a fresh config per call on the server so request state never leaks", async () => {
     const { getWagmiConfig } = await import("@/lib/web3/wagmi");
     const config = getWagmiConfig();
 
     expect(config.chains).toHaveLength(1);
     expect(config.chains[0]?.id).toBe(42161);
-    expect(getWagmiConfig()).toBe(config);
+    expect(getWagmiConfig()).not.toBe(config);
   });
 
   it("registers MetaMask and the generic injected connector, and never WalletConnect", async () => {
