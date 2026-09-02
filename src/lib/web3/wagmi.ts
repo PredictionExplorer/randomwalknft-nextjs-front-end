@@ -1,8 +1,4 @@
-import {
-  cookieStorage,
-  createConfig,
-  createStorage
-} from "wagmi";
+import { cookieStorage, createConfig, createStorage } from "wagmi";
 import type { Config, CreateConnectorFn } from "wagmi";
 import { injected, metaMask } from "wagmi/connectors";
 

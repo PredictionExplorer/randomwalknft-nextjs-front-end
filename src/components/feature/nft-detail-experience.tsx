@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { Route } from "next";
 import { Film, Image as ImageIcon, Play } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isAddress } from "viem";
 import { usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { toast } from "sonner";
@@ -78,24 +78,19 @@ async function probeAssetReady(url: string) {
   }
 }
 
-export function NftDetailExperience({
-  nft,
-  message,
-  initialTheme,
-  initialMedia
-}: NftDetailExperienceProps) {
+export function NftDetailExperience({ nft, message, initialTheme, initialMedia }: NftDetailExperienceProps) {
   const { NFT_ADDRESS } = useContracts();
   const pathname = usePathname();
   const router = useRouter();
   const publicClient = usePublicClient();
   const { address, canTransact, isConnected, isWrongNetwork } = useWalletStatus();
   const [theme, setTheme] = useState<AssetTheme>(initialTheme);
-  const [activeMedia, setActiveMedia] = useState<AssetVariant>(initialMedia);
-  const [modal, setModal] = useState<AssetVariant | null>(initialMedia);
+  const [requestedMedia, setActiveMedia] = useState<AssetVariant>(initialMedia);
+  const [requestedModal, setModal] = useState<AssetVariant | null>(initialMedia);
   const [tokenName, setTokenName] = useState(nft.name);
   const [transferAddress, setTransferAddress] = useState("");
   const [isMutating, setIsMutating] = useState(false);
-  const [flashMessage, setFlashMessage] = useState(message);
+  const announcedMessageRef = useRef<string | undefined>(undefined);
 
   const { data: ownerOf } = useReadContract({
     address: NFT_ADDRESS,
@@ -124,9 +119,12 @@ export function NftDetailExperience({
   const wrongNetwork = isWrongNetwork;
   const walletTokenIds = (accountTokenIds ?? []).map((id) => Number(id));
   const currentWalletIndex = walletTokenIds.indexOf(nft.id);
-  const [mediaAvailability, setMediaAvailability] = useState<Record<AssetVariant, boolean>>(
-    shouldProbeMedia ? noMediaReady : allMediaReady
-  );
+  const [probedAvailability, setProbedAvailability] = useState<Record<AssetVariant, boolean>>(noMediaReady);
+  const mediaAvailability = shouldProbeMedia ? probedAvailability : allMediaReady;
+  // Visitors may request a variant that is still rendering; fall back to the still.
+  const activeMedia: AssetVariant = mediaAvailability[requestedMedia] ? requestedMedia : "image";
+  const modal: AssetVariant | null =
+    requestedModal !== null && mediaAvailability[requestedModal] ? requestedModal : null;
   const currentAssetThumb = getAssetPreview(nft.assets, theme);
   const modalSource =
     modal === null
@@ -141,14 +139,8 @@ export function NftDetailExperience({
   const hasPendingMedia = !imageZoomReady || !singleVideoReady || !tripleVideoReady;
 
   useEffect(() => {
-    setFlashMessage(message);
-  }, [message]);
-
-  useEffect(() => {
+    // The one-shot `message` param is consumed by the toast below and dropped from the URL.
     const params = new URLSearchParams();
-    if (flashMessage) {
-      params.set("message", flashMessage);
-    }
     if (theme !== "black") {
       params.set("theme", theme);
     }
@@ -158,7 +150,7 @@ export function NftDetailExperience({
 
     const href = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
     router.replace(href as Route, { scroll: false });
-  }, [activeMedia, flashMessage, pathname, router, theme]);
+  }, [activeMedia, pathname, router, theme]);
 
   useEffect(() => {
     if (!totalSupply) {
@@ -179,11 +171,11 @@ export function NftDetailExperience({
   }, [nft.id, router, totalSupply]);
 
   useEffect(() => {
-    if (flashMessage === "success") {
+    if (message === "success" && announcedMessageRef.current !== message) {
+      announcedMessageRef.current = message;
       toast.success("Media files are being generated. Refresh in a few minutes if assets are still processing.");
-      setFlashMessage(undefined);
     }
-  }, [flashMessage]);
+  }, [message]);
 
   useEffect(() => {
     if (!isPendingMetadata) {
@@ -198,13 +190,11 @@ export function NftDetailExperience({
   }, [isPendingMetadata, router]);
 
   useEffect(() => {
-    let cancelled = false;
-
     if (!shouldProbeMedia) {
-      setMediaAvailability(allMediaReady);
       return;
     }
 
+    let cancelled = false;
     void Promise.all([
       probeAssetReady(getAssetImage(nft.assets, theme)),
       probeAssetReady(getAssetBySelection(nft.assets, theme, "singleVideo")),
@@ -214,7 +204,7 @@ export function NftDetailExperience({
         return;
       }
 
-      setMediaAvailability({
+      setProbedAvailability({
         image,
         singleVideo,
         tripleVideo
@@ -225,30 +215,6 @@ export function NftDetailExperience({
       cancelled = true;
     };
   }, [nft.assets, shouldProbeMedia, theme]);
-
-  useEffect(() => {
-    if (activeMedia === "singleVideo" && !singleVideoReady) {
-      setActiveMedia("image");
-    }
-
-    if (activeMedia === "tripleVideo" && !tripleVideoReady) {
-      setActiveMedia("image");
-    }
-  }, [activeMedia, singleVideoReady, tripleVideoReady]);
-
-  useEffect(() => {
-    if (modal === "image" && !imageZoomReady) {
-      setModal(null);
-    }
-
-    if (modal === "singleVideo" && !singleVideoReady) {
-      setModal(null);
-    }
-
-    if (modal === "tripleVideo" && !tripleVideoReady) {
-      setModal(null);
-    }
-  }, [imageZoomReady, modal, singleVideoReady, tripleVideoReady]);
 
   async function runMutation(action: () => Promise<void>) {
     try {
@@ -311,13 +277,13 @@ export function NftDetailExperience({
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "transferFrom",
-      args: [address, transferAddress as `0x${string}`, BigInt(nft.id)]
+      args: [address, transferAddress, BigInt(nft.id)]
     });
     const hash = await writeContractAsync({
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "transferFrom",
-      args: [address, transferAddress as `0x${string}`, BigInt(nft.id)],
+      args: [address, transferAddress, BigInt(nft.id)],
       ...transferPrepared
     });
     await publicClient.waitForTransactionReceipt({ hash });
@@ -326,11 +292,7 @@ export function NftDetailExperience({
   return (
     <PageShell className="space-y-8 py-16">
       <Breadcrumbs
-        items={[
-          { href: "/", label: "Home" },
-          { href: "/gallery", label: "Collection" },
-          { label: formatId(nft.id) }
-        ]}
+        items={[{ href: "/", label: "Home" }, { href: "/gallery", label: "Collection" }, { label: formatId(nft.id) }]}
       />
 
       <PageHeading
@@ -388,10 +350,18 @@ export function NftDetailExperience({
           <Card className="bg-card/65">
             <CardContent className="space-y-4 p-5">
               <div className="flex gap-2">
-                <Button className="flex-1" variant={theme === "black" ? "default" : "outline"} onClick={() => setTheme("black")}>
+                <Button
+                  className="flex-1"
+                  variant={theme === "black" ? "default" : "outline"}
+                  onClick={() => setTheme("black")}
+                >
                   Dark
                 </Button>
-                <Button className="flex-1" variant={theme === "white" ? "default" : "outline"} onClick={() => setTheme("white")}>
+                <Button
+                  className="flex-1"
+                  variant={theme === "white" ? "default" : "outline"}
+                  onClick={() => setTheme("white")}
+                >
                   Light
                 </Button>
               </div>
@@ -399,7 +369,9 @@ export function NftDetailExperience({
                 <Button
                   variant={activeMedia === "image" ? "default" : "outline"}
                   className="gap-2.5"
-                  onClick={() => { setActiveMedia("image"); }}
+                  onClick={() => {
+                    setActiveMedia("image");
+                  }}
                 >
                   <ImageIcon className="h-4 w-4" />
                   Image
@@ -408,7 +380,9 @@ export function NftDetailExperience({
                   variant={activeMedia === "singleVideo" ? "secondary" : "outline"}
                   className="gap-2.5 border-primary/40"
                   disabled={!singleVideoReady}
-                  onClick={() => { setActiveMedia("singleVideo"); }}
+                  onClick={() => {
+                    setActiveMedia("singleVideo");
+                  }}
                 >
                   <Play className="h-4 w-4" />
                   Single video
@@ -417,7 +391,9 @@ export function NftDetailExperience({
                   variant={activeMedia === "tripleVideo" ? "secondary" : "outline"}
                   className="gap-2.5 border-primary/40"
                   disabled={!tripleVideoReady}
-                  onClick={() => { setActiveMedia("tripleVideo"); }}
+                  onClick={() => {
+                    setActiveMedia("tripleVideo");
+                  }}
                 >
                   <Film className="h-4 w-4" />
                   Triple video
@@ -427,7 +403,9 @@ export function NftDetailExperience({
                 <p className="text-xs text-muted-foreground">
                   {!imageZoomReady ? "Full-size image is still processing." : null}
                   {!imageZoomReady && (!singleVideoReady || !tripleVideoReady) ? " " : null}
-                  {!singleVideoReady || !tripleVideoReady ? "Video variants will unlock when processing completes." : null}
+                  {!singleVideoReady || !tripleVideoReady
+                    ? "Video variants will unlock when processing completes."
+                    : null}
                 </p>
               ) : null}
             </CardContent>
@@ -439,7 +417,9 @@ export function NftDetailExperience({
             </Button>
             <Button
               variant="outline"
-              onClick={() => router.push(`/detail/${Math.min(nft.id + 1, Number(totalSupply ?? BigInt(nft.id + 1)) - 1)}` as Route)}
+              onClick={() =>
+                router.push(`/detail/${Math.min(nft.id + 1, Number(totalSupply ?? BigInt(nft.id + 1)) - 1)}` as Route)
+              }
             >
               Next token
             </Button>
@@ -456,7 +436,9 @@ export function NftDetailExperience({
               <Button
                 variant="outline"
                 onClick={() =>
-                  router.push(`/detail/${walletTokenIds[Math.min(currentWalletIndex + 1, walletTokenIds.length - 1)]}` as Route)
+                  router.push(
+                    `/detail/${walletTokenIds[Math.min(currentWalletIndex + 1, walletTokenIds.length - 1)]}` as Route
+                  )
                 }
               >
                 Next in wallet
@@ -490,7 +472,11 @@ export function NftDetailExperience({
             <CardContent className="grid gap-4 sm:grid-cols-2 text-sm text-muted-foreground">
               <div className="min-w-0">
                 <span className="block text-xs uppercase tracking-[0.24em]">Owner</span>
-                <a href={`/gallery?address=${owner}`} className="text-secondary transition hover:text-primary" title={owner}>
+                <a
+                  href={`/gallery?address=${owner}`}
+                  className="text-secondary transition hover:text-primary"
+                  title={owner}
+                >
                   {shortenAddress(owner, 6)}
                 </a>
               </div>
@@ -511,11 +497,20 @@ export function NftDetailExperience({
               </div>
               <div>
                 <span className="block text-xs uppercase tracking-[0.24em]">Minted</span>
-                <span>{nft.tokenHistory[0] ? formatDateTimeFromUnix(nft.tokenHistory[0].timestamp) : isPendingMetadata ? "Just minted" : "Pending"}</span>
+                <span>
+                  {nft.tokenHistory[0]
+                    ? formatDateTimeFromUnix(nft.tokenHistory[0].timestamp)
+                    : isPendingMetadata
+                      ? "Just minted"
+                      : "Pending"}
+                </span>
               </div>
               <div>
                 <span className="block text-xs uppercase tracking-[0.24em]">Secondary market</span>
-                <ExternalLink href={AXIOM_ZERO_MARKETPLACE_URL} className="text-secondary transition hover:text-primary">
+                <ExternalLink
+                  href={AXIOM_ZERO_MARKETPLACE_URL}
+                  className="text-secondary transition hover:text-primary"
+                >
                   Axiom Zero
                 </ExternalLink>
               </div>
@@ -540,10 +535,7 @@ export function NftDetailExperience({
                         value={transferAddress}
                         onChange={(event) => setTransferAddress(event.target.value)}
                       />
-                      <Button
-                        disabled={isMutating || !canTransact}
-                        onClick={() => void runMutation(transferToken)}
-                      >
+                      <Button disabled={isMutating || !canTransact} onClick={() => void runMutation(transferToken)}>
                         Send
                       </Button>
                     </div>
@@ -560,10 +552,7 @@ export function NftDetailExperience({
                         value={tokenName}
                         onChange={(event) => setTokenName(event.target.value)}
                       />
-                      <Button
-                        disabled={isMutating || !canTransact}
-                        onClick={() => void runMutation(renameToken)}
-                      >
+                      <Button disabled={isMutating || !canTransact} onClick={() => void runMutation(renameToken)}>
                         Update
                       </Button>
                     </div>
@@ -578,8 +567,7 @@ export function NftDetailExperience({
                     <ExternalLink href="https://cosmicsignature.com/" className="text-secondary">
                       use this Random Walk NFT in Cosmic Signature
                     </ExternalLink>{" "}
-                    — anchor it for Stellar Selection rewards or attach it once for a 50% ETH
-                    gesture discount.
+                    — anchor it for Stellar Selection rewards or attach it once for a 50% ETH gesture discount.
                   </p>
                 </div>
               ) : (
@@ -714,14 +702,17 @@ export function NftDetailExperience({
         </TabsContent>
       </Tabs>
 
-      <Dialog open={Boolean(modal)} onOpenChange={(open) => {
-        if (!open) {
-          setModal(null);
-          window.scrollTo({ top: 0 });
-        } else {
-          setModal(activeMedia);
-        }
-      }}>
+      <Dialog
+        open={Boolean(modal)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setModal(null);
+            window.scrollTo({ top: 0 });
+          } else {
+            setModal(activeMedia);
+          }
+        }}
+      >
         <DialogContent className="overflow-hidden p-0">
           <DialogTitle className="sr-only">
             {modal ? `${mediaLabels[modal]} preview for ${formatId(nft.id)}` : `Preview for ${formatId(nft.id)}`}
@@ -736,7 +727,8 @@ export function NftDetailExperience({
               unoptimized
             />
           ) : modalSource ? (
-            <video autoPlay controls className="max-h-[80vh] w-full" src={modalSource} />
+            /* The films are silent renders (no audio track), so captions do not apply. */
+            <video autoPlay controls muted playsInline className="max-h-[80vh] w-full" src={modalSource} />
           ) : null}
         </DialogContent>
       </Dialog>

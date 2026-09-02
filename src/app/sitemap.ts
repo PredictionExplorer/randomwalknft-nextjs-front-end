@@ -43,17 +43,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { NFT_ADDRESS } = await getAppConfig();
     const totalSupply = Number(
-      (await publicClient.readContract({
+      await publicClient.readContract({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: "totalSupply"
-      })) as bigint
+      })
     );
 
     detailEntries = Array.from({ length: totalSupply }, (_, tokenId) => ({
       url: `${SITE_URL}/detail/${tokenId}`,
-      changeFrequency:
-        tokenId >= totalSupply - RECENT_TOKEN_WINDOW ? ("weekly" as const) : ("monthly" as const),
+      changeFrequency: tokenId >= totalSupply - RECENT_TOKEN_WINDOW ? ("weekly" as const) : ("monthly" as const),
       priority: 0.5,
       images: [createAssetUrls(tokenId).blackImage]
     }));

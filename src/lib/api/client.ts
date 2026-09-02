@@ -2,10 +2,7 @@ import "server-only";
 
 import type { ZodSchema } from "zod";
 
-import {
-  isFetchConnectionError,
-  rethrowAsBackendUnavailableIfConnectionFailed
-} from "@/lib/api/backend-errors";
+import { isFetchConnectionError, rethrowAsBackendUnavailableIfConnectionFailed } from "@/lib/api/backend-errors";
 import { BACKEND_RANDOMWALK_API_PREFIX, getBaseConfig, REVALIDATE_MEDIUM } from "@/lib/config";
 import { getApiBaseUrls, markServerDown, rebaseUrl } from "@/lib/server-rotation";
 
@@ -13,10 +10,7 @@ type FetchInit = RequestInit & {
   revalidate?: number;
 };
 
-async function parseResponse<T>(
-  response: Response,
-  schema?: ZodSchema<T>
-): Promise<T> {
+async function parseResponse<T>(response: Response, schema?: ZodSchema<T>): Promise<T> {
   if (!response.ok) {
     throw new Error(`Upstream request failed: ${response.status} ${response.statusText}`);
   }
@@ -93,24 +87,12 @@ function buildInit(init: FetchInit): RequestInit {
   };
 }
 
-export async function fetchApi<T>(
-  path: string,
-  init: FetchInit = {},
-  schema?: ZodSchema<T>
-) {
-  const response = await fetchWithFailover(
-    (origin) => `${origin}/${path.replace(/^\/+/, "")}`,
-    buildInit(init),
-    true
-  );
+export async function fetchApi<T>(path: string, init: FetchInit = {}, schema?: ZodSchema<T>) {
+  const response = await fetchWithFailover((origin) => `${origin}/${path.replace(/^\/+/, "")}`, buildInit(init), true);
   return parseResponse(response, schema);
 }
 
-export async function fetchRwalk<T>(
-  path: string,
-  init: FetchInit = {},
-  schema?: ZodSchema<T>
-) {
+export async function fetchRwalk<T>(path: string, init: FetchInit = {}, schema?: ZodSchema<T>) {
   const response = await fetchWithFailover(
     (origin) => `${origin}${BACKEND_RANDOMWALK_API_PREFIX}/${path.replace(/^\/+/, "")}`,
     buildInit(init),

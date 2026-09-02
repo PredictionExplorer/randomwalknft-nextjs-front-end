@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 export const TEST_ACCOUNT = "0x1234567890abcdef1234567890abcdef12345678";
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- global augmentation requires declaration merging
   interface Window {
     __mockWallet: {
       disconnect(): void;
@@ -142,9 +143,7 @@ export async function installMockWallet(
               throw error;
             }
             const nextChainId = (
-              Array.isArray(params)
-                ? (params[0] as { chainId?: string } | undefined)?.chainId
-                : undefined
+              Array.isArray(params) ? (params[0] as { chainId?: string } | undefined)?.chainId : undefined
             )?.toLowerCase();
             if (nextChainId) {
               currentChainId = nextChainId;
@@ -155,9 +154,7 @@ export async function installMockWallet(
           if (method === "wallet_addEthereumChain") {
             targetChainAdded = true;
             const nextChainId = (
-              Array.isArray(params)
-                ? (params[0] as { chainId?: string } | undefined)?.chainId
-                : undefined
+              Array.isArray(params) ? (params[0] as { chainId?: string } | undefined)?.chainId : undefined
             )?.toLowerCase();
             if (nextChainId) {
               currentChainId = nextChainId;

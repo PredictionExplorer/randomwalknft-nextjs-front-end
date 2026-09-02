@@ -26,12 +26,7 @@ const INSUFFICIENT_FUNDS_PATTERNS = [
   "plus gas"
 ];
 
-const NETWORK_PATTERNS = [
-  "network changed",
-  "chain mismatch",
-  "wrong network",
-  "disconnected from chain"
-];
+const NETWORK_PATTERNS = ["network changed", "chain mismatch", "wrong network", "disconnected from chain"];
 
 function matchesAny(text: string, patterns: string[]) {
   const lower = text.toLowerCase();
@@ -141,10 +136,9 @@ export function classifyWalletError(error: unknown): WalletError {
 
   if (raw && matchesAny(raw, INSUFFICIENT_FUNDS_PATTERNS)) {
     return {
-      message:
-        raw.toLowerCase().includes("plus gas")
-          ? raw
-          : "Insufficient funds to cover the transaction value and gas.",
+      message: raw.toLowerCase().includes("plus gas")
+        ? raw
+        : "Insufficient funds to cover the transaction value and gas.",
       severity: "warning"
     };
   }

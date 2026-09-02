@@ -24,12 +24,8 @@ describe("utils", () => {
 
   it("creates absolute asset urls from derived ASSET_BASE_URL (NEXT_PUBLIC_API_BASE_URL + /images/randomwalk)", () => {
     const urls = createAssetUrls(12);
-    expect(urls.blackThumb).toBe(
-      "https://api.test.example.com/images/randomwalk/000012_black_thumb.jpg"
-    );
-    expect(urls.whiteSingleVideo).toBe(
-      "https://api.test.example.com/images/randomwalk/000012_white_single.mp4"
-    );
+    expect(urls.blackThumb).toBe("https://api.test.example.com/images/randomwalk/000012_black_thumb.jpg");
+    expect(urls.whiteSingleVideo).toBe("https://api.test.example.com/images/randomwalk/000012_white_single.mp4");
   });
 
   it("selects the requested themed asset", () => {

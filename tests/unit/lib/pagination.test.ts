@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  clampPage,
-  getDescendingTokenPage,
-  getPaginationWindow,
-  paginateItems
-} from "@/lib/pagination";
+import { clampPage, getDescendingTokenPage, getPaginationWindow, paginateItems } from "@/lib/pagination";
 
 describe("pagination helpers", () => {
   it("clamps invalid page values", () => {

@@ -5,9 +5,7 @@ import { NftCard } from "@/components/nft/nft-card";
 
 describe("NftCard extended branches", () => {
   it("renders in compact mode with square aspect ratio", () => {
-    const { container } = render(
-      <NftCard id={1} image="/test.jpg" href="/detail/1" compact />
-    );
+    const { container } = render(<NftCard id={1} image="/test.jpg" href="/detail/1" compact />);
     expect(container.querySelector(".aspect-square")).toBeInTheDocument();
   });
 
@@ -22,9 +20,9 @@ describe("NftCard extended branches", () => {
   });
 
   it("renders non-compact mode with landscape aspect ratio", () => {
-    const { container } = render(
-      <NftCard id={1} image="/test.jpg" href="/detail/1" />
-    );
-    expect(container.querySelector("[class*='aspect-\\[1.6\\/1\\]']") || container.querySelector("[class*='aspect-']")).toBeInTheDocument();
+    const { container } = render(<NftCard id={1} image="/test.jpg" href="/detail/1" />);
+    expect(
+      container.querySelector("[class*='aspect-\\[1.6\\/1\\]']") || container.querySelector("[class*='aspect-']")
+    ).toBeInTheDocument();
   });
 });

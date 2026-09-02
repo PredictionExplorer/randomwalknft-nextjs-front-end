@@ -71,13 +71,7 @@ export function WalletLifecycleBridge() {
     } finally {
       recoveryInFlight.current = false;
     }
-  }, [
-    connectors,
-    isConnected,
-    isConnecting,
-    isReconnecting,
-    reconnectAsync
-  ]);
+  }, [connectors, isConnected, isConnecting, isReconnecting, reconnectAsync]);
 
   useEffect(() => {
     function onVisibilityChange() {

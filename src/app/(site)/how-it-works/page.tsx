@@ -36,9 +36,7 @@ export default async function HowItWorksPage() {
   const vault = await getVaultState();
   const launchedYearsAgo = new Date().getUTCFullYear() - 2021;
   const ratio =
-    vault?.mintPriceEth && vault.mintPriceEth > 0
-      ? Math.round(vault.prizeEth / vault.mintPriceEth)
-      : undefined;
+    vault?.mintPriceEth && vault.mintPriceEth > 0 ? Math.round(vault.prizeEth / vault.mintPriceEth) : undefined;
 
   return (
     <PageShell className="space-y-16 py-16">
@@ -61,56 +59,42 @@ export default async function HowItWorksPage() {
         }}
       />
       <div className="space-y-8">
-        <Breadcrumbs
-          items={[
-            { href: "/", label: "Home" },
-            { label: "How It Works" }
-          ]}
-        />
+        <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "How It Works" }]} />
         <div className="max-w-3xl space-y-5">
           <p className="text-xs uppercase tracking-[0.32em] text-secondary/80">The full story</p>
-          <h1 className="text-4xl font-semibold tracking-[0.08em] sm:text-5xl">
-            HOW RANDOM WALK NFT WORKS
-          </h1>
+          <h1 className="text-4xl font-semibold tracking-[0.08em] sm:text-5xl">HOW RANDOM WALK NFT WORKS</h1>
           <p className="text-lg leading-8 text-muted-foreground">
-            Random Walk NFT is a generative art collection and an on-chain game, live on Arbitrum
-            since 2021. Minting creates a unique seed that becomes six artworks, and every mint
-            feeds an ETH vault that pays the last minter standing. This page explains the whole
-            system — and how to verify every claim yourself.
+            Random Walk NFT is a generative art collection and an on-chain game, live on Arbitrum since 2021. Minting
+            creates a unique seed that becomes six artworks, and every mint feeds an ETH vault that pays the last minter
+            standing. This page explains the whole system — and how to verify every claim yourself.
           </p>
         </div>
       </div>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">
-          What exactly is minted?
-        </h2>
+        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">What exactly is minted?</h2>
         <p className="text-base leading-8 text-muted-foreground">
-          When you mint, the contract records a fresh 32-byte seed against your token id — data
-          that could not be known before the transaction confirmed. That seed is the artwork&apos;s
-          DNA. From it, an open-source generator produces a high-resolution still image and two
-          films (a single walker and a triple walker), each rendered on black and on white — six
-          works per token. The token itself carries the seed, the provenance, on-chain naming
+          When you mint, the contract records a fresh 32-byte seed against your token id — data that could not be known
+          before the transaction confirmed. That seed is the artwork&apos;s DNA. From it, an open-source generator
+          produces a high-resolution still image and two films (a single walker and a triple walker), each rendered on
+          black and on white — six works per token. The token itself carries the seed, the provenance, on-chain naming
           rights, and a place in the Vault game.
         </p>
       </section>
 
       <section className="grid items-start gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">
-            How does a seed become art?
-          </h2>
+          <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">How does a seed become art?</h2>
           <p className="text-base leading-8 text-muted-foreground">
-            The generator hashes the seed with SHA3-256, over and over, producing an endless stream
-            of random bits. Two bits at a time choose a direction — right, left, up, or down — and
-            the path walks millions of steps until it fills a 1.6:1 canvas. In parallel, three color
-            channels each take a small random step per walk step; after normalization they become
-            the RGB color of every point. Shape and palette are therefore born from the same
+            The generator hashes the seed with SHA3-256, over and over, producing an endless stream of random bits. Two
+            bits at a time choose a direction — right, left, up, or down — and the path walks millions of steps until it
+            fills a 1.6:1 canvas. In parallel, three color channels each take a small random step per walk step; after
+            normalization they become the RGB color of every point. Shape and palette are therefore born from the same
             randomness — no human curates the outcome.
           </p>
           <p className="text-base leading-8 text-muted-foreground">
-            The canvas on this page runs the identical algorithm in your browser at miniature
-            resolution, on a fresh random seed each time.
+            The canvas on this page runs the identical algorithm in your browser at miniature resolution, on a fresh
+            random seed each time.
           </p>
           <Button asChild variant="outline">
             <Link href="/code">Read the full generator source</Link>
@@ -120,22 +104,20 @@ export default async function HowItWorksPage() {
       </section>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">
-          How does the Vault game work?
-        </h2>
+        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">How does the Vault game work?</h2>
         <p className="text-base leading-8 text-muted-foreground">
-          Every wei paid for minting goes into the contract — the creators take nothing. The most
-          recent minter holds the vault&apos;s only key. If 30 days pass without a new mint, the
-          keyholder may withdraw half of everything inside; the other half stays and seeds the next
-          round. Any new mint resets the clock to 30 days and takes the key.
+          Every wei paid for minting goes into the contract — the creators take nothing. The most recent minter holds
+          the vault&apos;s only key. If 30 days pass without a new mint, the keyholder may withdraw half of everything
+          inside; the other half stays and seeds the next round. Any new mint resets the clock to 30 days and takes the
+          key.
         </p>
         <p className="text-base leading-8 text-muted-foreground">
-          Because the pool accumulates every mint while the price rises only gradually, the prize
-          stays several hundred times the current mint price.
+          Because the pool accumulates every mint while the price rises only gradually, the prize stays several hundred
+          times the current mint price.
           {vault && ratio
             ? ` As of today the vault holds ${vault.prizeEth.toFixed(2)} ETH against a mint price of ${vault.mintPriceEth?.toFixed(4)} ETH — a ratio of about ${ratio}x.`
             : ""}{" "}
-          {vault && vault.numWithdrawals === 0
+          {vault?.numWithdrawals === 0
             ? `In ${launchedYearsAgo} years and ${vault.mintedCount.toLocaleString()} mints, the clock has never reached zero — the vault has never been opened.`
             : ""}
         </p>
@@ -145,22 +127,17 @@ export default async function HowItWorksPage() {
       </section>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">
-          How does the mint price grow?
-        </h2>
+        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">How does the mint price grow?</h2>
         <p className="text-base leading-8 text-muted-foreground">
-          The price increases about 0.1% with every mint — a factor of 1.001, which compounds to a
-          doubling roughly every 693 mints. There is no supply cap; the rising price is the only
-          limit. This curve is why the game must eventually end: at some point minting becomes so
-          expensive that nobody dethrones the keyholder for 30 days, and the vault opens for the
-          last minter.
+          The price increases about 0.1% with every mint — a factor of 1.001, which compounds to a doubling roughly
+          every 693 mints. There is no supply cap; the rising price is the only limit. This curve is why the game must
+          eventually end: at some point minting becomes so expensive that nobody dethrones the keyholder for 30 days,
+          and the vault opens for the last minter.
         </p>
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">
-          Why can&apos;t the rules change?
-        </h2>
+        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">Why can&apos;t the rules change?</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {[
             {
@@ -206,28 +183,24 @@ export default async function HowItWorksPage() {
           >
             Axiom Zero
           </ExternalLink>
-          , or play the Vault game by minting. Beyond this site, Random Walk NFTs have live utility
-          in{" "}
+          , or play the Vault game by minting. Beyond this site, Random Walk NFTs have live utility in{" "}
           <ExternalLink href={COSMIC_SIGNATURE_URL} className="text-secondary transition hover:text-primary">
             Cosmic Signature
           </ExternalLink>
-          , a related on-chain art protocol by the same team: anchor a token there — without selling
-          it — to become eligible for Stellar Selection rewards (1,000 CST and a Cosmic Signature
-          NFT), or attach an unused token to one ETH gesture for a one-time 50% discount.
+          , a related on-chain art protocol by the same team: anchor a token there — without selling it — to become
+          eligible for Stellar Selection rewards (1,000 CST and a Cosmic Signature NFT), or attach an unused token to
+          one ETH gesture for a one-time 50% discount.
         </p>
       </section>
 
       <section className="max-w-3xl space-y-4">
-        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">
-          How can I verify all of this myself?
-        </h2>
+        <h2 className="text-2xl font-semibold tracking-[0.06em] sm:text-3xl">How can I verify all of this myself?</h2>
         <p className="text-base leading-8 text-muted-foreground">
           Don&apos;t trust this page — check it. The NFT contract is verified at{" "}
           <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="break-all text-secondary">
             {NFT_ADDRESS}
           </ExternalLink>{" "}
-          on Arbiscan, where every rule described here is readable in the source. The contract
-          repository is public on{" "}
+          on Arbiscan, where every rule described here is readable in the source. The contract repository is public on{" "}
           <ExternalLink href={CONTRACTS_GITHUB_URL} className="text-secondary">
             GitHub
           </ExternalLink>

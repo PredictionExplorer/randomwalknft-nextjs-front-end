@@ -35,7 +35,7 @@ const kelson = localFont({
   display: "swap"
 });
 
-export async function buildRootMetadata(): Promise<Metadata> {
+export function buildRootMetadata(): Metadata {
   const { SITE_DESCRIPTION, SITE_NAME, SITE_URL } = getBaseConfig();
   return {
     metadataBase: new URL(SITE_URL),
@@ -84,10 +84,7 @@ export async function RootLayoutShell({ children }: Readonly<{ children: React.R
         >
           Skip to content
         </a>
-        <AppProviders
-          initialState={initialState}
-          contracts={{ NFT_ADDRESS }}
-        >
+        <AppProviders initialState={initialState} contracts={{ NFT_ADDRESS }}>
           <div className="flex min-h-screen flex-col">
             <SiteHeader />
             <main id="main-content" className="flex-1">

@@ -49,15 +49,11 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 
 describe("CompareExperience", () => {
   beforeEach(() => {
-    signMessageAsync.mockResolvedValue(("0x" + "11".repeat(65)) as `0x${string}`);
+    signMessageAsync.mockResolvedValue("0x" + "11".repeat(65));
   });
 
   it("renders loading skeleton initially", () => {
-    server.use(
-      http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [1, 2], totalCount: 42, signNonce: "n" })
-      )
-    );
+    server.use(http.get("/api/compare", () => HttpResponse.json({ tokenIds: [1, 2], totalCount: 42, signNonce: "n" })));
 
     render(<CompareExperience />, { wrapper: Wrapper });
     expect(screen.getByText("WHICH")).toBeInTheDocument();
@@ -65,9 +61,7 @@ describe("CompareExperience", () => {
 
   it("renders two pick buttons after data loads", async () => {
     server.use(
-      http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [10, 20], totalCount: 5, signNonce: "n" })
-      )
+      http.get("/api/compare", () => HttpResponse.json({ tokenIds: [10, 20], totalCount: 5, signNonce: "n" }))
     );
 
     render(<CompareExperience />, { wrapper: Wrapper });
@@ -81,9 +75,7 @@ describe("CompareExperience", () => {
     let votedPayload: unknown = null;
 
     server.use(
-      http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [3, 7], totalCount: 10, signNonce: "nonce-xyz" })
-      ),
+      http.get("/api/compare", () => HttpResponse.json({ tokenIds: [3, 7], totalCount: 10, signNonce: "nonce-xyz" })),
       http.post("/api/compare", async ({ request }) => {
         votedPayload = await request.json();
         return HttpResponse.json({ result: "success" });
@@ -107,11 +99,7 @@ describe("CompareExperience", () => {
   });
 
   it("returns null when tokenIds array is empty", async () => {
-    server.use(
-      http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [], totalCount: 0, signNonce: "n" })
-      )
-    );
+    server.use(http.get("/api/compare", () => HttpResponse.json({ tokenIds: [], totalCount: 0, signNonce: "n" })));
 
     const { container } = render(<CompareExperience />, { wrapper: Wrapper });
     await waitFor(() => {
@@ -121,12 +109,8 @@ describe("CompareExperience", () => {
 
   it("shows error toast when vote fails", async () => {
     server.use(
-      http.get("/api/compare", () =>
-        HttpResponse.json({ tokenIds: [5, 8], totalCount: 3, signNonce: "n" })
-      ),
-      http.post("/api/compare", () =>
-        new HttpResponse(null, { status: 500 })
-      )
+      http.get("/api/compare", () => HttpResponse.json({ tokenIds: [5, 8], totalCount: 3, signNonce: "n" })),
+      http.post("/api/compare", () => new HttpResponse(null, { status: 500 }))
     );
 
     const user = userEvent.setup();
@@ -141,11 +125,7 @@ describe("CompareExperience", () => {
   });
 
   it("throws when fetch response is not ok", async () => {
-    server.use(
-      http.get("/api/compare", () =>
-        new HttpResponse(null, { status: 500 })
-      )
-    );
+    server.use(http.get("/api/compare", () => new HttpResponse(null, { status: 500 })));
 
     render(<CompareExperience />, { wrapper: Wrapper });
     expect(screen.getByText("WHICH")).toBeInTheDocument();

@@ -25,23 +25,15 @@ describe("MetaMask AsyncStorage web adapter", () => {
       ["chain", "42161"],
       ["missing", null]
     ]);
-    expect(new Set(await AsyncStorage.getAllKeys())).toEqual(
-      new Set(["session", "chain"])
-    );
+    expect(new Set(await AsyncStorage.getAllKeys())).toEqual(new Set(["session", "chain"]));
 
     await AsyncStorage.multiRemove(["session", "chain"]);
     expect(await AsyncStorage.getAllKeys()).toEqual([]);
   });
 
   it("deep-merges JSON objects", async () => {
-    await AsyncStorage.setItem(
-      "state",
-      JSON.stringify({ session: { account: "0x1", chainId: 1 }, keep: true })
-    );
-    await AsyncStorage.mergeItem(
-      "state",
-      JSON.stringify({ session: { chainId: 42161 }, added: "yes" })
-    );
+    await AsyncStorage.setItem("state", JSON.stringify({ session: { account: "0x1", chainId: 1 }, keep: true }));
+    await AsyncStorage.mergeItem("state", JSON.stringify({ session: { chainId: 42161 }, added: "yes" }));
 
     expect(JSON.parse((await AsyncStorage.getItem("state")) ?? "{}")).toEqual({
       session: { account: "0x1", chainId: 42161 },
@@ -62,11 +54,9 @@ describe("MetaMask AsyncStorage web adapter", () => {
 
   it("falls back to tab memory when browser storage rejects writes", async () => {
     window.localStorage.setItem("randomwalk:metamask:session", "stale");
-    const setItem = vi
-      .spyOn(Storage.prototype, "setItem")
-      .mockImplementation(() => {
-        throw new DOMException("Storage unavailable", "QuotaExceededError");
-      });
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage unavailable", "QuotaExceededError");
+    });
 
     await AsyncStorage.setItem("session", "memory-only");
 

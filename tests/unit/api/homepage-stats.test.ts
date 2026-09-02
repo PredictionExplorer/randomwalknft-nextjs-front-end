@@ -37,9 +37,7 @@ function mockHomepageContracts(totalSupply: bigint, mintPrice = 10_000_000_000_0
 }
 
 function mockRatingOrder(ids: number[]) {
-  server.use(
-    http.get(`${API_BASE_URL}/api/randomwalk/rating_order`, () => HttpResponse.json(ids))
-  );
+  server.use(http.get(`${API_BASE_URL}/api/randomwalk/rating_order`, () => HttpResponse.json(ids)));
 }
 
 describe("getHomepageStats", () => {

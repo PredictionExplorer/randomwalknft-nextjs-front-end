@@ -21,21 +21,12 @@ type ConnectWalletButtonProps = {
   onBeforeOpen?: () => void;
 };
 
-function RainbowKitConnectWalletButton({
-  onBeforeOpen
-}: ConnectWalletButtonProps) {
+function RainbowKitConnectWalletButton({ onBeforeOpen }: ConnectWalletButtonProps) {
   const { disconnect } = useDisconnect();
 
   return (
     <ConnectButton.Custom>
-      {({
-        account,
-        chain,
-        mounted,
-        openAccountModal,
-        openChainModal,
-        openConnectModal
-      }) => {
+      {({ account, chain, mounted, openAccountModal, openChainModal, openConnectModal }) => {
         const ready = mounted;
         const connected = Boolean(ready && account && chain);
 
@@ -80,7 +71,7 @@ function RainbowKitConnectWalletButton({
                   Switch network
                 </>
               ) : (
-                currentChain.name ?? getChainDisplayName()
+                (currentChain.name ?? getChainDisplayName())
               )}
             </Button>
 

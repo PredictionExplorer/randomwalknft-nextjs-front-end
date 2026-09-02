@@ -7,7 +7,7 @@ describe("analytics", () => {
     window.dataLayer = [];
     trackEvent("transaction_submitted", { flow: "mint" });
     expect(window.dataLayer).toHaveLength(1);
-    expect(window.dataLayer![0]).toMatchObject({ event: "transaction_submitted", flow: "mint" });
+    expect(window.dataLayer[0]).toMatchObject({ event: "transaction_submitted", flow: "mint" });
     delete window.dataLayer;
   });
 
@@ -27,7 +27,7 @@ describe("analytics", () => {
   it("trackWebVital calls trackEvent with metric data", () => {
     window.dataLayer = [];
     trackWebVital("LCP", 2.567, "good");
-    expect(window.dataLayer![0]).toMatchObject({
+    expect(window.dataLayer[0]).toMatchObject({
       event: "web_vital",
       metric: "LCP",
       value: 2.57,

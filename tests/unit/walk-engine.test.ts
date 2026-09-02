@@ -52,9 +52,7 @@ describe("walk-engine", () => {
   it("produces different walks for different seeds", () => {
     const a = generateWalk(randomSeedHex(), { vert: 80 });
     const b = generateWalk(randomSeedHex(), { vert: 80 });
-    expect(a.pointCount === b.pointCount && a.xs[100] === b.xs[100] && a.xs[500] === b.xs[500]).toBe(
-      false
-    );
+    expect(a.pointCount === b.pointCount && a.xs[100] === b.xs[100] && a.xs[500] === b.xs[500]).toBe(false);
   });
 
   it("normalizes every color channel to the full byte range", () => {

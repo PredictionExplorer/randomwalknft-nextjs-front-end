@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 async function fetchRandomTokenId(exclude?: number): Promise<number | null> {
-  const url =
-    exclude !== undefined ? `/api/random-token?exclude=${exclude}` : "/api/random-token";
+  const url = exclude !== undefined ? `/api/random-token?exclude=${exclude}` : "/api/random-token";
 
   const response = await fetch(url);
   if (!response.ok) return null;
@@ -27,10 +26,7 @@ function createInitialState(initialTokenId: number | undefined): TokenHistorySta
   };
 }
 
-function resolveHistoryState(
-  state: TokenHistoryState,
-  initialTokenId: number | undefined
-): TokenHistoryState {
+function resolveHistoryState(state: TokenHistoryState, initialTokenId: number | undefined): TokenHistoryState {
   if (state.sourceInitialTokenId === initialTokenId) {
     return state;
   }
@@ -40,9 +36,7 @@ function resolveHistoryState(
 
 /** Random image passes `initialTokenId`; random video omits it and fetches via /api/random-token. */
 export function useRandomTokenHistory(initialTokenId?: number) {
-  const [storedState, setStoredState] = useState<TokenHistoryState>(() =>
-    createInitialState(initialTokenId)
-  );
+  const [storedState, setStoredState] = useState<TokenHistoryState>(() => createInitialState(initialTokenId));
   const { history, index } = resolveHistoryState(storedState, initialTokenId);
 
   useEffect(() => {

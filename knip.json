@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "tests/e2e/**/*.ts",
+    "tests/setup/**/*.{ts,tsx}",
+    "tests/unit/**/*.test.{ts,tsx}",
+    "src/components/ui/*.tsx"
+  ],
+  "project": ["src/**/*.{ts,tsx,css}", "tests/**/*.{ts,tsx}"],
+  "ignore": ["src/generated/**"],
+  "ignoreDependencies": ["tailwindcss"]
+}

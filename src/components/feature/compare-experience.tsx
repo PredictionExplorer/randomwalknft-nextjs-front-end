@@ -29,10 +29,7 @@ const compareResponseSchema = z.object({
 
 type CompareResponse = z.infer<typeof compareResponseSchema>;
 
-async function getComparePair(opts: {
-  voter?: string;
-  skipPairFilter?: boolean;
-}): Promise<CompareResponse> {
+async function getComparePair(opts: { voter?: string; skipPairFilter?: boolean }): Promise<CompareResponse> {
   const params = new URLSearchParams();
   if (opts.voter) {
     params.set("voter", opts.voter);
@@ -70,7 +67,7 @@ async function submitVote(payload: {
     let message = "Vote failed.";
     try {
       const body: unknown = await response.json();
-      if (body && typeof body === "object" && "error" in body && typeof (body as { error: unknown }).error === "string") {
+      if (body && typeof body === "object" && "error" in body && typeof body.error === "string") {
         message = (body as { error: string }).error;
       }
     } catch {
@@ -151,13 +148,7 @@ export function CompareExperience() {
   if (pairQuery.isPending || !pairQuery.data) {
     return (
       <PageShell className="space-y-8 py-16">
-        <PageHeading
-          title={[
-            { text: "WHICH" },
-            { text: "NFT", tone: "primary" },
-            { text: "IS MORE BEAUTIFUL?" }
-          ]}
-        />
+        <PageHeading title={[{ text: "WHICH" }, { text: "NFT", tone: "primary" }, { text: "IS MORE BEAUTIFUL?" }]} />
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-4">
             <Skeleton className="aspect-square w-full" />
@@ -182,13 +173,7 @@ export function CompareExperience() {
 
   return (
     <PageShell className="space-y-8 py-16">
-      <PageHeading
-        title={[
-          { text: "WHICH" },
-          { text: "NFT", tone: "primary" },
-          { text: "IS MORE BEAUTIFUL?" }
-        ]}
-      />
+      <PageHeading title={[{ text: "WHICH" }, { text: "NFT", tone: "primary" }, { text: "IS MORE BEAUTIFUL?" }]} />
 
       <Badge variant="secondary">{pairQuery.data.totalCount} votes</Badge>
 
@@ -209,8 +194,8 @@ export function CompareExperience() {
       {votingBlocked ? (
         <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4 text-sm">
           <p className="text-muted-foreground">
-            We couldn&apos;t find a pair you haven&apos;t voted on yet (after many random draws). You can load a
-            random pair anyway — voting will fail if you already chose between these two.
+            We couldn&apos;t find a pair you haven&apos;t voted on yet (after many random draws). You can load a random
+            pair anyway — voting will fail if you already chose between these two.
           </p>
           <Button
             type="button"

@@ -18,7 +18,11 @@ export function MyNftsView() {
   const { NFT_ADDRESS } = useContracts();
   const mounted = useMounted();
   const { address, isReady } = useWalletStatus();
-  const { data, error: readError, isError: readFailed } = useReadContract({
+  const {
+    data,
+    error: readError,
+    isError: readFailed
+  } = useReadContract({
     address: NFT_ADDRESS,
     abi: nftAbi,
     functionName: "walletOfOwner",

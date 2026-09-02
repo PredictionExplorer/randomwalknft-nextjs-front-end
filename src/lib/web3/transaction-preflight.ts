@@ -111,8 +111,7 @@ export async function prepareContractWrite<
   TFunctionName extends ContractFunctionName<TAbi, "nonpayable" | "payable">
 >({ publicClient, account, value = 0n, ...request }: PrepareContractWriteParams<TAbi, TFunctionName>) {
   const feeFields = await estimateBufferedTransactionFees(publicClient);
-  const feePerGasForBalance =
-    "gasPrice" in feeFields ? feeFields.gasPrice : feeFields.maxFeePerGas;
+  const feePerGasForBalance = "gasPrice" in feeFields ? feeFields.gasPrice : feeFields.maxFeePerGas;
 
   const gasEstimate = await publicClient.estimateContractGas({
     ...request,

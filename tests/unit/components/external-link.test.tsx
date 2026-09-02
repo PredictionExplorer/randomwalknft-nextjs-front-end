@@ -13,15 +13,15 @@ describe("ExternalLink", () => {
 
   it("shows icon when showIcon is true", () => {
     const { container } = render(
-      <ExternalLink href="https://example.com" showIcon>Test</ExternalLink>
+      <ExternalLink href="https://example.com" showIcon>
+        Test
+      </ExternalLink>
     );
     expect(container.querySelector("svg")).toBeInTheDocument();
   });
 
   it("hides icon by default", () => {
-    const { container } = render(
-      <ExternalLink href="https://example.com">Test</ExternalLink>
-    );
+    const { container } = render(<ExternalLink href="https://example.com">Test</ExternalLink>);
     expect(container.querySelector("svg")).not.toBeInTheDocument();
   });
 });

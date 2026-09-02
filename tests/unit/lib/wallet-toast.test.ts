@@ -28,9 +28,7 @@ describe("showWalletError", () => {
 
   it("shows warning toast for network errors", () => {
     showWalletError(new Error("Underlying network changed"));
-    expect(toast.warning).toHaveBeenCalledWith(
-      "Network changed. Please switch back to Arbitrum One and try again."
-    );
+    expect(toast.warning).toHaveBeenCalledWith("Network changed. Please switch back to Arbitrum One and try again.");
   });
 
   it("shows error toast for unknown errors", () => {

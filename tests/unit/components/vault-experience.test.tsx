@@ -7,17 +7,15 @@ import { ContractsProvider } from "@/components/providers/contracts-context";
 import type { VaultState } from "@/lib/types";
 
 const NFT_ADDRESS = "0x895a6F444BE4ba9d124F61DF736605792B35D66b";
-const { prepareContractWrite, walletStatus, writeContractAsync } = vi.hoisted(
-  () => ({
-    prepareContractWrite: vi.fn(),
-    writeContractAsync: vi.fn(),
-    walletStatus: {
-      address: "0x1234567890abcdef1234567890abcdef12345678",
-      canTransact: false,
-      isReady: false
-    }
-  })
-);
+const { prepareContractWrite, walletStatus, writeContractAsync } = vi.hoisted(() => ({
+  prepareContractWrite: vi.fn(),
+  writeContractAsync: vi.fn(),
+  walletStatus: {
+    address: "0x1234567890abcdef1234567890abcdef12345678",
+    canTransact: false,
+    isReady: false
+  }
+}));
 
 vi.mock("wagmi", () => ({
   usePublicClient: () => ({ simulateContract: vi.fn() }),

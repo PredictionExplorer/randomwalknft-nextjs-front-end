@@ -35,12 +35,7 @@ export default function FaqPage() {
           }))
         }}
       />
-      <Breadcrumbs
-        items={[
-          { href: "/", label: "Home" },
-          { label: "FAQ" }
-        ]}
-      />
+      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "FAQ" }]} />
       <PageHeading
         eyebrow="Frequently asked questions"
         title={[{ text: "FAQ", tone: "secondary" }]}
@@ -64,11 +59,17 @@ export default function FaqPage() {
           <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
             <p>Join the community — we are happy to help.</p>
             <p>
-              <ExternalLink href="https://twitter.com/RandomWalkNFT" className="text-secondary underline underline-offset-4">
+              <ExternalLink
+                href="https://twitter.com/RandomWalkNFT"
+                className="text-secondary underline underline-offset-4"
+              >
                 Twitter
               </ExternalLink>
               {" · "}
-              <ExternalLink href="https://discord.gg/bGnPn96Qwt" className="text-secondary underline underline-offset-4">
+              <ExternalLink
+                href="https://discord.gg/bGnPn96Qwt"
+                className="text-secondary underline underline-offset-4"
+              >
                 Discord
               </ExternalLink>
             </p>

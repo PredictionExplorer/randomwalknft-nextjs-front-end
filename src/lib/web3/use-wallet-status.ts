@@ -7,25 +7,11 @@ import { getConfiguredEvmChain } from "@/lib/web3/evm-chain";
 import { WALLET_RESUME_EVENT } from "@/lib/web3/wallet-events";
 
 export function useWalletStatus() {
-  const {
-    address,
-    chain,
-    connector,
-    isConnected,
-    isConnecting,
-    isReconnecting,
-    status
-  } = useAccount();
+  const { address, chain, connector, isConnected, isConnecting, isReconnecting, status } = useAccount();
   const configuredChainId = getConfiguredEvmChain().id;
-  const chainUnsupported = chain
-    ? "unsupported" in chain &&
-      (chain as typeof chain & { unsupported?: boolean }).unsupported === true
-    : false;
-  const isWrongNetwork = Boolean(
-    isConnected && (!chain || chain.id !== configuredChainId || chainUnsupported)
-  );
-  const isReady =
-    isConnected && !isConnecting && !isReconnecting && !isWrongNetwork;
+  const chainUnsupported = (chain as (typeof chain & { unsupported?: boolean }) | undefined)?.unsupported === true;
+  const isWrongNetwork = isConnected && (chain?.id !== configuredChainId || chainUnsupported);
+  const isReady = isConnected && !isConnecting && !isReconnecting && !isWrongNetwork;
   const {
     data: walletClient,
     error: walletClientError,

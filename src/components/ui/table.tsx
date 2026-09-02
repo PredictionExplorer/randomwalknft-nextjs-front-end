@@ -16,17 +16,17 @@ export function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTabl
 
 export function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <tr
-      className={cn("border-b border-border/60 transition-colors hover:bg-white/[0.02]", className)}
-      {...props}
-    />
+    <tr className={cn("border-b border-border/60 transition-colors hover:bg-white/[0.02]", className)} {...props} />
   );
 }
 
 export function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
-      className={cn("px-4 py-3 text-left align-middle text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground", className)}
+      className={cn(
+        "px-4 py-3 text-left align-middle text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground",
+        className
+      )}
       {...props}
     />
   );

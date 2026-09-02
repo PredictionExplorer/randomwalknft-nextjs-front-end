@@ -100,9 +100,7 @@ describe("rebaseUrl", () => {
   it("moves a URL from the failed base onto the current pick", () => {
     const t0 = slotStart(2);
     markServerDown(A, t0);
-    expect(rebaseUrl(`${A}/api/randomwalk/statistics`, [A, B], t0 + 1)).toBe(
-      `${B}/api/randomwalk/statistics`
-    );
+    expect(rebaseUrl(`${A}/api/randomwalk/statistics`, [A, B], t0 + 1)).toBe(`${B}/api/randomwalk/statistics`);
   });
 
   it("returns null for URLs outside the configured bases", () => {

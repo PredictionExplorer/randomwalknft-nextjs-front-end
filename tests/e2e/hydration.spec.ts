@@ -47,9 +47,6 @@ for (const route of pages) {
     // wallet transports that can intentionally keep the network active.
     await page.waitForTimeout(750);
 
-    expect(
-      hydrationErrors,
-      `Hydration errors on ${route}:\n${hydrationErrors.join("\n")}`
-    ).toHaveLength(0);
+    expect(hydrationErrors, `Hydration errors on ${route}:\n${hydrationErrors.join("\n")}`).toHaveLength(0);
   });
 }

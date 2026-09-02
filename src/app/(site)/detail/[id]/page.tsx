@@ -74,13 +74,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   }
 }
 
-export default async function DetailPage({
-  params,
-  searchParams
-}: {
-  params: Params;
-  searchParams: SearchParams;
-}) {
+export default async function DetailPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { SITE_NAME, SITE_URL } = getBaseConfig();
   const { NFT_ADDRESS } = await getAppConfig();
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
@@ -97,11 +91,10 @@ export default async function DetailPage({
   if (!nft) {
     notFound();
   }
-  const initialTheme: AssetTheme =
-    resolvedSearchParams.theme === "white" ? "white" : "black";
+  const initialTheme: AssetTheme = resolvedSearchParams.theme === "white" ? "white" : "black";
   const initialMedia: AssetVariant =
     !nft.isPendingMetadata &&
-      (resolvedSearchParams.media === "singleVideo" || resolvedSearchParams.media === "tripleVideo")
+    (resolvedSearchParams.media === "singleVideo" || resolvedSearchParams.media === "tripleVideo")
       ? resolvedSearchParams.media
       : "image";
 
@@ -166,12 +159,7 @@ export default async function DetailPage({
               })
         }}
       />
-      <NftDetailExperience
-        nft={nft}
-        message={message}
-        initialTheme={initialTheme}
-        initialMedia={initialMedia}
-      />
+      <NftDetailExperience nft={nft} message={message} initialTheme={initialTheme} initialMedia={initialMedia} />
     </>
   );
 }

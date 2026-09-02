@@ -99,9 +99,7 @@ describe("classifyWalletError", () => {
     it("classifies 'network changed' as warning", () => {
       const result = classifyWalletError(new Error("Underlying network changed"));
       expect(result.severity).toBe("warning");
-      expect(result.message).toBe(
-        "Network changed. Please switch back to Arbitrum One and try again."
-      );
+      expect(result.message).toBe("Network changed. Please switch back to Arbitrum One and try again.");
     });
 
     it("classifies 'chain mismatch' as warning", () => {
@@ -131,9 +129,7 @@ describe("classifyWalletError", () => {
 
     it("explains disconnected and missing-chain errors", () => {
       expect(classifyWalletError({ code: 4900 }).message).toMatch(/disconnected/i);
-      expect(classifyWalletError({ code: 4902 }).message).toMatch(
-        /Arbitrum One is not available/i
-      );
+      expect(classifyWalletError({ code: 4902 }).message).toMatch(/Arbitrum One is not available/i);
     });
   });
 

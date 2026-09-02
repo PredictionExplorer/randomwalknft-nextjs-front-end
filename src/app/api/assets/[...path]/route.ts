@@ -12,7 +12,7 @@ function isAllowedFile(path: string) {
 }
 
 function createImagePlaceholder(fileName: string, includeBody: boolean) {
-  const match = fileName.match(/^(\d{6})_(black|white)_(thumb\.jpg|\.png)$/);
+  const match = /^(\d{6})_(black|white)_(thumb\.jpg|\.png)$/.exec(fileName);
 
   if (!match) {
     return null;
@@ -49,10 +49,7 @@ function createImagePlaceholder(fileName: string, includeBody: boolean) {
   });
 }
 
-async function handleAssetRequest(
-  method: "GET" | "HEAD",
-  { params }: { params: Promise<{ path: string[] }> }
-) {
+async function handleAssetRequest(method: "GET" | "HEAD", { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
   const fileName = path.join("/");
 
@@ -66,15 +63,12 @@ async function handleAssetRequest(
 
   let upstream: Response;
   try {
-    upstream = await fetch(
-      url,
-      isVideo
-        ? { cache: "no-store", method }
-        : { next: { revalidate: 3600 }, method }
-    );
+    upstream = await fetch(url, isVideo ? { cache: "no-store", method } : { next: { revalidate: 3600 }, method });
   } catch {
     return NextResponse.json(
-      { error: "Asset server unreachable (check NEXT_PUBLIC_API_BASE_URL and that the host serves /images/randomwalk)." },
+      {
+        error: "Asset server unreachable (check NEXT_PUBLIC_API_BASE_URL and that the host serves /images/randomwalk)."
+      },
       { status: 502 }
     );
   }
@@ -105,16 +99,10 @@ async function handleAssetRequest(
   });
 }
 
-export async function GET(
-  _: Request,
-  context: { params: Promise<{ path: string[] }> }
-) {
+export async function GET(_: Request, context: { params: Promise<{ path: string[] }> }) {
   return handleAssetRequest("GET", context);
 }
 
-export async function HEAD(
-  _: Request,
-  context: { params: Promise<{ path: string[] }> }
-) {
+export async function HEAD(_: Request, context: { params: Promise<{ path: string[] }> }) {
   return handleAssetRequest("HEAD", context);
 }

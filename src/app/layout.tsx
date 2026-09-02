@@ -5,7 +5,7 @@ import { getMissingEnvKeys } from "@/lib/env";
 
 import { buildRootMetadata, RootLayoutShell } from "./root-layout-shell";
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
   if (getMissingEnvKeys().length > 0) {
     return {
       title: "Environment variables unset"
@@ -20,7 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;

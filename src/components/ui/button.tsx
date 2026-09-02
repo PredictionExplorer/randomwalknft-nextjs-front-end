@@ -1,6 +1,6 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,14 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-primary bg-primary text-[#140a1f] shadow-[0_0_18px_rgba(198,118,215,0.28)] hover:bg-primary/90",
-        outline:
-          "border-border bg-transparent text-foreground hover:border-primary hover:bg-primary/10",
+          "border-primary bg-primary text-primary-foreground shadow-[0_0_18px_rgba(198,118,215,0.28)] hover:bg-primary/90",
+        outline: "border-border bg-transparent text-foreground hover:border-primary hover:bg-primary/10",
         ghost: "border-transparent bg-transparent text-foreground hover:bg-accent",
-        secondary:
-          "border-secondary bg-secondary/12 text-secondary hover:bg-secondary/20",
-        destructive:
-          "border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20"
+        secondary: "border-secondary bg-secondary/12 text-secondary hover:bg-secondary/20",
+        destructive: "border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20"
       },
       size: {
         default: "h-11 px-5",
@@ -33,18 +30,16 @@ const buttonVariants = cva(
   }
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-}
+export type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    /** Render the styles onto the child element (e.g. a `Link`) instead of a `<button>`. */
+    asChild?: boolean;
+  };
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
-  }
-);
-Button.displayName = "Button";
+/** React 19: `ref` is a regular prop, so no `forwardRef` wrapper is needed. */
+function Button({ className, variant, size, asChild = false, ...props }: ButtonProps) {
+  const Comp = asChild ? Slot : "button";
+  return <Comp className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+}
 
 export { Button, buttonVariants };

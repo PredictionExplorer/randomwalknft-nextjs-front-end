@@ -19,11 +19,7 @@ const { API_BASE_URL, RWALK_BASE_URL } = getBaseConfig();
 
 describe("getVoteCount", () => {
   it("returns total_count from vote_count endpoint", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/api/randomwalk/vote_count`, () =>
-        HttpResponse.json({ total_count: 42 })
-      )
-    );
+    server.use(http.get(`${API_BASE_URL}/api/randomwalk/vote_count`, () => HttpResponse.json({ total_count: 42 })));
 
     const count = await getVoteCount();
 
@@ -33,11 +29,7 @@ describe("getVoteCount", () => {
 
 describe("getRandomPair", () => {
   it("returns number array from random endpoint", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/api/randomwalk/random`, () =>
-        HttpResponse.json([101, 202])
-      )
-    );
+    server.use(http.get(`${API_BASE_URL}/api/randomwalk/random`, () => HttpResponse.json([101, 202])));
 
     const pair = await getRandomPair();
 
@@ -47,11 +39,7 @@ describe("getRandomPair", () => {
 
 describe("getRatingOrder", () => {
   it("returns number array from rating_order endpoint", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/api/randomwalk/rating_order`, () =>
-        HttpResponse.json([3, 1, 4, 2, 5])
-      )
-    );
+    server.use(http.get(`${API_BASE_URL}/api/randomwalk/rating_order`, () => HttpResponse.json([3, 1, 4, 2, 5])));
 
     const order = await getRatingOrder();
 
@@ -109,15 +97,10 @@ describe("getTokenDetail", () => {
 
   it("falls back to on-chain token data when the token API has not indexed a fresh mint yet", async () => {
     const readContractMock = vi.spyOn(publicClient, "readContract");
-    readContractMock
-      .mockResolvedValueOnce("0xowner")
-      .mockResolvedValueOnce("0xseed")
-      .mockResolvedValueOnce("");
+    readContractMock.mockResolvedValueOnce("0xowner").mockResolvedValueOnce("0xseed").mockResolvedValueOnce("");
 
     server.use(
-      http.get(`${RWALK_BASE_URL}/tokens/info/8`, () =>
-        HttpResponse.json({ error: "Not found" }, { status: 404 })
-      ),
+      http.get(`${RWALK_BASE_URL}/tokens/info/8`, () => HttpResponse.json({ error: "Not found" }, { status: 404 })),
       http.get(`${RWALK_BASE_URL}/tokens/history/8/0/1000`, () =>
         HttpResponse.json({ error: "Not found" }, { status: 404 })
       )

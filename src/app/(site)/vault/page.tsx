@@ -54,24 +54,14 @@ export default async function VaultPage() {
 
   const launchedYearsAgo = new Date().getUTCFullYear() - 2021;
   const ratio =
-    vault?.mintPriceEth && vault.mintPriceEth > 0
-      ? Math.round(vault.prizeEth / vault.mintPriceEth)
-      : undefined;
+    vault?.mintPriceEth && vault.mintPriceEth > 0 ? Math.round(vault.prizeEth / vault.mintPriceEth) : undefined;
 
   return (
     <PageShell className="space-y-10 py-16">
-      <Breadcrumbs
-        items={[
-          { href: "/", label: "Home" },
-          { label: "The Vault" }
-        ]}
-      />
+      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "The Vault" }]} />
       <PageHeading
         eyebrow="The game inside the museum"
-        title={[
-          { text: "THE" },
-          { text: "VAULT", tone: "secondary" }
-        ]}
+        title={[{ text: "THE" }, { text: "VAULT", tone: "secondary" }]}
         description="The Vault is the prize pool inside the Random Walk NFT smart contract. Every mint adds ETH to it. If 30 days pass without a new mint, the most recent minter — the keyholder — can withdraw half of everything inside. Any new mint resets the clock and takes the key."
       />
 
@@ -80,9 +70,8 @@ export default async function VaultPage() {
       ) : (
         <Card>
           <CardContent className="p-6 text-sm leading-7 text-muted-foreground">
-            Live vault data is temporarily unavailable. The rules still apply on-chain: every mint
-            feeds the pool, and the last minter can withdraw half of it after 30 days without a new
-            mint. Check the contract directly on{" "}
+            Live vault data is temporarily unavailable. The rules still apply on-chain: every mint feeds the pool, and
+            the last minter can withdraw half of it after 30 days without a new mint. Check the contract directly on{" "}
             <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="text-secondary">
               Arbiscan
             </ExternalLink>
@@ -94,13 +83,13 @@ export default async function VaultPage() {
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold tracking-[0.08em]">How does the Vault game work?</h2>
         <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-          All ETH paid for minting goes into the contract — the creators take nothing. The mint
-          price rises about 0.1% with every mint, so the pool compounds as the collection grows.
+          All ETH paid for minting goes into the contract — the creators take nothing. The mint price rises about 0.1%
+          with every mint, so the pool compounds as the collection grows.
           {ratio && vault
             ? ` Today the prize is ${vault.prizeEth.toFixed(2)} ETH, roughly ${ratio}x the current mint price of ${vault.mintPriceEth?.toFixed(4)} ETH.`
             : ""}{" "}
-          When a withdrawal happens, only half the pool leaves; the other half seeds the next round,
-          so the game never truly ends.
+          When a withdrawal happens, only half the pool leaves; the other half seeds the next round, so the game never
+          truly ends.
         </p>
         <div className="grid gap-4 md:grid-cols-3">
           {[

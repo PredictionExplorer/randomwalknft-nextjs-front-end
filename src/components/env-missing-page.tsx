@@ -30,9 +30,7 @@ export function EnvMissingPage({ missingKeys }: EnvMissingPageProps) {
         <code style={{ color: "#a78bfa" }}>local</code>, <code style={{ color: "#a78bfa" }}>sepolia</code>,{" "}
         <code style={{ color: "#a78bfa" }}>mainnet</code>.
       </p>
-      <p style={{ fontSize: "0.875rem", color: "#a1a1aa", marginBottom: "0.75rem" }}>
-        Missing or invalid:
-      </p>
+      <p style={{ fontSize: "0.875rem", color: "#a1a1aa", marginBottom: "0.75rem" }}>Missing or invalid:</p>
       <ul
         style={{
           textAlign: "left",

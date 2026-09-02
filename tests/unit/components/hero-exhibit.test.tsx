@@ -28,11 +28,7 @@ describe("HeroExhibit", () => {
   });
 
   it("rotates to a new random token when the film ends", async () => {
-    server.use(
-      http.get("/api/random-token", () =>
-        HttpResponse.json({ tokenId: 99, totalSupply: 200 })
-      )
-    );
+    server.use(http.get("/api/random-token", () => HttpResponse.json({ tokenId: 99, totalSupply: 200 })));
 
     const playSpy = vi.fn().mockResolvedValue(undefined);
     const loadSpy = vi.fn();
@@ -57,9 +53,7 @@ describe("HeroExhibit", () => {
   });
 
   it("does not crash if the fetch fails on video end", async () => {
-    server.use(
-      http.get("/api/random-token", () => new HttpResponse(null, { status: 500 }))
-    );
+    server.use(http.get("/api/random-token", () => new HttpResponse(null, { status: 500 })));
 
     const { container } = render(<HeroExhibit initialTokenId={5} />);
     const video = container.querySelector("video")!;

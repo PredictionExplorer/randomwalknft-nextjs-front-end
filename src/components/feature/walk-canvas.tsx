@@ -126,16 +126,16 @@ export function WalkCanvas({
   }, [seed, drawKey, vert, background, durationMs]);
 
   return (
-    <canvas
-      ref={canvasRef}
+    <div
       role="img"
       aria-label={label}
-      className={cn("h-auto w-full", className)}
+      className={cn("w-full", className)}
       style={{
-        imageRendering: "pixelated",
         backgroundColor: background,
         aspectRatio: dimensions ? `${dimensions.width} / ${dimensions.height}` : "1.66 / 1"
       }}
-    />
+    >
+      <canvas ref={canvasRef} aria-hidden className="block h-full w-full" style={{ imageRendering: "pixelated" }} />
+    </div>
   );
 }

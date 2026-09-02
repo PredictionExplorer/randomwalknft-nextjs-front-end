@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Lock } from "lucide-react";
 
+import { formatClock } from "@/lib/time";
 import type { VaultState } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -14,20 +15,6 @@ async function fetchVaultState(): Promise<VaultState> {
     throw new Error("vault_unavailable");
   }
   return (await response.json()) as VaultState;
-}
-
-function formatRemaining(totalSeconds: number): string {
-  const clamped = Math.max(0, totalSeconds);
-  const days = Math.floor(clamped / 86_400);
-  const hours = Math.floor((clamped % 86_400) / 3_600);
-  const minutes = Math.floor((clamped % 3_600) / 60);
-  const seconds = clamped % 60;
-  const pad = (value: number) => String(value).padStart(2, "0");
-
-  if (days > 0) {
-    return `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-  }
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
 /**
@@ -61,7 +48,7 @@ export function VaultTicker({ className }: { className?: string }) {
     <Link
       href="/vault"
       aria-label={`Vault: ${vault.prizeEth.toFixed(2)} ETH prize, ${
-        claimable ? "claimable now" : `claimable in ${formatRemaining(remaining)}`
+        claimable ? "claimable now" : `claimable in ${formatClock(remaining)}`
       }`}
       data-testid="vault-ticker"
       className={cn(
@@ -78,7 +65,7 @@ export function VaultTicker({ className }: { className?: string }) {
           claimable && "text-secondary"
         )}
       >
-        {claimable ? "claimable now" : formatRemaining(remaining)}
+        {claimable ? "claimable now" : formatClock(remaining)}
       </span>
     </Link>
   );

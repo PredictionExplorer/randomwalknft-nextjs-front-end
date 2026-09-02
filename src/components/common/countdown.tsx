@@ -1,54 +1,56 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { describeDuration, splitDuration } from "@/lib/time";
 
-function splitDuration(totalSeconds: number) {
-  const clamped = Math.max(0, totalSeconds);
-  const days = Math.floor(clamped / 86_400);
-  const hours = Math.floor((clamped % 86_400) / 3_600);
-  const minutes = Math.floor((clamped % 3_600) / 60);
-  const seconds = clamped % 60;
-
-  return { days, hours, minutes, seconds };
-}
-
-export function Countdown({
-  seconds,
-  onComplete
-}: {
-  seconds: number;
-  onComplete?: () => void;
-}) {
+export function Countdown({ seconds, onComplete }: { seconds: number; onComplete?: () => void }) {
   const [remaining, setRemaining] = useState(seconds);
+  const [trackedSeconds, setTrackedSeconds] = useState(seconds);
+  const completedRef = useRef(false);
+  const handleComplete = useEffectEvent(() => onComplete?.());
 
-  useEffect(() => {
+  // A new `seconds` value (e.g. a fresh contract read) restarts the clock. Adjusting
+  // state during render avoids an extra committed frame with the stale value.
+  if (seconds !== trackedSeconds) {
+    setTrackedSeconds(seconds);
     setRemaining(seconds);
-  }, [seconds]);
+  }
 
   useEffect(() => {
-    if (remaining <= 0) {
-      onComplete?.();
-      return;
+    if (remaining > 0) {
+      // Counting again (fresh mount or a reset): arm completion for this run.
+      completedRef.current = false;
+      const timer = window.setTimeout(() => setRemaining((value) => value - 1), 1000);
+      return () => window.clearTimeout(timer);
     }
 
-    const timer = window.setTimeout(() => setRemaining((value) => value - 1), 1000);
-    return () => window.clearTimeout(timer);
-  }, [onComplete, remaining]);
+    if (!completedRef.current) {
+      completedRef.current = true;
+      handleComplete();
+    }
+    return undefined;
+  }, [remaining]);
 
-  const parts = useMemo(() => splitDuration(remaining), [remaining]);
+  const parts = splitDuration(remaining);
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {Object.entries(parts).map(([label, value]) => (
-        <Card key={label}>
-          <CardContent className="flex flex-col items-center justify-center gap-1 p-5">
-            <span className="text-3xl font-semibold text-primary">{value}</span>
-            <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{label}</span>
-          </CardContent>
-        </Card>
-      ))}
+    <div>
+      <p className="sr-only">
+        {remaining <= 0 ? "The countdown has finished." : `${describeDuration(remaining)} remain.`}
+      </p>
+      {/* Per-second digits are decorative for assistive tech; the summary above is stable. */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden>
+        {Object.entries(parts).map(([label, value]) => (
+          <Card key={label}>
+            <CardContent className="flex flex-col items-center justify-center gap-1 p-5">
+              <span className="text-3xl font-semibold tabular-nums text-primary">{String(value).padStart(2, "0")}</span>
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{label}</span>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

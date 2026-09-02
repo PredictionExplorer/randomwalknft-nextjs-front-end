@@ -108,27 +108,21 @@ describe("daily featured token selection", () => {
 
   it("keeps daily selections unique and inside the minted range", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 0, max: 5_000 }),
-        fc.integer({ min: -5, max: 30 }),
-        (totalSupply, count) => {
-          const selected = dailyFeaturedTokenIds(totalSupply, { dayKey: "2026-06-25", count });
-          const expectedLength = Math.min(Math.max(count, 0), totalSupply);
+      fc.property(fc.integer({ min: 0, max: 5_000 }), fc.integer({ min: -5, max: 30 }), (totalSupply, count) => {
+        const selected = dailyFeaturedTokenIds(totalSupply, { dayKey: "2026-06-25", count });
+        const expectedLength = Math.min(Math.max(count, 0), totalSupply);
 
-          expect(selected).toHaveLength(expectedLength);
-          expect(new Set(selected).size).toBe(selected.length);
-          for (const id of selected) {
-            expect(id).toBeGreaterThanOrEqual(0);
-            expect(id).toBeLessThan(totalSupply);
-          }
+        expect(selected).toHaveLength(expectedLength);
+        expect(new Set(selected).size).toBe(selected.length);
+        for (const id of selected) {
+          expect(id).toBeGreaterThanOrEqual(0);
+          expect(id).toBeLessThan(totalSupply);
         }
-      )
+      })
     );
   });
 
   it("defaults to the daily featured pool size", () => {
-    expect(dailyFeaturedTokenIds(100, { dayKey: "2026-06-25" })).toHaveLength(
-      DAILY_FEATURED_TOKEN_COUNT
-    );
+    expect(dailyFeaturedTokenIds(100, { dayKey: "2026-06-25" })).toHaveLength(DAILY_FEATURED_TOKEN_COUNT);
   });
 });

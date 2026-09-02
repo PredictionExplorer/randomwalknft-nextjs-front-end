@@ -6,17 +6,11 @@ import { NftCard } from "@/components/nft/nft-card";
 describe("NftCard", () => {
   it("renders the asset preview and token label", () => {
     render(
-      <NftCard
-        id={42}
-        image="https://assets.test.example.com/randomwalk/000042_black_thumb.jpg"
-        href="/detail/42"
-      />
+      <NftCard id={42} image="https://assets.test.example.com/randomwalk/000042_black_thumb.jpg" href="/detail/42" />
     );
 
     expect(
-      screen.getByAltText(
-        "Random Walk NFT #000042 — generative random walk artwork from an on-chain seed"
-      )
+      screen.getByAltText("Random Walk NFT #000042 — generative random walk artwork from an on-chain seed")
     ).toBeInTheDocument();
     expect(screen.getByText("#000042")).toBeInTheDocument();
   });

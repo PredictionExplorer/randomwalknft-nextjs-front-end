@@ -20,19 +20,11 @@ import { NftCard } from "@/components/nft/nft-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { getErrorMessage } from "@/lib/web3/errors";
-import {
-  applyBasisPointsBuffer,
-  estimateBufferedTransactionFees
-} from "@/lib/web3/transaction-preflight";
+import { applyBasisPointsBuffer, estimateBufferedTransactionFees } from "@/lib/web3/transaction-preflight";
 import { showWalletError } from "@/lib/web3/wallet-toast";
 import { useWalletStatus } from "@/lib/web3/use-wallet-status";
 import { arbiscanContractUrl, createAssetUrls } from "@/lib/utils";
-import {
-  getChainDisplayName,
-  getConfiguredEvmChain,
-  getCurrentNetworkName,
-  getRpcHttpUrl
-} from "@/lib/web3/evm-chain";
+import { getChainDisplayName, getConfiguredEvmChain, getCurrentNetworkName, getRpcHttpUrl } from "@/lib/web3/evm-chain";
 
 const MINT_VALUE_BUFFER_BPS = 10_025n;
 
@@ -83,11 +75,11 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
     }
 
     startTransition(async () => {
-      const totalSupply = (await publicClient.readContract({
+      const totalSupply = await publicClient.readContract({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: "totalSupply"
-      })) as bigint;
+      });
       const tokenId = Number(totalSupply) - 1;
       toast.success("Mint complete.");
       trackEvent("transaction_confirmed", {
@@ -99,12 +91,12 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
       // backend renders the full media. Falls back to a direct redirect if the
       // seed read fails.
       try {
-        const seed = (await publicClient.readContract({
+        const seed = await publicClient.readContract({
           address: NFT_ADDRESS,
           abi: nftAbi,
           functionName: "seeds",
           args: [BigInt(tokenId)]
-        })) as `0x${string}`;
+        });
         setReveal({ tokenId, seed });
       } catch {
         router.push(`/detail/${tokenId}?message=success` as Route);
@@ -160,11 +152,11 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
         );
       }
 
-      const latestMintPrice = (await publicClient.readContract({
+      const latestMintPrice = await publicClient.readContract({
         address: nftTarget,
         abi: nftAbi,
         functionName: "getMintPrice"
-      })) as bigint;
+      });
       const mintValue = applyBasisPointsBuffer(latestMintPrice, MINT_VALUE_BUFFER_BPS);
 
       const mintCalldata = encodeFunctionData({
@@ -231,12 +223,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           onView={() => router.push(`/detail/${reveal.tokenId}?message=success` as Route)}
         />
       ) : null}
-      <Breadcrumbs
-        items={[
-          { href: "/", label: "Home" },
-          { label: "Mint" }
-        ]}
-      />
+      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Mint" }]} />
       <PageHeading
         eyebrow="Mint a new work — and take the vault key"
         title={
@@ -246,10 +233,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
                 { text: "RANDOM WALK", tone: "primary" },
                 { text: `NFT FOR ${mintPriceEth.toFixed(4)} ETH`, tone: "secondary" }
               ]
-            : [
-                { text: "SALE" },
-                { text: "OPENS IN", tone: "primary" }
-              ]
+            : [{ text: "SALE" }, { text: "OPENS IN", tone: "primary" }]
         }
         description="Minting creates a seed nobody has ever seen, hangs six new works in the museum, resets the vault's 30-day clock, and makes you the keyholder."
       />
@@ -278,7 +262,9 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
                   {mintPriceEth > 0 ? `${(withdrawalEth / mintPriceEth).toFixed(0)}x` : "—"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {withdrawalEth > 0 ? `${withdrawalEth.toFixed(2)} ETH waits in the vault for the last minter.` : "The vault grows with every mint."}
+                  {withdrawalEth > 0
+                    ? `${withdrawalEth.toFixed(2)} ETH waits in the vault for the last minter.`
+                    : "The vault grows with every mint."}
                 </p>
               </CardContent>
             </Card>
@@ -288,8 +274,7 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <div>
-                  NFT:
-                  {" "}
+                  NFT:{" "}
                   <ExternalLink href={arbiscanContractUrl(NFT_ADDRESS)} className="text-secondary">
                     {NFT_ADDRESS}
                   </ExternalLink>
@@ -301,23 +286,14 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           <button
             type="button"
             onClick={handleMint}
-            disabled={
-              isMinting ||
-              !isSaleOpen ||
-              isMintPriceLoading ||
-              mintPrice == null ||
-              !canTransact
-            }
+            disabled={isMinting || !isSaleOpen || isMintPriceLoading || mintPrice == null || !canTransact}
             className="inline-flex h-12 items-center justify-center rounded-full border border-[#9b4aaf] bg-[#9b4aaf] px-7 text-sm font-bold tracking-wide text-white shadow-[0_0_24px_rgba(155,74,175,0.5)] transition hover:bg-[#8a3f9d] hover:shadow-[0_0_32px_rgba(155,74,175,0.65)] disabled:pointer-events-none disabled:opacity-50"
           >
-            {isMinting
-              ? "Minting..."
-              : isReady && isWalletClientFetching
-                ? "Preparing wallet..."
-                : "Mint now"}
+            {isMinting ? "Minting..." : isReady && isWalletClientFetching ? "Preparing wallet..." : "Mint now"}
           </button>
           <p className="text-sm text-muted-foreground">
-            The app sends a small refundable buffer on mint so price changes while you sign are less likely to cause a failure.
+            The app sends a small refundable buffer on mint so price changes while you sign are less likely to cause a
+            failure.
           </p>
 
           <div id="how-it-works" className="grid gap-4 md:grid-cols-3">
@@ -357,7 +333,8 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.24em] text-secondary">Why mint?</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Each mint adds a new unique work to the collection, feeds the vault, and makes you the keyholder — if minting pauses for 30 days, half the vault is yours.
+              Each mint adds a new unique work to the collection, feeds the vault, and makes you the keyholder — if
+              minting pauses for 30 days, half the vault is yours.
             </p>
           </div>
           <div className="space-y-2">
@@ -373,7 +350,8 @@ export function MintExperience({ featuredIds }: { featuredIds: number[] }) {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.24em] text-secondary">Verified and transparent</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              The NFT contract is verified on Arbiscan — inspect every minting, ownership, naming, and withdrawal rule before you transact.
+              The NFT contract is verified on Arbiscan — inspect every minting, ownership, naming, and withdrawal rule
+              before you transact.
             </p>
           </div>
         </CardContent>

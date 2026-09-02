@@ -3,10 +3,9 @@ import { describe, expect, it } from "vitest";
 import { homepageAnnex, homepageCharter } from "@/lib/content/homepage";
 
 describe("homepageAnnex (Cosmic Signature)", () => {
-  const sectionText = [
-    homepageAnnex.body,
-    ...homepageAnnex.cards.map((card) => `${card.title} ${card.body}`)
-  ].join("\n");
+  const sectionText = [homepageAnnex.body, ...homepageAnnex.cards.map((card) => `${card.title} ${card.body}`)].join(
+    "\n"
+  );
 
   it("links to Cosmic Signature with descriptive anchor text", () => {
     expect(homepageAnnex.href).toBe("https://cosmicsignature.com/");

@@ -12,8 +12,7 @@ const webServerEnv = {
   NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://randomwalknft-api.com",
   NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URL ?? "https://arb1.arbitrum.io/rpc",
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "https://randomwalknft.com",
-  NEXT_PUBLIC_NFT_ADDRESS:
-    process.env.NEXT_PUBLIC_NFT_ADDRESS ?? "0x895a6F444BE4ba9d124F61DF736605792B35D66b"
+  NEXT_PUBLIC_NFT_ADDRESS: process.env.NEXT_PUBLIC_NFT_ADDRESS ?? "0x895a6F444BE4ba9d124F61DF736605792B35D66b"
 };
 
 export default defineConfig({

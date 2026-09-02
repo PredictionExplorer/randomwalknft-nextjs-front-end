@@ -68,7 +68,9 @@ export function HoverVideoCard({
         ) : null}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8">
           <p className="font-mono text-xs text-white/90">{label ?? formatId(id)}</p>
-          {sublabel ? <p className="mt-0.5 text-[0.65rem] uppercase tracking-[0.2em] text-white/60">{sublabel}</p> : null}
+          {sublabel ? (
+            <p className="mt-0.5 text-[0.65rem] uppercase tracking-[0.2em] text-white/60">{sublabel}</p>
+          ) : null}
         </div>
       </div>
     </Link>

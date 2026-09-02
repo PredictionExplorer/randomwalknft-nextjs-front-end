@@ -41,16 +41,10 @@ function isValidSiteOrigin(value: string | undefined, network: string): boolean 
   try {
     const url = new URL(value);
     const normalizedValue = value.trim().replace(/\/+$/, "");
-    const validProtocol =
-      url.protocol === "https:" || (network === "local" && url.protocol === "http:");
+    const validProtocol = url.protocol === "https:" || (network === "local" && url.protocol === "http:");
 
     return (
-      validProtocol &&
-      !url.username &&
-      !url.password &&
-      !url.search &&
-      !url.hash &&
-      url.origin === normalizedValue
+      validProtocol && !url.username && !url.password && !url.search && !url.hash && url.origin === normalizedValue
     );
   } catch {
     return false;

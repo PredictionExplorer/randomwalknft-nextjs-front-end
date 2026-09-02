@@ -14,11 +14,7 @@ const validSchema = z.object({ id: z.number(), name: z.string() });
 
 describe("fetchApi", () => {
   it("returns JSON on success", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/tokens`, () =>
-        HttpResponse.json({ id: 1, name: "Token One" })
-      )
-    );
+    server.use(http.get(`${API_BASE_URL}/tokens`, () => HttpResponse.json({ id: 1, name: "Token One" })));
 
     const result = await fetchApi<{ id: number; name: string }>("tokens");
 
@@ -26,23 +22,13 @@ describe("fetchApi", () => {
   });
 
   it("throws on non-OK response", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/error`, () =>
-        HttpResponse.json({ error: "Not found" }, { status: 404 })
-      )
-    );
+    server.use(http.get(`${API_BASE_URL}/error`, () => HttpResponse.json({ error: "Not found" }, { status: 404 })));
 
-    await expect(fetchApi("error")).rejects.toThrow(
-      "Upstream request failed: 404 Not Found"
-    );
+    await expect(fetchApi("error")).rejects.toThrow("Upstream request failed: 404 Not Found");
   });
 
   it("validates with Zod schema when provided", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/valid`, () =>
-        HttpResponse.json({ id: 42, name: "Valid" })
-      )
-    );
+    server.use(http.get(`${API_BASE_URL}/valid`, () => HttpResponse.json({ id: 42, name: "Valid" })));
 
     const result = await fetchApi("valid", {}, validSchema);
 
@@ -50,21 +36,13 @@ describe("fetchApi", () => {
   });
 
   it("throws ZodError on schema mismatch", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/invalid`, () =>
-        HttpResponse.json({ id: "not-a-number", name: "Test" })
-      )
-    );
+    server.use(http.get(`${API_BASE_URL}/invalid`, () => HttpResponse.json({ id: "not-a-number", name: "Test" })));
 
     await expect(fetchApi("invalid", {}, validSchema)).rejects.toThrow(z.ZodError);
   });
 
   it("strips leading slashes from path", async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/tokens`, () =>
-        HttpResponse.json({ id: 1 })
-      )
-    );
+    server.use(http.get(`${API_BASE_URL}/tokens`, () => HttpResponse.json({ id: 1 })));
 
     const result = await fetchApi<{ id: number }>("/tokens");
 
@@ -74,11 +52,7 @@ describe("fetchApi", () => {
 
 describe("fetchRwalk", () => {
   it("calls the RWALK base URL", async () => {
-    server.use(
-      http.get(`${RWALK_BASE_URL}/status`, () =>
-        HttpResponse.json({ status: "ok" })
-      )
-    );
+    server.use(http.get(`${RWALK_BASE_URL}/status`, () => HttpResponse.json({ status: "ok" })));
 
     const result = await fetchRwalk<{ status: string }>("status");
 
@@ -95,7 +69,7 @@ describe("postApi", () => {
       http.post(`${API_BASE_URL}/submit`, async ({ request }) => {
         capturedBody = await request.text();
         capturedHeaderMap["content-type"] = request.headers.get("Content-Type") ?? "";
-        capturedHeaderMap["accept"] = request.headers.get("Accept") ?? "";
+        capturedHeaderMap.accept = request.headers.get("Accept") ?? "";
         return HttpResponse.json({ success: true });
       })
     );
@@ -106,7 +80,7 @@ describe("postApi", () => {
     expect(result).toEqual({ success: true });
     expect(capturedBody).toBe(body);
     expect(capturedHeaderMap["content-type"]).toBe("application/json");
-    expect(capturedHeaderMap["accept"]).toBe("application/json");
+    expect(capturedHeaderMap.accept).toBe("application/json");
   });
 
   it("does not set Content-Type for FormData body", async () => {

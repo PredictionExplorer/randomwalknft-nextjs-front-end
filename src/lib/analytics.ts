@@ -14,6 +14,7 @@ export type AnalyticsEvent =
 export type AnalyticsPayload = Record<string, number | string | boolean | undefined>;
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- global augmentation requires declaration merging
   interface Window {
     dataLayer?: Array<Record<string, unknown>>;
   }

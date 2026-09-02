@@ -13,11 +13,11 @@ export async function GET(request: Request) {
   const exclude = excludeParam ? Number(excludeParam) : undefined;
 
   const totalSupply = Number(
-    (await publicClient.readContract({
+    await publicClient.readContract({
       address: NFT_ADDRESS,
       abi: nftAbi,
       functionName: "totalSupply"
-    })) as bigint
+    })
   );
 
   if (totalSupply <= 0) {

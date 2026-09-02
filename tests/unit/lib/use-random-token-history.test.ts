@@ -6,11 +6,7 @@ import { useRandomTokenHistory } from "@/lib/use-random-token-history";
 import { server } from "../../setup/msw/server";
 
 function mockRandomToken(tokenId: number, totalSupply = 100) {
-  server.use(
-    http.get("/api/random-token", () =>
-      HttpResponse.json({ tokenId, totalSupply })
-    )
-  );
+  server.use(http.get("/api/random-token", () => HttpResponse.json({ tokenId, totalSupply })));
 }
 
 describe("useRandomTokenHistory", () => {
@@ -103,31 +99,41 @@ describe("useRandomTokenHistory", () => {
 
     const { result } = renderHook(() => useRandomTokenHistory(1));
 
-    await act(async () => { await result.current.goNext(); });
+    await act(async () => {
+      await result.current.goNext();
+    });
     expect(result.current.currentTokenId).toBe(10);
 
-    await act(async () => { await result.current.goNext(); });
+    await act(async () => {
+      await result.current.goNext();
+    });
     expect(result.current.currentTokenId).toBe(20);
 
-    await act(async () => { await result.current.goNext(); });
+    await act(async () => {
+      await result.current.goNext();
+    });
     expect(result.current.currentTokenId).toBe(30);
 
-    act(() => { result.current.goBack(); });
+    act(() => {
+      result.current.goBack();
+    });
     expect(result.current.currentTokenId).toBe(20);
 
-    act(() => { result.current.goBack(); });
+    act(() => {
+      result.current.goBack();
+    });
     expect(result.current.currentTokenId).toBe(10);
 
-    act(() => { result.current.goBack(); });
+    act(() => {
+      result.current.goBack();
+    });
     expect(result.current.currentTokenId).toBe(1);
 
     expect(result.current.canGoBack).toBe(false);
   });
 
   it("does not advance when the API call fails", async () => {
-    server.use(
-      http.get("/api/random-token", () => new HttpResponse(null, { status: 500 }))
-    );
+    server.use(http.get("/api/random-token", () => new HttpResponse(null, { status: 500 })));
 
     const { result } = renderHook(() => useRandomTokenHistory(10));
 
@@ -140,11 +146,7 @@ describe("useRandomTokenHistory", () => {
   });
 
   it("does not advance when totalSupply is zero", async () => {
-    server.use(
-      http.get("/api/random-token", () =>
-        HttpResponse.json({ tokenId: 0, totalSupply: 0 })
-      )
-    );
+    server.use(http.get("/api/random-token", () => HttpResponse.json({ tokenId: 0, totalSupply: 0 })));
 
     const { result } = renderHook(() => useRandomTokenHistory(5));
 

@@ -14,6 +14,7 @@ import { WalletStatusCard } from "@/components/wallet/wallet-status-card";
 import { trackEvent } from "@/lib/analytics";
 import { useContracts } from "@/components/providers/contracts-context";
 import { nftAbi } from "@/generated/wagmi";
+import { splitDuration } from "@/lib/time";
 import type { VaultState } from "@/lib/types";
 import { createAssetUrls, formatEth, formatId, shortenAddress } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/web3/errors";
@@ -28,16 +29,6 @@ async function fetchVaultState(): Promise<VaultState> {
     throw new Error("vault_unavailable");
   }
   return (await response.json()) as VaultState;
-}
-
-function splitDuration(totalSeconds: number) {
-  const clamped = Math.max(0, totalSeconds);
-  return {
-    days: Math.floor(clamped / 86_400),
-    hours: Math.floor((clamped % 86_400) / 3_600),
-    minutes: Math.floor((clamped % 3_600) / 60),
-    seconds: clamped % 60
-  };
 }
 
 /** Live vault room: big clock, prize, keyholder spotlight, dethrone CTA, withdraw flow. */
@@ -78,10 +69,7 @@ export function VaultExperience({
   const remaining = Math.max(0, vault.secondsUntilWithdrawal - elapsedSeconds);
   const claimable = remaining <= 0;
   const parts = splitDuration(remaining);
-  const isKeyholder =
-    address != null &&
-    vault.lastMinter != null &&
-    address.toLowerCase() === vault.lastMinter.toLowerCase();
+  const isKeyholder = address != null && address.toLowerCase() === vault.lastMinter?.toLowerCase();
 
   const handleWithdraw = async () => {
     try {
@@ -117,9 +105,7 @@ export function VaultExperience({
           <CardContent className="space-y-8 p-6 sm:p-8">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                  Inside the vault
-                </p>
+                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Inside the vault</p>
                 <p
                   className="mt-2 text-5xl font-semibold tabular-nums text-secondary sm:text-6xl"
                   data-testid="vault-prize"
@@ -128,8 +114,7 @@ export function VaultExperience({
                 </p>
               </div>
               <p className="max-w-[16rem] text-sm leading-6 text-muted-foreground">
-                Half of every mint ever paid. Claimable by the keyholder when the clock reaches
-                zero.
+                Half of every mint ever paid. Claimable by the keyholder when the clock reaches zero.
               </p>
             </div>
 
@@ -145,16 +130,11 @@ export function VaultExperience({
               {/* The per-second digits are decorative for screen readers; the summary above is stable. */}
               <div className="mt-3 grid grid-cols-4 gap-3" aria-hidden>
                 {Object.entries(parts).map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="rounded-2xl border border-border/70 bg-background/60 p-4 text-center"
-                  >
+                  <div key={label} className="rounded-2xl border border-border/70 bg-background/60 p-4 text-center">
                     <p className="text-3xl font-semibold tabular-nums text-foreground sm:text-4xl">
                       {String(value).padStart(2, "0")}
                     </p>
-                    <p className="mt-1 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground">
-                      {label}
-                    </p>
+                    <p className="mt-1 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground">{label}</p>
                   </div>
                 ))}
               </div>
@@ -173,8 +153,7 @@ export function VaultExperience({
                 </Button>
                 {vault.mintPriceEth != null && vault.mintPriceEth > 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    The prize is {(vault.prizeEth / vault.mintPriceEth).toFixed(0)}x the current
-                    mint price.
+                    The prize is {(vault.prizeEth / vault.mintPriceEth).toFixed(0)}x the current mint price.
                   </p>
                 ) : null}
               </div>
@@ -185,9 +164,7 @@ export function VaultExperience({
         <Card className="bg-card/70">
           <CardContent className="space-y-5 p-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                The keyholder
-              </p>
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">The keyholder</p>
               {vault.lastMinter ? (
                 <Link
                   href={`/gallery?address=${vault.lastMinter}` as Route}
@@ -199,15 +176,13 @@ export function VaultExperience({
                 <p className="mt-2 text-sm text-muted-foreground">No minter recorded yet.</p>
               )}
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                The most recent minter holds the only key. If nobody mints before the clock runs
-                out, the vault opens for them alone.
+                The most recent minter holds the only key. If nobody mints before the clock runs out, the vault opens
+                for them alone.
               </p>
             </div>
             {keyholderTokenId != null ? (
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                  Their latest work
-                </p>
+                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Their latest work</p>
                 <NftCard
                   id={keyholderTokenId}
                   image={createAssetUrls(keyholderTokenId).blackThumb}

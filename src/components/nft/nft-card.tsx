@@ -1,8 +1,8 @@
 "use client";
 
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import type { Route } from "next";
 import { useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";

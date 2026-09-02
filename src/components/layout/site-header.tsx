@@ -1,8 +1,8 @@
 "use client";
 
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import type { Route } from "next";
 import { ChevronDown, Menu, Wallet } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";

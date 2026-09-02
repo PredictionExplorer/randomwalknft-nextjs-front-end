@@ -4,7 +4,7 @@ import { getApiBase } from "@/lib/server-rotation";
 /** Path segments on the Go webserv origin (see websrv static / API routes). */
 /** JSON API prefix on the Go webserv (RandomWalk NFT data). */
 export const BACKEND_RANDOMWALK_API_PREFIX = "/api/randomwalk";
-export const BACKEND_ASSET_PATH = "/images/randomwalk";
+const BACKEND_ASSET_PATH = "/images/randomwalk";
 
 const DEFAULT_SITE_NAME = "Random Walk NFT";
 const DEFAULT_SITE_DESCRIPTION =
@@ -70,8 +70,6 @@ export function getBaseConfig(): BaseEnvConfig {
     ASSET_BASE_URL: `${origin}${BACKEND_ASSET_PATH}`
   };
 }
-
-export const SUPPORTED_ASSET_EXTENSIONS = [".png", ".jpg", ".jpeg", ".mp4", ".webp"] as const;
 
 export const REVALIDATE_SHORT = 60;
 export const REVALIDATE_MEDIUM = 300;

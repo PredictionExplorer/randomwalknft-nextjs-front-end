@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { WalkCanvas } from "@/components/feature/walk-canvas";
 import { Button } from "@/components/ui/button";
@@ -11,19 +11,14 @@ import { formatId } from "@/lib/utils";
  * browser draws the new work live from its actual on-chain seed — the wait
  * becomes the unveiling.
  */
-export function MintRevealTheater({
-  tokenId,
-  seed,
-  onView
-}: {
-  tokenId: number;
-  seed: string;
-  onView: () => void;
-}) {
+export function MintRevealTheater({ tokenId, seed, onView }: { tokenId: number; seed: string; onView: () => void }) {
   const [drawingDone, setDrawingDone] = useState(false);
+  const viewButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    // Move focus into the reveal so keyboard users land on the only action.
+    viewButtonRef.current?.focus();
     return () => {
       document.body.style.overflow = "";
     };
@@ -62,7 +57,7 @@ export function MintRevealTheater({
         size="lg"
         variant={drawingDone ? "secondary" : "outline"}
         onClick={onView}
-        autoFocus
+        ref={viewButtonRef}
         data-testid="mint-reveal-view"
       >
         {drawingDone ? "View your work in the collection" : "Skip to your work"}

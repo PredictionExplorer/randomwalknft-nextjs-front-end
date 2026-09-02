@@ -2,13 +2,7 @@
 
 import { isRandomWalkBackendUnavailableMessage } from "@/lib/api/backend-errors";
 
-export default function GlobalError({
-  error,
-  reset
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const backendDown = isRandomWalkBackendUnavailableMessage(error.message);
 
   return (
@@ -19,9 +13,7 @@ export default function GlobalError({
             {backendDown ? "RandomWalk backend API is down" : "Something went wrong"}
           </h1>
           <p className="text-sm text-[#c4c2ca]">
-            {backendDown
-              ? error.message
-              : "A critical error occurred. Please try again."}
+            {backendDown ? error.message : "A critical error occurred. Please try again."}
           </p>
           <button
             type="button"

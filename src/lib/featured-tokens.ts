@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 
 export const FEATURED_TOKEN_FALLBACK_ID = 1;
-export const FEATURED_CARD_COUNT = 3;
+const FEATURED_CARD_COUNT = 3;
 export const DAILY_FEATURED_TOKEN_COUNT = 15;
 
 const HASH_SPACE_48 = 2 ** 48;
@@ -75,9 +75,7 @@ function hashToBoundedInt(seed: string, drawIndex: number, upperBound: number): 
   const maxUnbiased = Math.floor(HASH_SPACE_48 / upperBound) * upperBound;
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
-    const digest = createHash("sha256")
-      .update(`${seed}:${drawIndex}:${attempt}`)
-      .digest();
+    const digest = createHash("sha256").update(`${seed}:${drawIndex}:${attempt}`).digest();
     const value = digest.readUIntBE(0, 6);
 
     if (value < maxUnbiased) {
@@ -86,9 +84,7 @@ function hashToBoundedInt(seed: string, drawIndex: number, upperBound: number): 
   }
 
   // The rejection path is vanishingly unlikely for NFT-sized ranges; this keeps the function total.
-  const digest = createHash("sha256")
-    .update(`${seed}:${drawIndex}:fallback`)
-    .digest();
+  const digest = createHash("sha256").update(`${seed}:${drawIndex}:fallback`).digest();
   return digest.readUIntBE(0, 6) % upperBound;
 }
 

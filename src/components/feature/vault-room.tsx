@@ -5,18 +5,9 @@ import type { Route } from "next";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { splitDuration } from "@/lib/time";
 import type { VaultState } from "@/lib/types";
 import { shortenAddress } from "@/lib/utils";
-
-function splitDuration(totalSeconds: number) {
-  const clamped = Math.max(0, totalSeconds);
-  return {
-    days: Math.floor(clamped / 86_400),
-    hours: Math.floor((clamped % 86_400) / 3_600),
-    minutes: Math.floor((clamped % 3_600) / 60),
-    seconds: clamped % 60
-  };
-}
 
 /** Homepage Vault room: the live prize, the ticking clock, and the keyholder. */
 export function VaultRoom({ initialVault }: { initialVault: VaultState }) {
@@ -37,7 +28,10 @@ export function VaultRoom({ initialVault }: { initialVault: VaultState }) {
       <div className="space-y-6">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Inside the vault</p>
-          <p className="mt-2 text-6xl font-semibold tabular-nums text-secondary sm:text-7xl" data-testid="vault-room-prize">
+          <p
+            className="mt-2 text-6xl font-semibold tabular-nums text-secondary sm:text-7xl"
+            data-testid="vault-room-prize"
+          >
             {initialVault.prizeEth.toFixed(2)}
             <span className="ml-3 text-2xl font-normal text-muted-foreground">ETH</span>
           </p>
@@ -63,9 +57,7 @@ export function VaultRoom({ initialVault }: { initialVault: VaultState }) {
           <Button asChild size="lg" variant="outline">
             <Link href="/mint">
               Take the key
-              {initialVault.mintPriceEth != null
-                ? ` — mint for ${initialVault.mintPriceEth.toFixed(4)} ETH`
-                : ""}
+              {initialVault.mintPriceEth != null ? ` — mint for ${initialVault.mintPriceEth.toFixed(4)} ETH` : ""}
             </Link>
           </Button>
         </div>

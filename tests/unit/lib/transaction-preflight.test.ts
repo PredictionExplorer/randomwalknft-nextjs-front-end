@@ -95,9 +95,7 @@ describe("transaction preflight", () => {
     const estimateContractGas = vi.fn().mockResolvedValue(50n);
     const publicClient = createPublicClientMock({
       estimateContractGas,
-      estimateFeesPerGas: vi
-        .fn()
-        .mockResolvedValue({ maxFeePerGas: 20_002_000n, maxPriorityFeePerGas: 100n }),
+      estimateFeesPerGas: vi.fn().mockResolvedValue({ maxFeePerGas: 20_002_000n, maxPriorityFeePerGas: 100n }),
       getBlock: vi.fn().mockResolvedValue({ baseFeePerGas: 20_004_000n }),
       getBalance: vi.fn().mockResolvedValue(10n ** 24n)
     });

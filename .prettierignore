@@ -1,0 +1,13 @@
+.next
+coverage
+playwright-report
+test-results
+.lighthouseci
+node_modules
+pnpm-lock.yaml
+legacy
+public
+src/generated
+tests/e2e/**/*-snapshots
+*.tsbuildinfo
+contracts

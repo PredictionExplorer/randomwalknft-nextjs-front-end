@@ -8,13 +8,7 @@ export type ContractsContextValue = {
 
 const ContractsContext = createContext<ContractsContextValue | null>(null);
 
-export function ContractsProvider({
-  value,
-  children
-}: {
-  value: ContractsContextValue;
-  children: React.ReactNode;
-}) {
+export function ContractsProvider({ value, children }: { value: ContractsContextValue; children: React.ReactNode }) {
   return <ContractsContext.Provider value={value}>{children}</ContractsContext.Provider>;
 }
 

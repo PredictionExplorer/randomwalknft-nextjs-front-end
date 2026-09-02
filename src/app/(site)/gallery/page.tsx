@@ -21,11 +21,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const GALLERY_DESCRIPTION =
   "Browse the full Random Walk NFT collection. Sort by newest or community beauty score and explore generative art on Arbitrum.";
 
-export async function generateMetadata({
-  searchParams
-}: {
-  searchParams: SearchParams;
-}): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
   const state = parseCollectionQueryState(await searchParams);
 
   // Wallet-filtered and search-result views: keep them out of the index to
@@ -85,11 +81,13 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
     })) as bigint[];
     tokenIds = walletTokens.map((tokenId) => Number(tokenId));
   } else {
-    totalSupply = Number((await publicClient.readContract({
-      address: NFT_ADDRESS,
-      abi: nftAbi,
-      functionName: "totalSupply"
-    })) as bigint);
+    totalSupply = Number(
+      await publicClient.readContract({
+        address: NFT_ADDRESS,
+        abi: nftAbi,
+        functionName: "totalSupply"
+      })
+    );
     if (sortBy === "tokenId" && query === undefined) {
       pageData = getDescendingTokenPage(totalSupply, requestedPage, PAGE_SIZE);
     } else {
@@ -157,12 +155,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
           }
         }}
       />
-      <Breadcrumbs
-        items={[
-          { href: "/", label: "Home" },
-          { label: "Collection" }
-        ]}
-      />
+      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Collection" }]} />
       <PageHeading
         eyebrow="Full collection"
         title={[
@@ -171,13 +164,21 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
           { text: "NFT", tone: "secondary" },
           { text: "GALLERY" }
         ]}
-        description={address ? `Showing NFTs owned by ${address.slice(0, 8)}...${address.slice(-4)}` : "Browse every Random Walk NFT — sort by newest or community beauty score."}
+        description={
+          address
+            ? `Showing NFTs owned by ${address.slice(0, 8)}...${address.slice(-4)}`
+            : "Browse every Random Walk NFT — sort by newest or community beauty score."
+        }
       />
 
       <div className="flex flex-wrap gap-2" aria-label="Gallery rooms">
         {[
           { label: "Newest acquisitions", href: "/gallery", active: state.sortBy === "tokenId" && !state.address },
-          { label: "The most beautiful", href: "/gallery?sortBy=beauty", active: state.sortBy === "beauty" && !state.address },
+          {
+            label: "The most beautiful",
+            href: "/gallery?sortBy=beauty",
+            active: state.sortBy === "beauty" && !state.address
+          },
           { label: "A random work", href: "/random", active: false }
         ].map((room) => (
           <a
@@ -203,7 +204,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
         </span>
       </div>
 
-      {(state.query !== undefined || state.sortBy !== "tokenId" || state.view !== "gallery" || state.address) ? (
+      {state.query !== undefined || state.sortBy !== "tokenId" || state.view !== "gallery" || state.address ? (
         <div className="flex flex-wrap gap-2">
           {state.address ? (
             <span className="rounded-full border border-border/80 px-3 py-1 text-xs text-muted-foreground">
@@ -233,9 +234,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Sear
         view={view}
         emptyMessage="No NFTs found for this wallet."
         rankOffset={
-          sortBy === "beauty" && !address && query === undefined
-            ? (pageData.page - 1) * PAGE_SIZE
-            : undefined
+          sortBy === "beauty" && !address && query === undefined ? (pageData.page - 1) * PAGE_SIZE : undefined
         }
       />
       <Pager pathname="/gallery" page={pageData.page} totalPages={pageData.totalPages} searchParams={pagerParams} />

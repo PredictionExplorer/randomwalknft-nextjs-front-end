@@ -1,47 +1,37 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  baseConnect,
-  baseDisconnect,
-  baseIsAuthorized,
-  baseSetup,
-  metaMaskConnector,
-  metaMaskFactory,
-  trackEvent
-} = vi.hoisted(() => {
-  const baseConnect = vi.fn();
-  const baseDisconnect = vi.fn();
-  const baseIsAuthorized = vi.fn();
-  const baseSetup = vi.fn();
+const { baseConnect, baseDisconnect, baseIsAuthorized, baseSetup, metaMaskConnector, metaMaskFactory, trackEvent } =
+  vi.hoisted(() => {
+    const baseConnect = vi.fn();
+    const baseDisconnect = vi.fn();
+    const baseIsAuthorized = vi.fn();
+    const baseSetup = vi.fn();
 
-  return {
-    baseConnect,
-    baseDisconnect,
-    baseIsAuthorized,
-    baseSetup,
-    metaMaskConnector: vi.fn(() => ({
-      id: "metaMaskSDK",
-      name: "MetaMask",
-      type: "metaMask",
-      connect: baseConnect,
-      disconnect: baseDisconnect,
-      isAuthorized: baseIsAuthorized,
-      setup: baseSetup
-    })),
-    metaMaskFactory: vi.fn(),
-    trackEvent: vi.fn()
-  };
-});
+    return {
+      baseConnect,
+      baseDisconnect,
+      baseIsAuthorized,
+      baseSetup,
+      metaMaskConnector: vi.fn(() => ({
+        id: "metaMaskSDK",
+        name: "MetaMask",
+        type: "metaMask",
+        connect: baseConnect,
+        disconnect: baseDisconnect,
+        isAuthorized: baseIsAuthorized,
+        setup: baseSetup
+      })),
+      metaMaskFactory: vi.fn(),
+      trackEvent: vi.fn()
+    };
+  });
 
 vi.mock("@/lib/analytics", () => ({
   trackEvent
 }));
 
 vi.mock("wagmi", () => ({
-  createConnector:
-    (factory: (config: unknown) => unknown) =>
-    (config: unknown) =>
-      factory(config)
+  createConnector: (factory: (config: unknown) => unknown) => (config: unknown) => factory(config)
 }));
 
 vi.mock("wagmi/connectors", () => ({
@@ -141,8 +131,7 @@ describe("metaMaskSdkWallet", () => {
     await expect(connector.connect()).rejects.toBe(connectionError);
     expect(trackEvent).toHaveBeenCalledWith("wallet_connect_error", {
       connector: "metaMaskSDK",
-      message:
-        "A wallet request is already pending. Open MetaMask and complete or reject it before trying again.",
+      message: "A wallet request is already pending. Open MetaMask and complete or reject it before trying again.",
       recovery: false
     });
   });

@@ -7,12 +7,7 @@ import { formatEther } from "viem";
 import { REVALIDATE_LONG, REVALIDATE_MEDIUM, REVALIDATE_SHORT } from "@/lib/config";
 import { getAppConfig } from "@/lib/server/app-config";
 import { fetchApi, fetchRwalk, postApi } from "@/lib/api/client";
-import {
-  actionResponseSchema,
-  tokenHistorySchema,
-  tokenInfoSchema,
-  voteCountSchema
-} from "@/lib/api/schemas";
+import { actionResponseSchema, tokenHistorySchema, tokenInfoSchema, voteCountSchema } from "@/lib/api/schemas";
 import type { tokenDetailSchema } from "@/lib/api/schemas";
 
 import { nftAbi } from "@/generated/wagmi";
@@ -56,8 +51,7 @@ async function fetchTokenDetail(
   tokenId: number,
   init: { cache?: RequestCache; revalidate?: number } = { revalidate: REVALIDATE_MEDIUM }
 ): Promise<Nft> {
-  const historyInit =
-    init.cache === "no-store" ? { cache: "no-store" as const } : { revalidate: REVALIDATE_SHORT };
+  const historyInit = init.cache === "no-store" ? { cache: "no-store" as const } : { revalidate: REVALIDATE_SHORT };
 
   const [infoResponse, historyResponse] = await Promise.all([
     fetchRwalk(`tokens/info/${tokenId}`, init, tokenInfoSchema),
@@ -86,19 +80,19 @@ async function getPendingTokenDetail(tokenId: number): Promise<Nft | null> {
         abi: nftAbi,
         functionName: "ownerOf",
         args: [BigInt(tokenId)]
-      }) as Promise<`0x${string}`>,
+      }),
       publicClient.readContract({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: "seeds",
         args: [BigInt(tokenId)]
-      }) as Promise<`0x${string}`>,
+      }),
       publicClient.readContract({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: "tokenNames",
         args: [BigInt(tokenId)]
-      }) as Promise<string>
+      })
     ]);
 
     return {
@@ -120,16 +114,12 @@ export const getTokenDetail = cache(async (tokenId: number): Promise<Nft> => {
   return fetchTokenDetail(tokenId);
 });
 
-export async function getTokenDetailFresh(tokenId: number): Promise<Nft> {
-  return fetchTokenDetail(tokenId, { cache: "no-store" });
-}
-
 export async function getTokenDetailOrFallback(
   tokenId: number,
   options: { fresh?: boolean } = {}
 ): Promise<Nft | null> {
   try {
-    return options.fresh ? await getTokenDetailFresh(tokenId) : await getTokenDetail(tokenId);
+    return options.fresh ? await fetchTokenDetail(tokenId, { cache: "no-store" }) : await getTokenDetail(tokenId);
   } catch {
     return getPendingTokenDetail(tokenId);
   }
@@ -148,11 +138,11 @@ export async function getRandomMintedTokenIds(count: number): Promise<number[]> 
   try {
     const { NFT_ADDRESS } = await getAppConfig();
     const totalSupply = Number(
-      (await publicClient.readContract({
+      await publicClient.readContract({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: "totalSupply"
-      })) as bigint
+      })
     );
 
     const pool = Array.from({ length: Math.max(0, totalSupply) }, (_, tokenId) => tokenId);
@@ -200,22 +190,21 @@ export const getVaultState = cache(async (): Promise<VaultState | null> => {
 
   try {
     const { NFT_ADDRESS } = await getAppConfig();
-    const read = <T,>(functionName: string) =>
+    const read = <T>(functionName: string) =>
       publicClient.readContract({
         address: NFT_ADDRESS,
         abi: nftAbi,
         functionName: functionName as never
       }) as Promise<T>;
 
-    const [supply, prize, untilWithdrawal, lastMinter, mintPrice, numWithdrawals] =
-      await Promise.allSettled([
-        read<bigint>("totalSupply"),
-        read<bigint>("withdrawalAmount"),
-        read<bigint>("timeUntilWithdrawal"),
-        read<`0x${string}`>("lastMinter"),
-        read<bigint>("getMintPrice"),
-        read<bigint>("numWithdrawals")
-      ]);
+    const [supply, prize, untilWithdrawal, lastMinter, mintPrice, numWithdrawals] = await Promise.allSettled([
+      read<bigint>("totalSupply"),
+      read<bigint>("withdrawalAmount"),
+      read<bigint>("timeUntilWithdrawal"),
+      read<`0x${string}`>("lastMinter"),
+      read<bigint>("getMintPrice"),
+      read<bigint>("numWithdrawals")
+    ]);
 
     if (supply.status !== "fulfilled") {
       return null;
@@ -225,11 +214,9 @@ export const getVaultState = cache(async (): Promise<VaultState | null> => {
 
     const state: VaultState = {
       prizeEth: prize.status === "fulfilled" ? Number(formatEther(prize.value)) : 0,
-      secondsUntilWithdrawal:
-        untilWithdrawal.status === "fulfilled" ? Number(untilWithdrawal.value) : 0,
+      secondsUntilWithdrawal: untilWithdrawal.status === "fulfilled" ? Number(untilWithdrawal.value) : 0,
       lastMinter: leader && leader.toLowerCase() !== ZERO_ADDRESS ? leader : undefined,
-      mintPriceEth:
-        mintPrice.status === "fulfilled" ? Number(formatEther(mintPrice.value)) : undefined,
+      mintPriceEth: mintPrice.status === "fulfilled" ? Number(formatEther(mintPrice.value)) : undefined,
       mintedCount: Number(supply.value),
       numWithdrawals: numWithdrawals.status === "fulfilled" ? Number(numWithdrawals.value) : 0,
       readAtMs: Date.now()
@@ -245,10 +232,7 @@ export const getVaultState = cache(async (): Promise<VaultState | null> => {
 const WALL_ROW_COUNT = 8;
 
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
-  const [vault, ratingOrderResult] = await Promise.all([
-    getVaultState(),
-    getRatingOrder().catch(() => [] as number[])
-  ]);
+  const [vault, ratingOrderResult] = await Promise.all([getVaultState(), getRatingOrder().catch(() => [] as number[])]);
 
   const mintedCount = vault?.mintedCount ?? 0;
   const featuredTokenIds = getHomepageFeaturedTokenIds(mintedCount);
@@ -293,11 +277,7 @@ export async function fetchBeautyComparePairIds(
   }
   const q = params.toString();
   const suffix = q ? `?${q}` : "";
-  return fetchApi(
-    `api/randomwalk/ranking/beauty-pair-ids${suffix}`,
-    { cache: "no-store" },
-    beautyPairIdsSchema
-  );
+  return fetchApi(`api/randomwalk/ranking/beauty-pair-ids${suffix}`, { cache: "no-store" }, beautyPairIdsSchema);
 }
 
 /** Cached per-request only; fetch is no-store so /compare refetches show an up-to-date total after each vote. */
@@ -316,11 +296,7 @@ const rankingSignChallengeSchema = z.object({
 
 /** One-time nonce for wallet-signed beauty votes (Go GET .../ranking/sign-challenge). */
 export async function fetchRankingSignChallenge() {
-  return fetchApi(
-    "api/randomwalk/ranking/sign-challenge",
-    { cache: "no-store" },
-    rankingSignChallengeSchema
-  );
+  return fetchApi("api/randomwalk/ranking/sign-challenge", { cache: "no-store" }, rankingSignChallengeSchema);
 }
 
 export type BeautyVoteSignedPayload = {

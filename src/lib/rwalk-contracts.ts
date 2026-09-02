@@ -2,10 +2,7 @@ import "server-only";
 
 import { z } from "zod";
 
-import {
-  isFetchConnectionError,
-  rethrowAsBackendUnavailableIfConnectionFailed
-} from "@/lib/api/backend-errors";
+import { isFetchConnectionError, rethrowAsBackendUnavailableIfConnectionFailed } from "@/lib/api/backend-errors";
 import { getApiBase, markServerDown } from "@/lib/server-rotation";
 import { getCurrentNetworkName } from "@/lib/web3/evm-chain";
 
@@ -49,9 +46,7 @@ export async function fetchRwalkContractsFromApi(): Promise<RwalkContractAddress
   }
 
   const isLocal = getCurrentNetworkName() === "local";
-  const init: RequestInit = isLocal
-    ? { cache: "no-store" }
-    : ({ next: { revalidate: 300 } } as RequestInit);
+  const init: RequestInit = isLocal ? { cache: "no-store" } : { next: { revalidate: 300 } };
 
   let res: Response | undefined;
   const maxAttempts = 3;

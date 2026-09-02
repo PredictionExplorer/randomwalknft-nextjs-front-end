@@ -1,7 +1,4 @@
-import type {
-  CollectionQueryState,
-  CollectionViewMode
-} from "@/lib/types";
+import type { CollectionQueryState, CollectionViewMode } from "@/lib/types";
 
 function parsePositiveInteger(value: string | string[] | undefined) {
   if (typeof value !== "string" || value.trim() === "") {

@@ -25,7 +25,10 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           }))
         }}
       />
-      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.24em] text-muted-foreground">
+      <nav
+        aria-label="Breadcrumb"
+        className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.24em] text-muted-foreground"
+      >
         {items.map((item, index) => (
           <span key={`${item.label}-${index}`} className="flex items-center gap-2">
             {item.href ? (

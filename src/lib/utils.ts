@@ -69,11 +69,7 @@ export function createAssetUrls(tokenId: number): NftAssetUrls {
   };
 }
 
-export function getAssetBySelection(
-  assets: NftAssetUrls,
-  theme: AssetTheme,
-  variant: AssetVariant
-) {
+export function getAssetBySelection(assets: NftAssetUrls, theme: AssetTheme, variant: AssetVariant) {
   if (variant === "image") {
     return theme === "black" ? assets.blackImage : assets.whiteImage;
   }

@@ -12,19 +12,13 @@ async function goto(page: Page, path: string) {
 test("home page renders primary CTAs in the entry hall", async ({ page }) => {
   await goto(page, "/");
   await expect(page.getByRole("link", { name: /mint a new work/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /enter the gallery/i })).toHaveAttribute(
-    "href",
-    "/gallery"
-  );
+  await expect(page.getByRole("link", { name: /enter the gallery/i })).toHaveAttribute("href", "/gallery");
   await expect(page.getByRole("heading", { level: 1, name: /random walk nft/i })).toBeVisible();
 });
 
 test("home page emits the configured canonical URL", async ({ page }) => {
   await goto(page, "/");
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-    "href",
-    expectedCanonicalOrigin
-  );
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", expectedCanonicalOrigin);
 });
 
 test("home hero fills the first viewport with the heading visible", async ({ page }) => {
@@ -52,22 +46,18 @@ test("home page shows the live vault state", async ({ page }) => {
   await goto(page, "/");
 
   await expect(page.getByTestId("vault-room-prize")).toBeVisible();
-  await expect(page.getByRole("link", { name: /visit the vault/i }).first()).toHaveAttribute(
-    "href",
-    "/vault"
-  );
+  await expect(page.getByRole("link", { name: /visit the vault/i }).first()).toHaveAttribute("href", "/vault");
 });
 
 test("home page links Random Walk NFT to Cosmic Signature", async ({ page }) => {
   await goto(page, "/");
 
-  await expect(
-    page.getByRole("heading", { name: /what can you do with a random walk nft\?/i })
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /what can you do with a random walk nft\?/i })).toBeVisible();
   await expect(page.getByText(/1,000 CST/i).first()).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: /use your random walk nft in cosmic signature/i })
-  ).toHaveAttribute("href", "https://cosmicsignature.com/");
+  await expect(page.getByRole("link", { name: /use your random walk nft in cosmic signature/i })).toHaveAttribute(
+    "href",
+    "https://cosmicsignature.com/"
+  );
 });
 
 test("vault page shows the prize, clock, and rules", async ({ page }) => {

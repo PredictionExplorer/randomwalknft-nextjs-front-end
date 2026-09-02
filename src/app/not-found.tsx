@@ -9,11 +9,7 @@ export default function NotFoundPage() {
     <PageShell className="flex min-h-[60vh] flex-col items-center justify-center space-y-8 py-16 text-center">
       <PageHeading
         eyebrow="404"
-        title={[
-          { text: "PAGE" },
-          { text: "NOT", tone: "primary" },
-          { text: "FOUND", tone: "secondary" }
-        ]}
+        title={[{ text: "PAGE" }, { text: "NOT", tone: "primary" }, { text: "FOUND", tone: "secondary" }]}
         description="The page you are looking for does not exist or has been moved."
       />
       <div className="flex flex-wrap justify-center gap-4">

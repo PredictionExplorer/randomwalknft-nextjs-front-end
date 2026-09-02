@@ -25,6 +25,11 @@ type AssetRemotePattern = {
   pathname: string;
 };
 
+/** The slice of webpack's configuration this file touches; Next types the callback argument as `any`. */
+type WebpackAliasConfig = {
+  resolve: { alias?: Record<string, string | false | string[]> };
+};
+
 /**
  * One remote pattern per configured API origin. `NEXT_PUBLIC_API_URLS` is the
  * comma-separated rotation list (see `src/lib/server-rotation.ts`); the singular
@@ -76,7 +81,7 @@ const nextConfig: NextConfig = {
       "@react-native-async-storage/async-storage": asyncStorageStubTurbopack
     }
   },
-  webpack: (config) => {
+  webpack: (config: WebpackAliasConfig) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       "@react-native-async-storage/async-storage": asyncStorageStubWebpack
@@ -85,8 +90,14 @@ const nextConfig: NextConfig = {
   },
   typedRoutes: true,
   reactStrictMode: true,
-  async redirects() {
-    return [
+  /**
+   * React Compiler (stable in Next 16): automatic memoization across every component.
+   * View Transitions need no flag: the App Router ships React canary, so `ViewTransition`
+   * is importable from `react` directly.
+   */
+  reactCompiler: true,
+  redirects() {
+    return Promise.resolve([
       {
         source: "/marketplace",
         destination: AXIOM_ZERO_MARKETPLACE_URL,
@@ -97,20 +108,20 @@ const nextConfig: NextConfig = {
         destination: "/vault",
         permanent: true
       }
-    ];
+    ]);
   },
   allowedDevOrigins: ["http://127.0.0.1:3000", "http://localhost:3000"],
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "nfts.cosmicsignature.com",
+        hostname: "nfts.cosmicsignature.com"
       },
       {
         protocol: "https",
-        hostname: "randomwalknft-api.com",
+        hostname: "randomwalknft-api.com"
       },
-      ...assetRemotes,
+      ...assetRemotes
     ],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60

@@ -1,5 +1,5 @@
 /** Shown in app `error.tsx` when fetch to the Go webserv fails (e.g. ECONNREFUSED). */
-export const RANDOMWALK_BACKEND_UNAVAILABLE_MESSAGE =
+const RANDOMWALK_BACKEND_UNAVAILABLE_MESSAGE =
   "RandomWalk backend API is unreachable. Start websrv (Go) or check NEXT_PUBLIC_API_BASE_URL.";
 
 export function isRandomWalkBackendUnavailableMessage(message: string): boolean {

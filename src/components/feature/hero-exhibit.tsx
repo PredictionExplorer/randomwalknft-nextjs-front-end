@@ -35,11 +35,7 @@ export function HeroExhibit({
   const [owner, setOwner] = useState(initialOwner);
   // Server snapshot assumes motion so the film is in the SSR HTML; visitors
   // with reduced motion get the still swapped in on hydration.
-  const reducedMotion = useSyncExternalStore(
-    subscribeToReducedMotion,
-    getReducedMotionSnapshot,
-    () => false
-  );
+  const reducedMotion = useSyncExternalStore(subscribeToReducedMotion, getReducedMotionSnapshot, () => false);
 
   const handleEnded = useCallback(async () => {
     try {
@@ -58,7 +54,7 @@ export function HeroExhibit({
         void video.play();
       }
     } catch {
-      videoRef.current?.play();
+      void videoRef.current?.play();
     }
   }, [tokenId]);
 
@@ -97,12 +93,8 @@ export function HeroExhibit({
       >
         <p className="text-[0.6rem] uppercase tracking-[0.3em] text-white/50">Now showing</p>
         <p className="mt-1 font-mono text-sm text-white">{formatId(tokenId)}</p>
-        {owner ? (
-          <p className="mt-1 truncate text-xs text-white/60">Collected by {shortenAddress(owner)}</p>
-        ) : null}
-        <p className="mt-1 text-[0.6rem] uppercase tracking-[0.2em] text-white/40">
-          Triple walk film · CC0
-        </p>
+        {owner ? <p className="mt-1 truncate text-xs text-white/60">Collected by {shortenAddress(owner)}</p> : null}
+        <p className="mt-1 text-[0.6rem] uppercase tracking-[0.2em] text-white/40">Triple walk film · CC0</p>
       </Link>
     </>
   );

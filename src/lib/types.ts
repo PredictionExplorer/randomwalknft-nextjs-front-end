@@ -13,7 +13,7 @@ export type NftAssetUrls = {
   whiteTripleVideo: string;
 };
 
-export type NftHistoryRecord = {
+type NftHistoryRecord = {
   recordType: number;
   blockNumber?: number | undefined;
   timestamp: number;
@@ -35,12 +35,6 @@ export type Nft = {
   tokenHistory: NftHistoryRecord[];
   mintedAt?: string | undefined;
   isPendingMetadata?: boolean | undefined;
-};
-
-export type WalletActionState = {
-  status: "idle" | "pending" | "success" | "error";
-  message?: string | undefined;
-  hash?: `0x${string}` | undefined;
 };
 
 export type CollectionQueryState = {

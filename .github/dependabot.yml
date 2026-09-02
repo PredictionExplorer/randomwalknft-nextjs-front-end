@@ -1,0 +1,50 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      next-react:
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+          - "eslint-config-next"
+          - "@next/*"
+      web3:
+        patterns:
+          - "wagmi"
+          - "viem"
+          - "@wagmi/*"
+          - "@metamask/*"
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "@playwright/test"
+          - "@testing-library/*"
+          - "msw"
+          - "jsdom"
+          - "fast-check"
+          - "@axe-core/*"
+          - "@lhci/*"
+      tooling:
+        patterns:
+          - "eslint*"
+          - "typescript*"
+          - "prettier"
+          - "knip"
+          - "husky"
+          - "lint-staged"
+      radix:
+        patterns:
+          - "@radix-ui/*"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday

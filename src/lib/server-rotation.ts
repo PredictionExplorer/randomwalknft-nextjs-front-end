@@ -31,10 +31,7 @@ const trimmedList = (raw: string | undefined): string[] =>
     .filter(Boolean);
 
 /** Parses a plural env list with a singular fallback. Exported for tests. */
-export const parseUrlList = (
-  plural: string | undefined,
-  singular: string | undefined
-): string[] => {
+export const parseUrlList = (plural: string | undefined, singular: string | undefined): string[] => {
   const list = trimmedList(plural);
   if (list.length > 0) {
     return list;
@@ -52,16 +49,13 @@ let rpcListCache: string[] | null = null;
  */
 export function getApiBaseUrls(): string[] {
   if (!apiListCache || apiListCache.length === 0) {
-    apiListCache = parseUrlList(
-      process.env.NEXT_PUBLIC_API_URLS,
-      process.env.NEXT_PUBLIC_API_BASE_URL
-    );
+    apiListCache = parseUrlList(process.env.NEXT_PUBLIC_API_URLS, process.env.NEXT_PUBLIC_API_BASE_URL);
   }
   return apiListCache;
 }
 
 /** JSON-RPC endpoints, in rotation order (no trailing slash). */
-export function getRpcBaseUrls(): string[] {
+function getRpcBaseUrls(): string[] {
   if (!rpcListCache || rpcListCache.length === 0) {
     rpcListCache = parseUrlList(process.env.NEXT_PUBLIC_RPC_URLS, process.env.NEXT_PUBLIC_RPC_URL);
   }
@@ -111,10 +105,7 @@ function pickServerInternal(urls: string[], now: number): string {
       return candidate;
     }
   }
-  console.error(
-    "[serverRotation] all servers are marked down, using hourly pick anyway:",
-    urls.join(", ")
-  );
+  console.error("[serverRotation] all servers are marked down, using hourly pick anyway:", urls.join(", "));
   return urls[start] ?? "";
 }
 
@@ -125,10 +116,7 @@ export function markServerDown(url: string, now: number = Date.now()): void {
     return;
   }
   downUntil.set(base, now + FAILURE_COOLDOWN_MS);
-  console.warn(
-    `[serverRotation] marking server down for ${Math.round(FAILURE_COOLDOWN_MS / 1000)}s:`,
-    base
-  );
+  console.warn(`[serverRotation] marking server down for ${Math.round(FAILURE_COOLDOWN_MS / 1000)}s:`, base);
 }
 
 /** The API origin to use right now (hourly rotation + failover). "" when unconfigured. */

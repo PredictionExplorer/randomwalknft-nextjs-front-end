@@ -11,9 +11,7 @@ async function openMobileWalletModal(page: Page) {
   await expect(page.getByText("MetaMask", { exact: true }).first()).toBeVisible();
 }
 
-test("mobile navigation opens a MetaMask SDK option without WalletConnect", async ({
-  page
-}) => {
+test("mobile navigation opens a MetaMask SDK option without WalletConnect", async ({ page }) => {
   const forbiddenRequests: string[] = [];
   page.on("request", (request) => {
     if (/walletconnect|reown/i.test(request.url())) {
@@ -25,15 +23,11 @@ test("mobile navigation opens a MetaMask SDK option without WalletConnect", asyn
   await openMobileWalletModal(page);
 
   await expect(page.getByText(/walletconnect/i)).toHaveCount(0);
-  await expect(
-    page.getByRole("heading", { name: /navigation menu/i })
-  ).not.toBeVisible();
+  await expect(page.getByRole("heading", { name: /navigation menu/i })).not.toBeVisible();
   expect(forbiddenRequests).toEqual([]);
 });
 
-test("a mobile in-app provider connects through the production modal", async ({
-  page
-}) => {
+test("a mobile in-app provider connects through the production modal", async ({ page }) => {
   await installMockWallet(page, {
     announceEip6963: true,
     chainId: "0xa4b1"

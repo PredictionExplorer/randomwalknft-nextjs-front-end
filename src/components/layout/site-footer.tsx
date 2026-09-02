@@ -16,19 +16,28 @@ export function SiteFooter() {
         <div className="space-y-3">
           <p className="text-lg font-semibold text-foreground">Random Walk NFT</p>
           <p className="max-w-xl leading-7">
-            A living museum of generative art on Arbitrum. Every work is drawn by chance from an
-            on-chain seed, released CC0, and backed by an immutable contract whose vault rewards the
-            last minter.
+            A living museum of generative art on Arbitrum. Every work is drawn by chance from an on-chain seed, released
+            CC0, and backed by an immutable contract whose vault rewards the last minter.
           </p>
         </div>
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.24em] text-secondary">Navigate</p>
           <div className="space-y-2">
-            <Link href="/gallery" className="block transition hover:text-secondary">Collection</Link>
-            <Link href="/mint" className="block transition hover:text-secondary">Mint</Link>
-            <Link href="/vault" className="block transition hover:text-secondary">The Vault</Link>
-            <Link href="/how-it-works" className="block transition hover:text-secondary">How It Works</Link>
-            <Link href="/faq" className="block transition hover:text-secondary">FAQ</Link>
+            <Link href="/gallery" className="block transition hover:text-secondary">
+              Collection
+            </Link>
+            <Link href="/mint" className="block transition hover:text-secondary">
+              Mint
+            </Link>
+            <Link href="/vault" className="block transition hover:text-secondary">
+              The Vault
+            </Link>
+            <Link href="/how-it-works" className="block transition hover:text-secondary">
+              How It Works
+            </Link>
+            <Link href="/faq" className="block transition hover:text-secondary">
+              FAQ
+            </Link>
           </div>
         </div>
         <div className="space-y-2">

@@ -38,9 +38,7 @@ test("MetaMask SDK connects an installed extension provider", async ({ page }) =
   await expect(page.getByRole("button", { name: /0x12/i })).toBeVisible();
 });
 
-test("an installed EIP-6963 wallet is discovered without WalletConnect", async ({
-  page
-}) => {
+test("an installed EIP-6963 wallet is discovered without WalletConnect", async ({ page }) => {
   await installMockWallet(page, {
     announceEip6963: true,
     chainId: "0xa4b1",
@@ -65,9 +63,7 @@ test("wrong-network wallet shows the switch-network action", async ({ page }) =>
   await expect(page.getByRole("button", { name: /switch network/i })).toBeVisible();
 });
 
-test("a first-time wallet can add and switch to the configured chain", async ({
-  page
-}) => {
+test("a first-time wallet can add and switch to the configured chain", async ({ page }) => {
   await installMockWallet(page, {
     chainId: "0x1",
     missingChainUntilAdded: true
@@ -76,15 +72,8 @@ test("a first-time wallet can add and switch to the configured chain", async ({
   await connectBrowserWallet(page);
 
   await expect(page.getByRole("button", { name: /0x12/i })).toBeVisible();
-  const requestedMethods = await page.evaluate(() =>
-    window.__mockWallet.requests.map((request) => request.method)
-  );
-  expect(requestedMethods).toEqual(
-    expect.arrayContaining([
-      "wallet_switchEthereumChain",
-      "wallet_addEthereumChain"
-    ])
-  );
+  const requestedMethods = await page.evaluate(() => window.__mockWallet.requests.map((request) => request.method));
+  expect(requestedMethods).toEqual(expect.arrayContaining(["wallet_switchEthereumChain", "wallet_addEthereumChain"]));
 });
 
 test("wallet state reconnects across SSR hydration and refresh", async ({ page }) => {

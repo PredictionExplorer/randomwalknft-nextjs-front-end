@@ -6,36 +6,48 @@ on:
       - main
       - master
       - "codex/**"
+      - "redesign/**"
   pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # NEXT_PUBLIC_* values are inlined at build time; every job that builds needs them.
+  NEXT_PUBLIC_NETWORK: mainnet
+  NEXT_PUBLIC_API_BASE_URL: http://randomwalknft-api.com
+  NEXT_PUBLIC_RPC_URL: https://arb1.arbitrum.io/rpc
+  NEXT_PUBLIC_SITE_URL: https://randomwalknft.com
 
 jobs:
   static:
+    name: Lint, types, format, dead code
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.19.0
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - run: pnpm format:check
+      - run: pnpm knip
 
   unit:
+    name: Unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.19.0
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:unit
@@ -46,16 +58,15 @@ jobs:
           path: coverage/unit
 
   e2e:
+    name: End-to-end (functional)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.19.0
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
@@ -72,20 +83,24 @@ jobs:
           path: test-results
 
   visual:
+    name: Visual regression
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
+    # Pinned Playwright image: screenshots are only comparable when fonts, GPU, and
+    # browser builds match the environment that produced the committed baselines.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.19.0
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:e2e:visual
+        env:
+          HOME: /root
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -98,41 +113,40 @@ jobs:
           path: test-results
 
   lighthouse:
+    name: Lighthouse budgets
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.19.0
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:lighthouse
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
 
   build:
+    name: Production build
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      NEXT_PUBLIC_NETWORK: mainnet
-      NEXT_PUBLIC_API_BASE_URL: http://randomwalknft-api.com
-      NEXT_PUBLIC_RPC_URL: https://arb1.arbitrum.io/rpc
-      NEXT_PUBLIC_SITE_URL: https://randomwalknft.com
     needs:
       - static
       - unit
       - e2e
       - visual
+      - lighthouse
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.13.1
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.19.0
+          node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build

@@ -41,10 +41,10 @@ export function AppProviders({ children, initialState, contracts }: AppProviders
             <WalletLifecycleBridge />
             {children}
           </RainbowKitProvider>
-        <Toaster position="top-right" richColors />
-        {process.env.NODE_ENV === "development" ? <ReactQueryDevtools initialIsOpen={false} /> : null}
-      </QueryClientProvider>
-    </WagmiProvider>
+          <Toaster position="top-right" richColors />
+          {process.env.NODE_ENV === "development" ? <ReactQueryDevtools initialIsOpen={false} /> : null}
+        </QueryClientProvider>
+      </WagmiProvider>
     </ContractsProvider>
   );
 }

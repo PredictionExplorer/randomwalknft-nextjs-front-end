@@ -12,13 +12,7 @@ function truncateCid(cid: string, head = 6, tail = 4) {
   return `${cid.slice(0, head)}…${cid.slice(-tail)}`;
 }
 
-export function IpfsLink({
-  uri,
-  gatewayUrl
-}: {
-  uri: string;
-  gatewayUrl: string;
-}) {
+export function IpfsLink({ uri, gatewayUrl }: { uri: string; gatewayUrl: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copyUri() {
@@ -39,12 +33,7 @@ export function IpfsLink({
       >
         {display}
       </ExternalLink>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7"
-        onClick={() => void copyUri()}
-      >
+      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => void copyUri()}>
         {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
         <span className="sr-only">Copy IPFS URI</span>
       </Button>

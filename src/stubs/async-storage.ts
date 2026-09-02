@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await -- implements AsyncStorage's promise-returning interface */
 /**
  * Web stub for @metamask/sdk’s optional React Native dependency. The browser bundle still
  * references this module; webpack would otherwise try to resolve the real RN package.
@@ -26,18 +27,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function mergeRecords(
-  current: Record<string, unknown>,
-  incoming: Record<string, unknown>
-): Record<string, unknown> {
+function mergeRecords(current: Record<string, unknown>, incoming: Record<string, unknown>): Record<string, unknown> {
   const merged = { ...current };
 
   for (const [key, value] of Object.entries(incoming)) {
     const currentValue = merged[key];
-    merged[key] =
-      isRecord(currentValue) && isRecord(value)
-        ? mergeRecords(currentValue, value)
-        : value;
+    merged[key] = isRecord(currentValue) && isRecord(value) ? mergeRecords(currentValue, value) : value;
   }
 
   return merged;
@@ -159,10 +154,7 @@ const AsyncStorage = {
       try {
         for (let index = 0; index < storage.length; index += 1) {
           const key = storage.key(index);
-          if (
-            key?.startsWith(STORAGE_PREFIX) &&
-            !removedFallbackKeys.has(key)
-          ) {
+          if (key?.startsWith(STORAGE_PREFIX) && !removedFallbackKeys.has(key)) {
             keys.add(key.slice(STORAGE_PREFIX.length));
           }
         }

@@ -92,10 +92,8 @@ describe("WalletStatusCard", () => {
       vi.advanceTimersByTime(8_000);
     });
 
-    expect(
-      screen
-        .getByRole("link", { name: /open this page in metamask/i })
-        .getAttribute("href")
-    ).toMatch(/^https:\/\/metamask\.app\.link\/dapp\//);
+    expect(screen.getByRole("link", { name: /open this page in metamask/i }).getAttribute("href")).toMatch(
+      /^https:\/\/metamask\.app\.link\/dapp\//
+    );
   });
 });

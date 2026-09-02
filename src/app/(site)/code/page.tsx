@@ -24,18 +24,10 @@ export const metadata: Metadata = {
 export default function CodePage() {
   return (
     <PageShell className="space-y-10 py-16">
-      <Breadcrumbs
-        items={[
-          { href: "/", label: "Home" },
-          { label: "Open Source" }
-        ]}
-      />
+      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Open Source" }]} />
       <PageHeading
         eyebrow="Fully verifiable"
-        title={[
-          { text: "OPEN" },
-          { text: "SOURCE", tone: "secondary" }
-        ]}
+        title={[{ text: "OPEN" }, { text: "SOURCE", tone: "secondary" }]}
         description="Every Random Walk NFT can be independently verified. The complete source code, dependencies, and reproduction steps are published here — nothing is hidden."
       />
 
@@ -44,7 +36,8 @@ export default function CodePage() {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.22em] text-secondary">1. Set up your environment</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              The generator requires a system-level image library. The Guide tab below walks you through installing it on Ubuntu or any compatible system.
+              The generator requires a system-level image library. The Guide tab below walks you through installing it
+              on Ubuntu or any compatible system.
             </p>
           </div>
           <div className="space-y-2">
@@ -56,7 +49,8 @@ export default function CodePage() {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.22em] text-secondary">3. Generate your artwork</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Run the generator with any token number. It fetches the seed from Arbitrum and renders both the black and white image and video variants.
+              Run the generator with any token number. It fetches the seed from Arbitrum and renders both the black and
+              white image and video variants.
             </p>
           </div>
         </CardContent>
@@ -67,9 +61,8 @@ export default function CodePage() {
           <div className="space-y-1">
             <p className="text-sm font-medium">Permanent IPFS backup</p>
             <p className="text-sm leading-7 text-muted-foreground">
-              All generation code and files shown on this page are also stored on IPFS.
-              If this website ever becomes unavailable, you can retrieve everything
-              from IPFS and recreate the artwork from scratch.
+              All generation code and files shown on this page are also stored on IPFS. If this website ever becomes
+              unavailable, you can retrieve everything from IPFS and recreate the artwork from scratch.
             </p>
           </div>
           <IpfsLink

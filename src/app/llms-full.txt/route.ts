@@ -11,13 +11,9 @@ export async function GET() {
   const vault = await getVaultState().catch(() => null);
   const asOf = new Date().toISOString().slice(0, 10);
 
-  const faqSection = faqItems
-    .map((item) => `### ${item.summary}\n\n${item.detail}`)
-    .join("\n\n");
+  const faqSection = faqItems.map((item) => `### ${item.summary}\n\n${item.detail}`).join("\n\n");
 
-  const charterSection = homepageCharter
-    .map((item) => `### ${item.title}\n\n${item.body}`)
-    .join("\n\n");
+  const charterSection = homepageCharter.map((item) => `### ${item.title}\n\n${item.body}`).join("\n\n");
 
   const liveFacts = vault
     ? `

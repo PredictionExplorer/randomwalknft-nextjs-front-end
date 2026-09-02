@@ -14,16 +14,14 @@ describe("assets route", () => {
   });
 
   it("proxies allowed image assets with caching headers", async () => {
-    const fetchMock = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValue(
-        new Response("ok", {
-          status: 200,
-          headers: {
-            "content-type": "image/jpeg"
-          }
-        })
-      );
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("ok", {
+        status: 200,
+        headers: {
+          "content-type": "image/jpeg"
+        }
+      })
+    );
 
     const response = await GET(new Request("http://localhost"), {
       params: Promise.resolve({ path: ["000001_black_thumb.jpg"] })
@@ -41,9 +39,7 @@ describe("assets route", () => {
   });
 
   it("uses no-store for video assets", async () => {
-    const fetchMock = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValue(new Response("video", { status: 200 }));
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("video", { status: 200 }));
 
     await GET(new Request("http://localhost"), {
       params: Promise.resolve({ path: ["000001_black_single.mp4"] })
@@ -68,9 +64,7 @@ describe("assets route", () => {
   });
 
   it("returns a placeholder image when a generated image asset is not found", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(null, { status: 404 })
-    );
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 404 }));
     const response = await GET(new Request("http://localhost"), {
       params: Promise.resolve({ path: ["000001_black_thumb.jpg"] })
     });
@@ -84,9 +78,7 @@ describe("assets route", () => {
   });
 
   it("returns upstream error status when a missing video asset is requested", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(null, { status: 404 })
-    );
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 404 }));
     const response = await GET(new Request("http://localhost"), {
       params: Promise.resolve({ path: ["000001_black_single.mp4"] })
     });
@@ -98,9 +90,7 @@ describe("assets route", () => {
   });
 
   it("supports HEAD requests for probing asset availability", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(null, { status: 404 })
-    );
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 404 }));
 
     const response = await HEAD(new Request("http://localhost", { method: "HEAD" }), {
       params: Promise.resolve({ path: ["000001_black_thumb.jpg"] })

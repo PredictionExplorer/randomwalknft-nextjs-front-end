@@ -3,18 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WALLET_RESUME_EVENT } from "@/lib/web3/wallet-events";
 
-const { accountState, metaMaskConnector, reconnectAsync, trackEvent } = vi.hoisted(
-  () => ({
-    reconnectAsync: vi.fn(),
-    trackEvent: vi.fn(),
-    accountState: {
-      isConnected: false,
-      isConnecting: false,
-      isReconnecting: false
-    },
-    metaMaskConnector: { id: "metaMaskSDK" }
-  })
-);
+const { accountState, metaMaskConnector, reconnectAsync, trackEvent } = vi.hoisted(() => ({
+  reconnectAsync: vi.fn(),
+  trackEvent: vi.fn(),
+  accountState: {
+    isConnected: false,
+    isConnecting: false,
+    isReconnecting: false
+  },
+  metaMaskConnector: { id: "metaMaskSDK" }
+}));
 
 vi.mock("wagmi", () => ({
   useAccount: () => accountState,

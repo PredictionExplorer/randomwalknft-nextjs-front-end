@@ -7,13 +7,7 @@ import { PageHeading } from "@/components/common/page-heading";
 import { PageShell } from "@/components/common/page-shell";
 import { Button } from "@/components/ui/button";
 
-export default function ErrorPage({
-  error,
-  reset
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const backendDown = isRandomWalkBackendUnavailableMessage(error.message);
 
   return (
