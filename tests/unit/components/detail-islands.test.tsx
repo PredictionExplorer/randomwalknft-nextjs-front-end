@@ -63,8 +63,12 @@ describe("PendingRefresh", () => {
   });
 
   it("strips the one-shot success message and refreshes while the token is pending", () => {
-    render(<PendingRefresh pending stripMessage />);
+    const { rerender } = render(<PendingRefresh pending justMinted plaque="Minted 2021" />);
     expect(router.replace).toHaveBeenCalledWith("/detail/42", { scroll: false });
+    expect(screen.getByTestId("token-plaque")).toHaveTextContent(/freshly minted/i);
+    // The URL cleanup re-renders without the flag; the notice stays.
+    rerender(<PendingRefresh pending justMinted={false} plaque="Minted 2021" />);
+    expect(screen.getByTestId("token-plaque")).toHaveTextContent(/freshly minted/i);
 
     act(() => {
       vi.advanceTimersByTime(15_000);
@@ -74,7 +78,8 @@ describe("PendingRefresh", () => {
   });
 
   it("does nothing for a settled token", () => {
-    render(<PendingRefresh pending={false} stripMessage={false} />);
+    render(<PendingRefresh pending={false} justMinted={false} plaque="Minted 2021" />);
+    expect(screen.getByTestId("token-plaque")).toHaveTextContent("Minted 2021");
     act(() => {
       vi.advanceTimersByTime(60_000);
     });

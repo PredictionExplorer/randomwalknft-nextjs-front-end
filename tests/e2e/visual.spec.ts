@@ -1,117 +1,103 @@
 import { expect, test, type Page } from "@playwright/test";
 
-async function waitForStableDocumentHeight(page: Page) {
+import { isLiveUpstream } from "./fixtures/mock-upstream";
+
+/**
+ * Pixel baselines for every room in both wings, taken against the deterministic mock
+ * upstream. Baselines are Linux-only (see scripts/visual-baselines.sh) so they match the
+ * pinned Playwright image CI runs in; the chromium project is the only one that snapshots.
+ */
+test.skip(isLiveUpstream, "visual baselines need the deterministic mock upstream");
+
+const WINGS = ["dark", "light"] as const;
+
+/** Pages whose full height is stable enough to snapshot end to end. */
+const FULL_PAGES: Array<{ path: string; name: string }> = [
+  { path: "/gallery", name: "gallery" },
+  { path: "/gallery?sortBy=beauty&view=compact", name: "gallery-beauty-study" },
+  { path: "/detail/12", name: "detail" },
+  { path: "/vault", name: "vault" },
+  { path: "/mint", name: "mint" },
+  { path: "/atelier", name: "atelier" },
+  { path: "/compare", name: "salon" },
+  { path: "/faq", name: "faq" },
+  { path: "/how-it-works", name: "how-it-works" },
+  { path: "/code", name: "code" }
+];
+
+async function settle(page: Page, path: string) {
+  await page.goto(path, { waitUntil: "networkidle" });
   await page.waitForFunction(
     () =>
-      new Promise((resolve) => {
-        let lastHeight = 0;
-        let stableFrames = 0;
-
-        const check = () => {
-          const height = document.documentElement.scrollHeight;
-          if (height === lastHeight) {
-            stableFrames += 1;
-          } else {
-            lastHeight = height;
-            stableFrames = 0;
-          }
-
-          if (stableFrames >= 5) {
-            resolve(true);
-            return;
-          }
-
-          requestAnimationFrame(check);
-        };
-
-        check();
-      }),
-    undefined,
-    { timeout: 10000 }
+      document.documentElement.dataset.hydrated === "true" &&
+      Array.from(document.querySelectorAll("body > div[hidden]")).every((node) => node.childElementCount === 0)
   );
+  await page.evaluate(() => document.fonts.ready);
+  // Let hover-video posters and lazily drawn canvases finish their first paint.
+  await page.waitForTimeout(400);
 }
 
-test.describe("visual regressions", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 1100 });
-    await page.addStyleTag({
-      content: `
-        *, *::before, *::after {
-          animation: none !important;
-          transition: none !important;
-        }
-        video {
-          visibility: hidden !important;
-        }
-      `
-    });
-  });
+/** Time- and chance-dependent surfaces: the header clock, countdown digits and rings, per-visit rails. */
+const timeMasks = (page: Page) => [
+  page.getByTestId("vault-ticker"),
+  page.locator("[data-testid=vault-room] svg"),
+  page.locator("[data-testid=vault-room] [aria-hidden]"),
+  page.locator("[data-testid=vault-chapter] [aria-hidden]"),
+  page.getByTestId("mint-featured-rail")
+];
 
-  /** Live header chip (prize + ticking clock) appears on every page. */
-  const headerMasks = (page: Page) => [page.getByTestId("vault-ticker")];
-
-  test("faq page matches desktop snapshot", async ({ page }) => {
-    await page.goto("/faq");
-    await expect(page).toHaveScreenshot("faq-desktop.png", {
-      animations: "disabled",
-      mask: headerMasks(page)
+for (const wing of WINGS) {
+  test.describe(`${wing} wing`, () => {
+    test.beforeEach(async ({ page, context }) => {
+      await context.addCookies([{ name: "rw-wing", value: wing, url: "http://127.0.0.1:3100" }]);
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.addStyleTag({
+        content: `
+          *, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }
+          video { visibility: hidden !important; }
+        `
+      });
     });
-  });
 
-  test("code page matches desktop snapshot", async ({ page }) => {
-    await page.goto("/code");
-    await expect(page).toHaveScreenshot("code-desktop.png", {
-      animations: "disabled",
-      mask: headerMasks(page)
+    test(`homepage opening matches (${wing})`, async ({ page }) => {
+      await settle(page, "/");
+      await expect(page).toHaveScreenshot(`home-opening-${wing}.png`, {
+        animations: "disabled",
+        mask: [...timeMasks(page), page.locator("canvas")],
+        maxDiffPixelRatio: 0.02
+      });
     });
-  });
 
-  test("detail page matches desktop snapshot", async ({ page }) => {
-    await page.goto("/detail/1");
-    await expect(page).toHaveScreenshot("detail-desktop.png", {
-      animations: "disabled",
-      mask: headerMasks(page)
+    test(`homepage collection and vault chapters match (${wing})`, async ({ page }) => {
+      await settle(page, "/");
+      await page.getByTestId("homepage-wall").scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      await expect(page.getByTestId("homepage-wall")).toHaveScreenshot(`home-collection-${wing}.png`, {
+        animations: "disabled",
+        // The exhibition row is resampled per visit by design; the sticky header's clock ticks.
+        mask: [page.locator("canvas"), page.getByTestId("wall-row-exhibition"), page.getByTestId("vault-ticker")],
+        maxDiffPixelRatio: 0.02
+      });
+      await page.getByTestId("vault-chapter").scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      await expect(page.getByTestId("vault-chapter")).toHaveScreenshot(`home-vault-${wing}.png`, {
+        animations: "disabled",
+        mask: [page.locator("[data-testid=vault-chapter] [aria-hidden]"), page.getByTestId("vault-ticker")],
+        maxDiffPixelRatio: 0.02
+      });
     });
-  });
 
-  test("homepage matches desktop snapshot", async ({ page }) => {
-    await page.goto("/");
-    await expect(page).toHaveScreenshot("homepage-desktop.png", {
-      animations: "disabled",
-      fullPage: true,
-      // Live surfaces: the masthead facts, the story stage, the collection wall
-      // (daily artworks + constellation), the vault chapter, and the salon pair.
-      mask: [
-        ...headerMasks(page),
-        page.getByTestId("masthead-facts"),
-        page.getByTestId("homepage-wall"),
-        page.locator("canvas"),
-        page.locator("section#vault"),
-        page.getByRole("heading", { name: /which is more beautiful/i }).locator("xpath=ancestor::section")
-      ],
-      maxDiffPixelRatio: 0.02
-    });
+    for (const { path, name } of FULL_PAGES) {
+      test(`${name} matches (${wing})`, async ({ page }) => {
+        await settle(page, path);
+        await expect(page).toHaveScreenshot(`${name}-${wing}.png`, {
+          animations: "disabled",
+          fullPage: true,
+          mask: [...timeMasks(page), page.locator("canvas")],
+          maxDiffPixelRatio: 0.02
+        });
+      });
+    }
   });
-
-  test("gallery matches desktop snapshot", async ({ page }) => {
-    await page.goto("/gallery");
-    await expect(page.locator('a[href^="/detail/"]')).toHaveCount(24);
-    await waitForStableDocumentHeight(page);
-    await expect(page).toHaveScreenshot("gallery-desktop.png", {
-      animations: "disabled",
-      fullPage: true,
-      mask: headerMasks(page),
-      maxDiffPixelRatio: 0.05
-    });
-  });
-
-  test("mint matches desktop snapshot", async ({ page }) => {
-    await page.goto("/mint");
-    await expect(page).toHaveScreenshot("mint-desktop.png", {
-      animations: "disabled",
-      fullPage: true,
-      mask: [...headerMasks(page), page.getByTestId("mint-featured-rail")],
-      maxDiffPixelRatio: 0.02
-    });
-  });
-});
+}

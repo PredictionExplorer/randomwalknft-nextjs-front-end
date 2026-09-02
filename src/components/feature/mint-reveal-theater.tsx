@@ -20,29 +20,32 @@ export function MintRevealTheater({ tokenId, seed, onView }: { tokenId: number; 
   return (
     <Dialog open onOpenChange={(open) => (open ? undefined : onView())}>
       <DialogContent
-        className="w-[min(96vw,64rem)] border-border p-0"
+        className="max-h-[94svh] w-[min(96vw,64rem)] overflow-y-auto border-border p-0"
         style={{ backgroundColor: edition === "white" ? "#ffffff" : "#000000" }}
         data-testid="mint-reveal-theater"
       >
-        <div className="p-6 text-center sm:p-8">
+        <div className="p-5 text-center sm:p-6">
           <DialogTitle className="eyebrow text-accent">A new work enters the collection</DialogTitle>
           <p
-            className={`font-display mt-3 text-5xl leading-none sm:text-6xl ${edition === "white" ? "text-black" : "text-white"}`}
+            className={`font-display mt-3 text-4xl leading-none sm:text-6xl ${edition === "white" ? "text-black" : "text-white"}`}
           >
             {formatId(tokenId)}
           </p>
         </div>
 
-        <WalkCanvas
-          seed={seed}
-          vert={300}
-          durationMs={12_000}
-          background={edition}
-          onComplete={() => setDrawingDone(true)}
-          label={`Your new artwork ${formatId(tokenId)} drawing itself from its on-chain seed`}
-        />
+        <div className="flex justify-center">
+          <WalkCanvas
+            seed={seed}
+            vert={300}
+            durationMs={12_000}
+            background={edition}
+            onComplete={() => setDrawingDone(true)}
+            label={`Your new artwork ${formatId(tokenId)} drawing itself from its on-chain seed`}
+            className="max-h-[48svh] w-auto"
+          />
+        </div>
 
-        <div className="space-y-5 p-6 text-center sm:p-8">
+        <div className="space-y-4 p-5 text-center sm:p-6">
           <p
             className={`break-all font-mono text-[0.65rem] ${edition === "white" ? "text-black/50" : "text-white/50"}`}
           >

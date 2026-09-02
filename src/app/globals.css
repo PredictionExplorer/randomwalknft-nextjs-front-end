@@ -111,9 +111,9 @@
   --muted: #e9e5dc;
   --muted-foreground: #5f5b53;
 
-  --accent: #8f6a1f;
+  --accent: #7a5a18;
   --accent-foreground: #fbf6ea;
-  --accent-soft: rgba(143, 106, 31, 0.12);
+  --accent-soft: rgba(122, 90, 24, 0.12);
 
   --border: rgba(17, 17, 16, 0.1);
   --border-strong: rgba(17, 17, 16, 0.24);

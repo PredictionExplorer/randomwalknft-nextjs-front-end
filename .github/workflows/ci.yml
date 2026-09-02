@@ -15,6 +15,9 @@ concurrency:
 
 env:
   # NEXT_PUBLIC_* values are inlined at build time; every job that builds needs them.
+  # End-to-end jobs override the API and RPC with the deterministic mock upstream
+  # (tests/e2e/mock-upstream) through playwright.config.ts, so CI never depends on
+  # the live indexer or Arbitrum RPC.
   NEXT_PUBLIC_NETWORK: mainnet
   NEXT_PUBLIC_API_BASE_URL: http://randomwalknft-api.com
   NEXT_PUBLIC_RPC_URL: https://arb1.arbitrum.io/rpc

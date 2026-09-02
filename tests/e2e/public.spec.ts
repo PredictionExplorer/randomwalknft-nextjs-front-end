@@ -10,13 +10,17 @@ const expectedCanonicalOrigin = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://ra
  * hidden `<div>`s at the end of <body> before being swapped into place, and strict
  * locators would briefly see it twice.
  */
-async function goto(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+async function settled(page: Page) {
   await page.waitForFunction(
     () =>
       document.documentElement.dataset.hydrated === "true" &&
       Array.from(document.querySelectorAll("body > div[hidden]")).every((node) => node.childElementCount === 0)
   );
+}
+
+async function goto(page: Page, path: string) {
+  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await settled(page);
 }
 
 test("home page opens with the masthead, live facts, and the first chapter", async ({ page }) => {
@@ -200,6 +204,7 @@ test("gallery rooms and hangings are plain links that persist in the URL", async
 
   await toolbar.getByRole("link", { name: /study hanging/i }).click();
   await expect(page).toHaveURL(/view=compact/);
+  await expect(toolbar.getByRole("link", { name: /study hanging/i })).toHaveAttribute("aria-current", "true");
   await expect(page).toHaveURL(/sortBy=beauty/);
 });
 
@@ -208,7 +213,8 @@ test("gallery jump-to-token applies a query filter", async ({ page }) => {
   await page.getByLabel(/jump to token number/i).fill("1");
   await page.getByRole("button", { name: /jump to token/i }).click();
   await expect(page).toHaveURL(/query=1/);
-  await expect(page.getByText(/Token #000001/i)).toBeVisible();
+  await settled(page);
+  await expect(page.getByTestId("collection-toolbar").getByText(/Token #000001/i)).toBeVisible();
   await expect(page.locator('a[href="/detail/1"]')).toHaveCount(1);
 });
 

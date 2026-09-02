@@ -70,9 +70,10 @@ export function VaultExperience({
   const { data: vault } = useQuery({
     queryKey: ["vault-state"],
     queryFn: fetchVaultState,
+    // The server HTML may be a minute old (ISR); show it, then always refresh live on mount.
     initialData: initialVault,
-    refetchInterval: 60_000,
-    staleTime: 30_000
+    staleTime: 0,
+    refetchInterval: 60_000
   });
   const [nowMs, setNowMs] = useState(() => initialVault.readAtMs);
   const withdraw = useWriteContract();

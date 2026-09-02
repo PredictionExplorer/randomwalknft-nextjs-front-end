@@ -80,7 +80,7 @@ export function CollectionToolbar({ state }: { state: CollectionQueryState }) {
               <Link
                 key={value}
                 href={hrefFor(state, { view: value, page: state.page })}
-                aria-pressed={state.view === value}
+                aria-current={state.view === value ? "true" : undefined}
                 aria-label={`${label} hanging`}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.16em] transition-colors",

@@ -76,3 +76,7 @@ public/mockServiceWorker.js
 
 # storybook (if added later)
 storybook-static/
+
+# Local visual baselines; only the Linux ones (CI image) are committed.
+tests/e2e/visual.spec.ts-snapshots/*-darwin.png
+tests/e2e/visual.spec.ts-snapshots/*-win32.png

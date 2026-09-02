@@ -180,7 +180,8 @@ export function WalkStory({ mintedCount }: WalkStoryProps) {
     : [];
   const shortSeed = overlay.seed ? `${overlay.seed.slice(0, 10)}…${overlay.seed.slice(-6)}` : "";
   const light = edition === "white";
-  const inkFaint = light ? "text-black/50" : "text-white/50";
+  // 65% ink keeps the tiny mono labels above 4.5:1 on both stage backgrounds.
+  const inkFaint = light ? "text-black/65" : "text-white/65";
   const ink = light ? "text-black/80" : "text-white/90";
 
   return (

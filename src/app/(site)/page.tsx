@@ -40,7 +40,8 @@ function WallRow({
   href,
   hrefLabel,
   ids,
-  sublabels
+  sublabels,
+  testId
 }: {
   title: string;
   subtitle: string;
@@ -48,13 +49,14 @@ function WallRow({
   hrefLabel: string;
   ids: number[];
   sublabels?: ((id: number, index: number) => string) | undefined;
+  testId?: string;
 }) {
   if (ids.length === 0) {
     return null;
   }
 
   return (
-    <div className="min-w-0 space-y-4">
+    <div className="min-w-0 space-y-4" data-testid={testId}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <h3 className="font-display text-2xl">{title}</h3>
@@ -199,6 +201,7 @@ export default async function HomePage() {
                 href={"/random"}
                 hrefLabel="Show me a random work"
                 ids={exhibitionIds.length > 0 ? exhibitionIds : featuredCards}
+                testId="wall-row-exhibition"
               />
             </div>
           </div>

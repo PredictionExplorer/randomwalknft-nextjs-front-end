@@ -50,7 +50,10 @@ export function ArtworkStage({
   const [proof, setProof] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
 
-  const availability = useMediaAvailability(assets, edition, pending);
+  // Once a page starts life as "pending" it keeps probing: the URL cleanup after a mint
+  // re-renders with the flag off, but the files may still be rendering upstream.
+  const [startedPending] = useState(pending);
+  const availability = useMediaAvailability(assets, edition, pending || startedPending);
   // Visitors may request a film that is still rendering; fall back to the still.
   const media: AssetVariant = availability[requestedMedia] ? requestedMedia : "image";
   const source = getAssetBySelection(assets, edition, media);
@@ -154,7 +157,7 @@ export function ArtworkStage({
           ) : null}
         </div>
 
-        {pending && !allReady ? (
+        {(pending || startedPending) && !allReady ? (
           <p
             className="absolute left-3 top-3 rounded-sm border border-accent/50 bg-black/60 px-2 py-1 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent"
             role="status"

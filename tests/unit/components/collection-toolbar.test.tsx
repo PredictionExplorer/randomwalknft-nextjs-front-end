@@ -22,7 +22,7 @@ describe("CollectionToolbar", () => {
     );
     expect(screen.getByRole("link", { name: /^newest$/i })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: /wall hanging/i })).toHaveAttribute("href", "/gallery?page=3");
-    expect(screen.getByRole("link", { name: /study hanging/i })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("link", { name: /study hanging/i })).toHaveAttribute("aria-current", "true");
   });
 
   it("carries the wallet and sort through the jump form and shows clearable chips", () => {

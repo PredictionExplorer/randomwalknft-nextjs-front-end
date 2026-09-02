@@ -105,7 +105,6 @@ export default async function DetailPage({ params, searchParams }: { params: Par
       <JsonLd
         data={tokenJsonLd({ nft, siteName: SITE_NAME, siteUrl: SITE_URL, contractAddress: NFT_ADDRESS, beautyRank })}
       />
-      <PendingRefresh pending={pending} stripMessage={justMinted} />
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-3">
@@ -126,22 +125,25 @@ export default async function DetailPage({ params, searchParams }: { params: Par
               formatId(nft.id)
             )}
           </h1>
-          <p className="eyebrow">
-            {justMinted
-              ? "Freshly minted · the museum is rendering your six works"
-              : mintRecord
+          <PendingRefresh
+            pending={pending}
+            justMinted={justMinted}
+            plaque={
+              mintRecord
                 ? `Minted ${formatDateFromUnix(mintRecord.timestamp)} · CC0 · six works from one seed`
-                : "CC0 · six works from one seed"}
-          </p>
+                : "CC0 · six works from one seed"
+            }
+          />
         </div>
         <TokenNav tokenId={nft.id} totalSupply={totalSupply} />
       </div>
 
+      {/* Right after a mint the indexer may know the token before its files exist, so probe media too. */}
       <ArtworkStage
         tokenId={nft.id}
         seed={nft.seed}
         assets={nft.assets}
-        pending={pending}
+        pending={pending || justMinted}
         initialEdition={initialEdition}
         initialMedia={initialMedia}
       />

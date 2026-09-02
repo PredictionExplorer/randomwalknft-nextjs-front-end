@@ -45,16 +45,19 @@ export default function FaqPage() {
       />
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <Accordion type="single" collapsible className="border-t border-border" data-testid="faq-list">
-          {faqItems.map((item) => (
-            <AccordionItem value={item.summary} key={item.summary}>
-              <AccordionTrigger className="text-left text-base sm:text-lg">{item.summary}</AccordionTrigger>
-              <AccordionContent className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                {item.detail}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <div>
+          <h2 className="sr-only">Questions and answers</h2>
+          <Accordion type="single" collapsible className="border-t border-border" data-testid="faq-list">
+            {faqItems.map((item) => (
+              <AccordionItem value={item.summary} key={item.summary}>
+                <AccordionTrigger className="text-left text-base sm:text-lg">{item.summary}</AccordionTrigger>
+                <AccordionContent className="max-w-3xl text-sm leading-7 text-muted-foreground">
+                  {item.detail}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
 
         <aside className="h-fit space-y-6 border-t border-border pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
           <div className="space-y-2">
